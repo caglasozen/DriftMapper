@@ -1,0 +1,14 @@
+# Ignore Everything
+*
+
+# Except some stuff
+!.gitignore
+!*.class
+!src
+!src/*
+!src/*/*
+!src/*/*/*
+!src/*/*/*/*
+!src/*/*/*/*/*
+!src/*/*/*/*/*/*
+!src/*/*/*/*/*/*/*
