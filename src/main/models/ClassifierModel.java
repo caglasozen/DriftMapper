@@ -59,16 +59,6 @@ public abstract class ClassifierModel {
         bnModel = new BayesianNetworkGenerator(modeller, variablesNames, xPossibleValues);
     }
 
-    protected static String[][] convertListToArrayTable(ArrayList<ArrayList<String>> table) {
-        String[][] convertedTable = new String[table.size()][table.get(0).size()];
-        for (int i = 0; i < convertedTable.length; i++) {
-            for (int j = 0; j < convertedTable[0].length; j++) {
-                convertedTable[i][j] = table.get(i).get(j);
-            }
-        }
-        return convertedTable;
-    }
-
     protected static Instances trimLastAttribute(Instances instances) {
         // Get attributes
         ArrayList<Attribute> attributes = new ArrayList<>();
@@ -88,7 +78,6 @@ public abstract class ClassifierModel {
     }
 
     protected void getXMeta() {
-        HashSet<Instance> allVectors = new HashSet<>();
         ArrayList<Map<String, Integer>> xValueToFreq = new ArrayList<>();
         // NOTE: j represents x_n
         for (int j = 0; j < dataSet.numAttributes() - 1; j++) {
@@ -116,18 +105,6 @@ public abstract class ClassifierModel {
 
         // Generate List of all possible combinations of x values
         generateCombinations(0, new ArrayList<>());
-
-        /*
-        while (xCombinations.size() > 0) {
-            ArrayList<String> combination = xCombinations.remove(0);
-            Instance inst = new DenseInstance(dataSet.numAttributes());
-            inst.setDataset(dataSet);
-            for (int j = 0; j < combination.size(); j++) {
-                inst.setValue(j, Double.parseDouble(combination.get(j)));
-            }
-            allPossibleInstances.add(inst);
-        }
-        */
 
         //Suggest Garbage collector to run
         System.gc();
@@ -238,27 +215,6 @@ public abstract class ClassifierModel {
             str_rep[i] = Double.toString(list[i]);
         }
         return str_rep;
-    }
-
-    protected ArrayList<ArrayList<String>> generateCombinationsOld(int currentIndex, ArrayList<String> auxCombination){
-        if (currentIndex == this.xPossibleValues.size()){
-            ArrayList<ArrayList<String>> retList = new ArrayList<>();
-            retList.add(new ArrayList<>(auxCombination));
-            return retList;
-        }
-        else {
-            ArrayList<ArrayList<String>> possibleCombinations = new ArrayList<>();
-            String[] curValues = this.xPossibleValues.get(currentIndex).toArray(new String[xPossibleValues.get(currentIndex).size()]);
-            for (String value : curValues){
-                // Add the new possible x value to the list of values and call itself with the new list
-                auxCombination.add(value);
-                // Add the generated combinations with the new list to the existing combinations
-                possibleCombinations.addAll(generateCombinationsOld(currentIndex + 1, auxCombination));
-                // Remove the added x value from the list of values
-                auxCombination.remove(auxCombination.size() - 1);
-            }
-            return possibleCombinations;
-        }
     }
 
     protected void generateCombinations(int currentIndex, ArrayList<Double> auxCombination){
