@@ -102,8 +102,8 @@ public abstract class ClassifierModel {
         }
         allPossibleInstances = new Instances(dataSet, nCombinations);
 
-        // Generate List of all possible combinations of x values
-        generateCombinations(0, new ArrayList<>());
+        // Generate set of all appeared combinations of x values
+        generateSampleCombinations();
 
         //Suggest Garbage collector to run
         System.gc();
@@ -248,6 +248,7 @@ public abstract class ClassifierModel {
             Integer hash = Arrays.hashCode(trimmedData.get(i).toDoubleArray());
             if (!hashedInstanceSet.containsKey(hash)) {
                 Instance inst = new DenseInstance(1.0, dataSet.get(i).toDoubleArray());
+                inst.setDataset(dataSet);
                 inst.setClassMissing();
                 allPossibleInstances.add(inst);
                 hashedInstanceSet.put(hash, inst);
