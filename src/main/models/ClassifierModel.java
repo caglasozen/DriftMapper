@@ -9,10 +9,9 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import javax.management.RuntimeErrorException;
+import java.lang.reflect.Array;
+import java.util.*;
 import java.util.stream.DoubleStream;
 
 /**
@@ -27,6 +26,7 @@ public abstract class ClassifierModel {
     protected ArrayList<ArrayList<String>> xPossibleValues = new ArrayList<>();
 
     protected Instances allPossibleInstances;
+    protected HashMap<Integer, Instance> hashedInstanceSet;
     protected Instances dataSet;
 
     protected BayesianNetworkGenerator bnModel;
@@ -235,6 +235,23 @@ public abstract class ClassifierModel {
                 generateCombinations(currentIndex + 1, auxCombination);
                 // Remove the added x value from the list of values
                 auxCombination.remove(auxCombination.size() - 1);
+            }
+        }
+    }
+
+    protected void generateSampleCombinations() {
+        hashedInstanceSet = new HashMap<>(dataSet.size());
+
+        Instances trimmedData = trimLastAttribute(dataSet);
+
+        if (trimmedData.size() != dataSet.size()) throw new RuntimeException();
+        for (int i = 0; i < dataSet.size(); i++) {
+            Integer hash = Arrays.hashCode(trimmedData.get(i).toDoubleArray());
+            if (!hashedInstanceSet.containsKey(hash)) {
+                Instance inst = new DenseInstance(1.0, dataSet.get(i).toDoubleArray());
+                inst.setClassMissing();
+                allPossibleInstances.add(inst);
+                hashedInstanceSet.put(hash, inst);
             }
         }
     }
