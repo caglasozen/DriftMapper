@@ -64,8 +64,17 @@ public class scratch {
                 String filename = args[1] + args[2];
                 Instances allInstances = loadAnyDataSet(filename);
                 Experiments experiment = new Experiments(baseModel, allInstances, windowSize, false);
-                String[][] dists = experiment.distanceOverInstances();
+                String[][] dists = experiment.distanceToStartOverInstances();
                 writeToCSV(dists, new String[]{"p(X)", "p(y|X)", Integer.toString(windowSize)}, "./ad_out/" + args[2] + ".txt");
+            }
+
+            else if (args[0].equals("AllPrevData")) {
+                int windowSize = 1000;
+                String filename = args[1] + args[2];
+                Instances allInstances = loadAnyDataSet(filename);
+                Experiments experiment = new Experiments(baseModel, allInstances, windowSize, false);
+                String[][] dists = experiment.distanceToPrevOverInstances();
+                writeToCSV(dists, new String[]{"p(X)", "p(y|X)", Integer.toString(windowSize)}, "./apd_out/" + args[2] + ".txt");
             }
 
             else if (args[0].equals("modelTest")){
