@@ -53,6 +53,7 @@ public class Experiments {
 
     public String[][] distanceToStartOverInstances() {
         String[][] distances = new String[models.length][2];
+        System.out.println("Number of models: " + models.length);
         for (int i = 0; i < models.length; i++) {
             distances[i][0] = Double.toString(EnsembleClassifierModel.pvModelDistance(models[0], models[i]));
             distances[i][1] = Double.toString(EnsembleClassifierModel.pygvModelDistance(models[0], models[i]));
@@ -62,6 +63,7 @@ public class Experiments {
 
     public String[][] distanceToPrevOverInstances() {
         String[][] distances = new String[models.length - 1][2];
+        System.out.println("Number of models: " + models.length);
         for (int i = 0; i < models.length - 1; i++) {
             distances[i][0] = Double.toString(EnsembleClassifierModel.pvModelDistance(models[i], models[i + 1]));
             distances[i][1] = Double.toString(EnsembleClassifierModel.pygvModelDistance(models[i], models[i + 1]));
