@@ -52,10 +52,10 @@ public class Experiments {
     }
 
     public String[][] distanceOverInstances() {
-        String[][] distances = new String[2][models.length - 2];
-        for (int i = 1; i < models.length; i++) {
-            distances[0][i - 1] = Double.toString(EnsembleClassifierModel.pvModelDistance(models[0], models[i]));
-            distances[1][i - 1] = Double.toString(EnsembleClassifierModel.pygvModelDistance(models[0], models[i]));
+        String[][] distances = new String[models.length][2];
+        for (int i = 0; i < models.length; i++) {
+            distances[i][0] = Double.toString(EnsembleClassifierModel.pvModelDistance(models[0], models[i]));
+            distances[i][1] = Double.toString(EnsembleClassifierModel.pygvModelDistance(models[0], models[i]));
         }
         return distances;
     }
