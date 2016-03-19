@@ -219,7 +219,10 @@ public abstract class ClassifierModel {
     public static double pvModelDistance(ClassifierModel modelBD, ClassifierModel modelAD) {
         double driftDist = 0.0f;
 
-        for (Instance combination : modelBD.allPossibleInstances){
+        // Trim last attribute as allPossibleCombinations contains a class attribute which has NaN
+        Instances allPossibleInstances = trimLastAttribute(modelBD.allPossibleInstances);
+
+        for (Instance combination : allPossibleInstances){
             driftDist = driftDist +
                     Math.pow((Math.sqrt(modelBD.findPv(convertDoubleToStringArray(combination.toDoubleArray())))
                             - Math.sqrt(modelAD.findPv(convertDoubleToStringArray(combination.toDoubleArray())))), 2);
