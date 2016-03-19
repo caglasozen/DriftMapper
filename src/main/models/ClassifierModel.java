@@ -9,8 +9,6 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-import javax.management.RuntimeErrorException;
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.DoubleStream;
 
@@ -51,7 +49,7 @@ public abstract class ClassifierModel {
             variablesNames[i] = dataSet.attribute(i).name();
         }
 
-        Instances trimmedInstances = trimLastAttribute(dataSet);
+        Instances trimmedInstances = trimClass(dataSet);
         // Chordalysis modeler with 0.1G of memory allocated
         ChordalysisModelling modeller = new ChordalysisModelling(0.05);
         modeller.buildModel(new Instances(trimmedInstances));
@@ -59,18 +57,19 @@ public abstract class ClassifierModel {
         bnModel = new BayesianNetworkGenerator(modeller, variablesNames, xPossibleValues);
     }
 
-    protected static Instances trimLastAttribute(Instances instances) {
+    protected static Instances trimClass(Instances instances) {
         // Get attributes
         ArrayList<Attribute> attributes = new ArrayList<>();
-        for (int i = 0; i < instances.numAttributes() - 1; i++) {
-            attributes.add(instances.attribute(i));
+        for (int i = 0; i < instances.numAttributes(); i++) {
+            // if the current attribute is not a class attribute, add the attribute
+            if (!(instances.classIndex() == i)) attributes.add(instances.attribute(i));
         }
         Instances instancesReturn = new Instances("Trimmed Data", attributes, instances.size());
         instancesReturn.setClassIndex(instancesReturn.numAttributes()-1);
 
         for (int i = 0; i < instances.size(); i++) {
             DenseInstance instance = new DenseInstance(instances.get(i));
-            instance.deleteAttributeAt(instance.numAttributes() - 1);
+            instance.deleteAttributeAt(instances.classIndex());
             instance.setDataset(instancesReturn);
             instancesReturn.add(instance);
         }
@@ -197,7 +196,7 @@ public abstract class ClassifierModel {
         double driftDist = 0.0f;
 
         // Trim last attribute as allPossibleCombinations contains a class attribute which has NaN
-        Instances allPossibleInstances = trimLastAttribute(modelBD.allPossibleInstances);
+        Instances allPossibleInstances = trimClass(modelBD.allPossibleInstances);
 
         for (Instance combination : allPossibleInstances){
             driftDist = driftDist +
@@ -242,7 +241,7 @@ public abstract class ClassifierModel {
     protected void generateSampleCombinations() {
         hashedInstanceSet = new HashMap<>(dataSet.size());
 
-        Instances trimmedData = trimLastAttribute(dataSet);
+        Instances trimmedData = trimClass(dataSet);
 
         if (trimmedData.size() != dataSet.size()) throw new RuntimeException();
         for (int i = 0; i < dataSet.size(); i++) {
