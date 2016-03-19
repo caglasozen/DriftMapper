@@ -63,7 +63,7 @@ public class scratch {
                 int windowSize = 1000;
                 String filename = args[1] + args[2];
                 Instances allInstances = loadAnyDataSet(filename);
-                Experiments experiment = new Experiments(baseModel, allInstances, windowSize, true);
+                Experiments experiment = new Experiments(baseModel, allInstances, windowSize, false);
                 String[][] dists = experiment.distanceOverInstances();
                 writeToCSV(dists, new String[]{"p(X)", "p(y|X)", Integer.toString(windowSize)}, "./ad_out/" + args[2] + ".txt");
             }
