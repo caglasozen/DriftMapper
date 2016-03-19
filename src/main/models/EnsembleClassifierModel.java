@@ -95,10 +95,17 @@ public class EnsembleClassifierModel extends ClassifierModel{
      */
     @Override
     public double findPv(String[] xValVector) {
-        int[] dataVector = new int[xValVector.length];
-        for (int i = 0; i < xValVector.length; i++) {
-            dataVector[i] = Double.valueOf(xValVector[i]).intValue();
+        try {
+            int[] dataVector = new int[xValVector.length];
+            for (int i = 0; i < xValVector.length; i++) {
+                dataVector[i] = this.bnModel.nodes[i].getOutcomeIndex(xValVector[i]);
+                //dataVector[i] = Double.valueOf(xValVector[i]).intValue();
+            }
+            return bnModel.getJointProbabilityOfX(dataVector);
         }
-        return bnModel.getJointProbabilityOfX(dataVector);
+        catch (IllegalArgumentException ex) {
+            System.out.print("e ");
+            return 0.0f;
+        }
     }
 }
