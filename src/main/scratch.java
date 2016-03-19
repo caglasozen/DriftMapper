@@ -167,6 +167,7 @@ public class scratch {
 
     public static Instances loadAnyDataSet(String filename) throws Exception{
         Instances continuousData = loadDataSet(filename);
+        if (filename.equals("../datasets/gas-sensor.arff")) continuousData.setClassIndex(0);
 
         ArrayList<Integer> continuousIndex = new ArrayList<>();
         for (int i = 0; i < continuousData.numAttributes(); i++) {
