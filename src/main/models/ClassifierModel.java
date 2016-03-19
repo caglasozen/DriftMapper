@@ -9,6 +9,7 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.DoubleStream;
 
@@ -130,8 +131,7 @@ public abstract class ClassifierModel {
     public static double pygvModelDistance(EnsembleClassifierModel modelBD, EnsembleClassifierModel modelAD) {
         WekaToSamoaInstanceConverter converter = new WekaToSamoaInstanceConverter();
 
-        Instances allPossibleInstances = modelBD.allPossibleInstances.size() > modelAD.allPossibleInstances.size() ?
-                modelBD.allPossibleInstances : modelAD.allPossibleInstances;
+        Instances allPossibleInstances = findIntersectionBetweenInstances(modelBD.allPossibleInstances, modelAD.allPossibleInstances);
 
         double[] totalDist = new double[modelBD.baseClassifiers.length];
         for (int k = 0; k < modelBD.baseClassifiers.length; k++) {
@@ -167,8 +167,7 @@ public abstract class ClassifierModel {
         double totalDist = 0.0f;
         WekaToSamoaInstanceConverter converter = new WekaToSamoaInstanceConverter();
 
-        Instances allPossibleInstances = modelBD.allPossibleInstances.size() > modelAD.allPossibleInstances.size() ?
-                modelBD.allPossibleInstances : modelAD.allPossibleInstances;
+        Instances allPossibleInstances = findIntersectionBetweenInstances(modelBD.allPossibleInstances, modelAD.allPossibleInstances);
 
         for (int k = 0; k < allPossibleInstances.size(); k++) {
             Instance inst = allPossibleInstances.get(k);
@@ -196,7 +195,9 @@ public abstract class ClassifierModel {
         double driftDist = 0.0f;
 
         // Trim last attribute as allPossibleCombinations contains a class attribute which has NaN
-        Instances allPossibleInstances = trimClass(modelBD.allPossibleInstances);
+        Instances trimmedBD = trimClass(modelBD.allPossibleInstances);
+        Instances trimmedAD = trimClass(modelAD.allPossibleInstances);
+        Instances allPossibleInstances = findIntersectionBetweenInstances(trimmedBD, trimmedAD);
 
         for (Instance combination : allPossibleInstances){
             driftDist = driftDist +
@@ -214,6 +215,23 @@ public abstract class ClassifierModel {
             str_rep[i] = Double.toString(list[i]);
         }
         return str_rep;
+    }
+
+    protected static Instances findIntersectionBetweenInstances(Instances instances1, Instances instances2) {
+        // Create a hashed mapped set of instances1 first
+        HashMap<Integer, Instance> baseMap = new HashMap<>(instances1.size());
+        for (Instance instance : instances1) {
+            Integer hash = Arrays.hashCode(instance.toDoubleArray());
+            if (!baseMap.containsKey(hash)) baseMap.put(hash, instance);
+        }
+
+        // Check each instance in instances2, if it is in instances1's baseMap, put into final Instances to return
+        Instances finalInstances = new Instances(instances2, instances1.size() + instances2.size());
+        for (Instance instance : instances2) {
+            Integer hash = Arrays.hashCode(instance.toDoubleArray());
+            if (baseMap.containsKey(hash)) finalInstances.add(instance);
+        }
+        return finalInstances;
     }
 
     protected void generateCombinations(int currentIndex, ArrayList<Double> auxCombination){
