@@ -104,8 +104,8 @@ public abstract class ClassifierModel {
         allPossibleInstances = new Instances(dataSet, nCombinations);
 
         // Generate set of all appeared combinations of x values
-        generateSampleCombinations();
 
+        generateCombinations(0, new ArrayList<>());
         //Suggest Garbage collector to run
         System.gc();
     }
