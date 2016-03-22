@@ -35,7 +35,7 @@ public class Experiments {
         }
     }
 
-    private static Instances convertStreamToInstances(CategoricalDriftGenerator dataStream) {
+    public static Instances convertStreamToInstances(CategoricalDriftGenerator dataStream) {
         SamoaToWekaInstanceConverter converter = new SamoaToWekaInstanceConverter();
         Instances convertedStreams = new Instances(converter.wekaInstancesInformation(dataStream.getHeader()),
                 dataStream.burnInNInstances.getValue());
