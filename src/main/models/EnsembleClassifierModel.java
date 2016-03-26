@@ -12,6 +12,7 @@ import java.util.stream.DoubleStream;
  **/
 public class EnsembleClassifierModel extends ClassifierModel{
     protected Classifier[] baseClassifiers;
+    // The p(y|v) when to switch to the next classifier
     protected double[] switchPoints;
 
     @Override
