@@ -94,11 +94,11 @@ public class EnsembleClassifierModel extends ClassifierModel{
      * @return Probability of given vector of x values occurring
      */
     @Override
-    public double findPv(String[] xValVector) {
+    public double findPv(double[] xValVector) {
         try {
             int[] dataVector = new int[xValVector.length];
             for (int i = 0; i < xValVector.length; i++) {
-                dataVector[i] = this.bnModel.nodes[i].getOutcomeIndex(xValVector[i]);
+                dataVector[i] = this.bnModel.nodes[i].getOutcomeIndex(Double.toString(xValVector[i]));
                 //dataVector[i] = Double.valueOf(xValVector[i]).intValue();
             }
             return bnModel.getJointProbabilityOfX(dataVector);

@@ -117,7 +117,7 @@ public abstract class ClassifierModel {
      * @param xValVector The combination of x values (xVector)
      * @return Probability of given vector of x values occurring
      */
-    abstract double findPv(String[] xValVector);
+    abstract double findPv(double[] xValVector);
 
     protected static double[] getNormalisedVotes(double[] unNormalisedVotes, int numberNormVotes) {
         double voteSum = DoubleStream.of(unNormalisedVotes).sum();
@@ -201,20 +201,12 @@ public abstract class ClassifierModel {
 
         for (Instance combination : allPossibleInstances){
             driftDist = driftDist +
-                    Math.pow((Math.sqrt(modelBD.findPv(convertDoubleToStringArray(combination.toDoubleArray())))
-                            - Math.sqrt(modelAD.findPv(convertDoubleToStringArray(combination.toDoubleArray())))), 2);
+                    Math.pow((Math.sqrt(modelBD.findPv(combination.toDoubleArray()))
+                            - Math.sqrt(modelAD.findPv(combination.toDoubleArray()))), 2);
         }
         driftDist = Math.sqrt(driftDist);
         driftDist = driftDist * (1/Math.sqrt(2));
         return driftDist;
-    }
-
-    public static String[] convertDoubleToStringArray(double[] list) {
-        String[] str_rep = new String[list.length];
-        for (int i = 0; i < list.length; i++) {
-            str_rep[i] = Double.toString(list[i]);
-        }
-        return str_rep;
     }
 
     protected static Instances findIntersectionBetweenInstances(Instances instances1, Instances instances2) {
