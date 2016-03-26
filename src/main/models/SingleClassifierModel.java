@@ -67,7 +67,7 @@ public class SingleClassifierModel extends ClassifierModel{
      * @return Probability of given vector of x values occurring
      */
     @Override
-    public double findPv(String[] xValVector) {
+    public double findPv(double[] xValVector) {
         int[] dataVector = new int[xValVector.length];
         for (int i = 0; i < xValVector.length; i++) {
             dataVector[i] = Double.valueOf(xValVector[i]).intValue();

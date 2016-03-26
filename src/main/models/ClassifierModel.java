@@ -117,7 +117,7 @@ public abstract class ClassifierModel {
      * @param xValVector The combination of x values (xVector)
      * @return Probability of given vector of x values occurring
      */
-    abstract double findPv(double[] xValVector);
+    public abstract double findPv(double[] xValVector);
 
     protected static double[] getNormalisedVotes(double[] unNormalisedVotes, int numberNormVotes) {
         double voteSum = DoubleStream.of(unNormalisedVotes).sum();
