@@ -1,6 +1,7 @@
 package main;
 
 import main.generator.CategoricalDriftGenerator;
+import main.models.ClassifierModel;
 import main.models.EnsembleClassifierModel;
 import com.yahoo.labs.samoa.instances.SamoaToWekaInstanceConverter;
 import weka.core.Instances;
@@ -9,28 +10,28 @@ import weka.core.Instances;
  * Created by loongkuan on 11/03/16.
  **/
 public class Experiments {
-    EnsembleClassifierModel[] models;
+    ClassifierModel[] models;
     Instances allInstances;
 
-    public Experiments(EnsembleClassifierModel baseModel, Instances allInstances, int windowSize, boolean startEnd) {
+    public Experiments(ClassifierModel baseModel, Instances allInstances, int windowSize, boolean startEnd) {
         System.out.println("Initialising experiment...");
-        if (!startEnd) models = new EnsembleClassifierModel[allInstances.size() / windowSize];
-        else models = new EnsembleClassifierModel[2];
+        if (!startEnd) models = new ClassifierModel[allInstances.size() / windowSize];
+        else models = new ClassifierModel[2];
         this.allInstances = allInstances;
         trainAllModels(baseModel, windowSize);
     }
 
-    public Experiments(EnsembleClassifierModel baseModel, CategoricalDriftGenerator dataStream) {
+    public Experiments(ClassifierModel baseModel, CategoricalDriftGenerator dataStream) {
         System.out.println("Initialising experiment...");
-        models = new EnsembleClassifierModel[2];
+        models = new ClassifierModel[2];
         this.allInstances = convertStreamToInstances(dataStream);
         trainAllModels(baseModel, dataStream.burnInNInstances.getValue());
     }
 
-    private void trainAllModels(EnsembleClassifierModel baseModel, int windowSize) {
+    private void trainAllModels(ClassifierModel baseModel, int windowSize) {
         System.out.println("Training Models...");
         for (int i = 0; i < models.length; i++) {
-            models[i] = new EnsembleClassifierModel(baseModel,
+            models[i] = new EnsembleClassifierModel((EnsembleClassifierModel) baseModel,
                     new Instances(this.allInstances, i*windowSize, windowSize));
         }
     }
