@@ -131,7 +131,7 @@ public abstract class ClassifierModel {
     public static double pygvModelDistance(EnsembleClassifierModel modelBD, EnsembleClassifierModel modelAD) {
         WekaToSamoaInstanceConverter converter = new WekaToSamoaInstanceConverter();
 
-        Instances allPossibleInstances = findIntersectionBetweenInstances(modelBD.allPossibleInstances, modelAD.allPossibleInstances);
+        Instances allPossibleInstances = findUnionBetweenInstances(modelBD.allPossibleInstances, modelAD.allPossibleInstances);
 
         double[] totalDist = new double[modelBD.baseClassifiers.length];
         for (int k = 0; k < modelBD.baseClassifiers.length; k++) {
@@ -239,7 +239,7 @@ public abstract class ClassifierModel {
         allInstance.addAll(instances2);
 
         // Create a hashed mapped set of instances1 first
-        Instances finalInstances = new Instances(instances2, instances1.size() + instances2.size());
+        Instances finalInstances = new Instances(instances1, instances1.size() + instances2.size());
         HashMap<Integer, Instance> baseMap = new HashMap<>(instances1.size());
         for (Instance instance : allInstance) {
             Integer hash = Arrays.hashCode(instance.toDoubleArray());
