@@ -24,7 +24,7 @@ public abstract class ClassifierModel {
     // Each dictionary represents the frequency distribution for an attribute
     protected ArrayList<ArrayList<String>> xPossibleValues = new ArrayList<>();
 
-    protected Instances allPossibleInstances;
+    public Instances allPossibleInstances;
     protected HashMap<Integer, Instance> hashedInstanceSet;
     protected Instances dataSet;
 
