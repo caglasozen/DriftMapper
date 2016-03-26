@@ -121,72 +121,21 @@ public abstract class ClassifierModel {
      */
     public abstract double findPv(double[] xValVector);
 
-    protected static double[] getNormalisedVotes(double[] unNormalisedVotes, int numberNormVotes) {
-        double voteSum = DoubleStream.of(unNormalisedVotes).sum();
-        double[] normalisedVotes = new double[numberNormVotes];
-        for (int i = 0; i < unNormalisedVotes.length; i++) {
-            normalisedVotes[i] = (voteSum == 0.0 || Double.isNaN(voteSum)) ? 0.0f : unNormalisedVotes[i] / voteSum;
-        }
-        return normalisedVotes;
-    }
-
-    public static double pygvModelDistance(EnsembleClassifierModel modelBD, EnsembleClassifierModel modelAD) {
-        WekaToSamoaInstanceConverter converter = new WekaToSamoaInstanceConverter();
-
-        Instances allPossibleInstances = findIntersectionBetweenInstances(modelBD.allPossibleInstances, modelAD.allPossibleInstances);
-
-        double[] totalDist = new double[modelBD.baseClassifiers.length];
-        for (int k = 0; k < modelBD.baseClassifiers.length; k++) {
-            totalDist[k] = 0.0f;
-            for (int j = 0; j < allPossibleInstances.size(); j++) {
-                Instance inst = allPossibleInstances.get(j);
-                double driftDist = 0.0f;
-                double[] pygvBD = modelBD.baseClassifiers[k].getVotesForInstance(converter.samoaInstance(inst));
-                double[] pygvAD = modelAD.baseClassifiers[k].getVotesForInstance(converter.samoaInstance(inst));
-                // Normalise votes
-                int numClasses = (pygvAD.length < pygvBD.length) ? pygvBD.length : pygvAD.length;
-                double[] pygvBDNorm = getNormalisedVotes(pygvBD, numClasses);
-                double[] pygvADNorm = getNormalisedVotes(pygvAD, numClasses);
-                // Get Distance
-                for (int i = 0; i < numClasses; i++) {
-                    driftDist = driftDist + Math.pow((Math.sqrt(pygvBDNorm[i]) - Math.sqrt(pygvADNorm[i])), 2);
-                }
-                driftDist = Math.sqrt(driftDist);
-                driftDist = driftDist * (1/Math.sqrt(2));
-                totalDist[k] = totalDist[k] + driftDist;
-            }
-            totalDist[k] = totalDist[k] / allPossibleInstances.size();
-        }
-
-        // Return the most accurate distance
-        for (int i = 0; i < modelBD.switchPoints.length; i++) {
-            if (totalDist[i] < modelBD.switchPoints[i]) return totalDist[i];
-        }
-        return totalDist[totalDist.length - 1];
-    }
-
     public static double pygvModelDistance(ClassifierModel modelBD, ClassifierModel modelAD) {
         Instances allPossibleInstances = findIntersectionBetweenInstances(modelBD.allPossibleInstances, modelAD.allPossibleInstances);
+
         Distance hellinger = new HellingerDistance();
         return hellinger.findPyGvDistance(modelBD, modelAD, allPossibleInstances);
     }
 
     public static double pvModelDistance(ClassifierModel modelBD, ClassifierModel modelAD) {
-        double driftDist = 0.0f;
-
         // Trim last attribute as allPossibleCombinations contains a class attribute which has NaN
         Instances trimmedBD = trimClass(modelBD.allPossibleInstances);
         Instances trimmedAD = trimClass(modelAD.allPossibleInstances);
         Instances allPossibleInstances = findIntersectionBetweenInstances(trimmedBD, trimmedAD);
 
-        for (Instance combination : allPossibleInstances){
-            driftDist = driftDist +
-                    Math.pow((Math.sqrt(modelBD.findPv(combination.toDoubleArray()))
-                            - Math.sqrt(modelAD.findPv(combination.toDoubleArray()))), 2);
-        }
-        driftDist = Math.sqrt(driftDist);
-        driftDist = driftDist * (1/Math.sqrt(2));
-        return driftDist;
+        Distance hellinger = new HellingerDistance();
+        return hellinger.findPyGvDistance(modelBD, modelAD, allPossibleInstances);
     }
 
     protected static Instances findIntersectionBetweenInstances(Instances instances1, Instances instances2) {
