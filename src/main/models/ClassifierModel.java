@@ -4,6 +4,8 @@ import main.generator.componets.BayesianNetworkGenerator;
 import com.yahoo.labs.samoa.instances.SamoaToWekaInstanceConverter;
 import com.yahoo.labs.samoa.instances.WekaToSamoaInstanceConverter;
 import explorer.ChordalysisModelling;
+import main.models.distance.Distance;
+import main.models.distance.HellingerDistance;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -110,7 +112,7 @@ public abstract class ClassifierModel {
         System.gc();
     }
 
-    public abstract double findPygv(int classLabel, double[] xValVector);
+    public abstract double findPygv(int classLabel, Instance xValVector);
 
     /**
      * Calculate the probability of a certain combination of x values (aka. xVector) occurring
@@ -163,32 +165,10 @@ public abstract class ClassifierModel {
         return totalDist[totalDist.length - 1];
     }
 
-    public static double pygvModelDistance(SingleClassifierModel modelBD, SingleClassifierModel modelAD) {
-        double totalDist = 0.0f;
-        WekaToSamoaInstanceConverter converter = new WekaToSamoaInstanceConverter();
-
+    public static double pygvModelDistance(ClassifierModel modelBD, ClassifierModel modelAD) {
         Instances allPossibleInstances = findIntersectionBetweenInstances(modelBD.allPossibleInstances, modelAD.allPossibleInstances);
-
-        for (int k = 0; k < allPossibleInstances.size(); k++) {
-            Instance inst = allPossibleInstances.get(k);
-            double driftDist = 0.0f;
-            double[] pygvBD = modelBD.baseClassifier.getVotesForInstance(converter.samoaInstance(inst));
-            double[] pygvAD = modelAD.baseClassifier.getVotesForInstance(converter.samoaInstance(inst));
-            // Normalise votes
-            int numClasses = (pygvAD.length < pygvBD.length) ? pygvBD.length : pygvAD.length;
-            double[] pygvBDNorm = getNormalisedVotes(pygvBD, numClasses);
-            double[] pygvADNorm = getNormalisedVotes(pygvAD, numClasses);
-            // Get Distance
-            for (int i = 0; i < numClasses; i++) {
-                driftDist = driftDist + Math.pow((Math.sqrt(pygvBDNorm[i]) - Math.sqrt(pygvADNorm[i])), 2);
-            }
-            driftDist = Math.sqrt(driftDist);
-            driftDist = driftDist * (1/Math.sqrt(2));
-            totalDist = totalDist + driftDist;
-        }
-        totalDist = totalDist / allPossibleInstances.size();
-
-        return totalDist;
+        Distance hellinger = new HellingerDistance();
+        return hellinger.findPyGvDistance(modelBD, modelAD, allPossibleInstances);
     }
 
     public static double pvModelDistance(ClassifierModel modelBD, ClassifierModel modelAD) {

@@ -38,14 +38,8 @@ public class SingleClassifierModel extends ClassifierModel{
     }
 
     @Override
-    public double findPygv(String classLabel, String[] xValVector) {
+    public double findPygv(int classLabel, Instance inst) {
         double pygv = 0.0f;
-
-        // Convert Array of vector given t an instance
-        Instance inst = new DenseInstance(xValVector.length);
-        for (int i = 0; i < xValVector.length; i++) {
-            inst.setValue(i, Double.parseDouble(xValVector[i]));
-        }
 
         // Get classifier's votes for instance/vector
         double[] votesForInstance = baseClassifier.getVotesForInstance(wekaConverter.samoaInstance(inst));
@@ -56,7 +50,7 @@ public class SingleClassifierModel extends ClassifierModel{
             normVotes[i] = (sumVotes == 0.0) ? 0.0f : votesForInstance[i] / sumVotes;
         }
 
-        pygv = normVotes[(int)Double.parseDouble(classLabel)];
+        pygv = normVotes[classLabel];
 
         return pygv;
     }
