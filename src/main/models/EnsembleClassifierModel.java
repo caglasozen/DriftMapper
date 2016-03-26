@@ -61,11 +61,11 @@ public class EnsembleClassifierModel extends ClassifierModel{
     }
 
     @Override
-    public double findPygv(String classLabel, String[] xValVector) {
+    public double findPygv(int classLabelIndex, double[] xValVector) {
         // Convert Array of vector given t an instance
         Instance inst = new DenseInstance(xValVector.length);
         for (int i = 0; i < xValVector.length; i++) {
-            inst.setValue(i, Double.parseDouble(xValVector[i]));
+            inst.setValue(i, xValVector[i]);
         }
 
         double pygv = 0.0f;
@@ -79,7 +79,7 @@ public class EnsembleClassifierModel extends ClassifierModel{
                 normVotes[j] = (sumVotes == 0.0) ? 0.0f : votesForInstance[j] / sumVotes;
             }
 
-            pygv = normVotes[(int)Double.parseDouble(classLabel)];
+            pygv = normVotes[classLabelIndex];
 
             if (pygv < this.switchPoints[i]) {
                 return pygv;

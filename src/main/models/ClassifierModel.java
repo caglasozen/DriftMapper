@@ -110,7 +110,7 @@ public abstract class ClassifierModel {
         System.gc();
     }
 
-    abstract double findPygv(String classLabel, String[] xValVector);
+    abstract double findPygv(int classLabel, double[] xValVector);
 
     /**
      * Calculate the probability of a certain combination of x values (aka. xVector) occurring
