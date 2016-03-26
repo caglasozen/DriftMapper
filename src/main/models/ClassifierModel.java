@@ -24,9 +24,9 @@ public abstract class ClassifierModel {
     // Each dictionary represents the frequency distribution for an attribute
     protected ArrayList<ArrayList<String>> xPossibleValues = new ArrayList<>();
 
-    public Instances allPossibleInstances;
+    Instances allPossibleInstances;
     protected HashMap<Integer, Instance> hashedInstanceSet;
-    protected Instances dataSet;
+    public Instances dataSet;
 
     protected BayesianNetworkGenerator bnModel;
 
@@ -110,7 +110,7 @@ public abstract class ClassifierModel {
         System.gc();
     }
 
-    abstract double findPygv(int classLabel, double[] xValVector);
+    public abstract double findPygv(int classLabel, double[] xValVector);
 
     /**
      * Calculate the probability of a certain combination of x values (aka. xVector) occurring
