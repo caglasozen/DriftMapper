@@ -135,7 +135,7 @@ public abstract class ClassifierModel {
         Instances allPossibleInstances = findIntersectionBetweenInstances(trimmedBD, trimmedAD);
 
         Distance hellinger = new HellingerDistance();
-        return hellinger.findPyGvDistance(modelBD, modelAD, allPossibleInstances);
+        return hellinger.findPvDistance(modelBD, modelAD, allPossibleInstances);
     }
 
     protected static Instances findIntersectionBetweenInstances(Instances instances1, Instances instances2) {
