@@ -7,8 +7,10 @@ import com.opencsv.CSVWriter;
 import moa.classifiers.*;
 import moa.classifiers.meta.WEKAClassifier;
 import weka.classifiers.functions.Logistic;
+import weka.classifiers.meta.AdaBoostM1;
 import weka.classifiers.trees.J48;
 import weka.classifiers.trees.RandomForest;
+import weka.classifiers.trees.RandomTree;
 import weka.core.Instances;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Discretize;
@@ -25,8 +27,12 @@ public class scratch {
         // Set classifiers
         WEKAClassifier lowDriftClassifier = new WEKAClassifier();
         lowDriftClassifier.baseLearnerOption.setCurrentObject(new Logistic());
+
         WEKAClassifier highDriftClassifier = new WEKAClassifier();
         highDriftClassifier.baseLearnerOption.setCurrentObject(new J48());
+
+        WEKAClassifier ensembleClassifier = new WEKAClassifier();
+        ensembleClassifier.baseLearnerOption.setCurrentObject(new RandomTree());
 
         WEKAClassifier classifierBD = new WEKAClassifier();
         classifierBD.baseLearnerOption.setCurrentObject(new RandomForest());
@@ -36,8 +42,8 @@ public class scratch {
         classifierBD.prepareForUse();
 
         EnsembleClassifierModel baseModel = new EnsembleClassifierModel(
-                new Classifier[]{lowDriftClassifier.copy(), highDriftClassifier.copy()},
-                new double[]{0.6, 1.0}, new Instances("Empty", new ArrayList<>(), 0));
+                new Classifier[]{ensembleClassifier.copy()},
+                new double[]{1.0}, new Instances("Empty", new ArrayList<>(), 0));
         try {
             if (args[0].equals("test")) {
                 System.out.println("Test");
@@ -87,6 +93,20 @@ public class scratch {
                 String[][] results = classifierDistanceTest(baseModel, dataStream);
                 writeToCSV(results, new String[]{"100", "1000", "10000", "100000", "1000000"}, "EnsembleDistance.csv");
             }
+
+            else if (args[0].equals("mapTest")){
+                // Set data generator to use
+                AbruptTreeDriftGenerator dataStream = new AbruptTreeDriftGenerator();
+                //AbruptDriftGenerator dataStream = new AbruptDriftGenerator();
+                configureDataSet(dataStream);
+                dataStream.prepareForUse();
+                // Get distance(s)
+
+                Instances allInstance = Experiments.convertStreamToInstances(dataStream);
+                Experiments experiment = new Experiments(baseModel, allInstance, 5000, false);
+                String[][] results = experiment.distanceToStartOverInstances();
+                writeToCSV(results, new String[]{"100", "1000", "10000", "100000", "1000000"}, "EnsembleDistance.csv");
+            }
         }
         catch (IOException ex) {
             System.out.println(ex);
@@ -98,8 +118,8 @@ public class scratch {
 
     private static String[][] classifierDistanceTest(EnsembleClassifierModel baseModel,
                                                      CategoricalDriftGenerator dataStream) {
-        double[] driftMags = new double[]{0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
-        int[] dataPoints = new int []{100, 1000, 10000, 100000, 1000000};
+        double[] driftMags = new double[]{0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7};
+        int[] dataPoints = new int []{100, 1000, 10000, 100000};
         int nTests = 10;
 
         String[][] results = new String[driftMags.length][dataPoints.length];
@@ -137,11 +157,11 @@ public class scratch {
         dataStream.nAttributes.setValue(5);
         dataStream.nValuesPerAttribute.setValue(3);
         dataStream.precisionDriftMagnitude.setValue(0.01);
-        dataStream.driftPriors.setValue(false);
+        dataStream.driftPriors.setValue(true);
         dataStream.driftConditional.setValue(true);
         dataStream.driftMagnitudeConditional.setValue(0.9);
         dataStream.driftMagnitudePrior.setValue(0.5);
-        dataStream.burnInNInstances.setValue(10000);
+        dataStream.burnInNInstances.setValue(100000);
     }
 
     public static void writeToCSV(String[][] data, String[] header, String filename) throws IOException{
