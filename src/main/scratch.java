@@ -2,15 +2,20 @@ package main;
 
 import main.generator.AbruptTreeDriftGenerator;
 import main.generator.CategoricalDriftGenerator;
-import main.models.EnsembleClassifierModel;
 import com.opencsv.CSVWriter;
+import main.models.JointModel;
+import main.models.posterior.EnsembleClassifier;
+import main.models.posterior.PosteriorModel;
+import main.models.posterior.SingleClassifier;
+import main.models.prior.BayesianNetwork;
+import main.models.prior.PriorModel;
 import moa.classifiers.*;
 import moa.classifiers.meta.WEKAClassifier;
 import weka.classifiers.functions.Logistic;
-import weka.classifiers.meta.AdaBoostM1;
 import weka.classifiers.trees.J48;
 import weka.classifiers.trees.RandomForest;
 import weka.classifiers.trees.RandomTree;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Discretize;
@@ -41,9 +46,16 @@ public class scratch {
         classifierBD.baseLearnerOption.setCurrentObject(new RandomForest());
         classifierBD.prepareForUse();
 
-        EnsembleClassifierModel baseModel = new EnsembleClassifierModel(
-                new Classifier[]{ensembleClassifier.copy()},
-                new double[]{1.0}, new Instances("Empty", new ArrayList<>(), 0));
+        com.yahoo.labs.samoa.instances.SamoaToWekaInstanceConverter conv = new com.yahoo.labs.samoa.instances.SamoaToWekaInstanceConverter();
+        AbruptTreeDriftGenerator gen = new AbruptTreeDriftGenerator();
+        gen.prepareForUse();
+        Instance inst = conv.wekaInstance(gen.nextInstance().instance);
+        Instances dataset = new Instances(inst.dataset());
+        dataset.add(conv.wekaInstance(gen.nextInstance().instance));
+        PosteriorModel basePosterior = new SingleClassifier(
+                ensembleClassifier.copy(),dataset);
+        PriorModel basePrior = new BayesianNetwork(dataset);
+        JointModel baseModel = new JointModel(basePrior, basePosterior);
         try {
             if (args[0].equals("test")) {
                 System.out.println("Test");
@@ -75,7 +87,7 @@ public class scratch {
             }
 
             else if (args[0].equals("AllPrevData")) {
-                int windowSize = 1000;
+                int windowSize = 5000;
                 String filename = args[1] + args[2];
                 Instances allInstances = loadAnyDataSet(filename);
                 Experiments experiment = new Experiments(baseModel, allInstances, windowSize, false);
@@ -116,7 +128,7 @@ public class scratch {
         }
     }
 
-    private static String[][] classifierDistanceTest(EnsembleClassifierModel baseModel,
+    private static String[][] classifierDistanceTest(JointModel baseModel,
                                                      CategoricalDriftGenerator dataStream) {
         double[] driftMags = new double[]{0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7};
         int[] dataPoints = new int []{100, 1000, 10000, 100000};
@@ -161,7 +173,7 @@ public class scratch {
         dataStream.driftConditional.setValue(true);
         dataStream.driftMagnitudeConditional.setValue(0.9);
         dataStream.driftMagnitudePrior.setValue(0.5);
-        dataStream.burnInNInstances.setValue(100000);
+        dataStream.burnInNInstances.setValue(10000);
     }
 
     public static void writeToCSV(String[][] data, String[] header, String filename) throws IOException{

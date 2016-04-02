@@ -72,12 +72,12 @@ public class BayesianNetworkGenerator {
 
         // Copy Bayesian Network
         bn = new BayesNet();
-		nodes = new BayesNode[nVariables];
-		for (int i = 0; i < nVariables; i++) {
+		nodes = new BayesNode[originStructure.nodes.length];
+		for (int i = 0; i < originStructure.nodes.length; i++) {
 			nodes[i] = bn.createNode("n"+(i+1));
 			//int nValues = r.nextInt(minNValuesPerNode, maxNValuesPerNode);
             int nValues = maxNValuesPerNode;
-			for (int j = 0; j < nValues; j++) {
+			for (int j = 0; j < originStructure.nodes[i].getOutcomeCount(); j++) {
 				nodes[i].addOutcome("s"+j);
 			}
 		}
@@ -106,8 +106,6 @@ public class BayesianNetworkGenerator {
         for (int i = 0; i < nodes.length; i++) {
             nodes[i].setProbabilities(originStructure.nodes[i].getProbabilities().clone());
         }
-        System.out.println("Generated BN structure as follows:");
-        System.out.println(toString());
     }
 
 	// Creating bn from a chordalysis model
