@@ -14,8 +14,6 @@ import java.util.*;
  * Created by loongkuan on 1/04/16.
  **/
 public class BayesianNetwork extends PriorModel{
-    private ArrayList<ArrayList<String>> xPossibleValues;
-    private Instances dataSet;
     private BayesianNetworkGenerator bnModel;
 
     public BayesianNetwork(Instances data) {
@@ -30,9 +28,8 @@ public class BayesianNetwork extends PriorModel{
         this.bnModel = bn;
     }
 
-    @Override
-    public void setData(Instances data) {
-        this.dataSet = data;
+    public void setDataSet(Instances dataSet) {
+        this.dataSet = dataSet;
         this.reset();
     }
 

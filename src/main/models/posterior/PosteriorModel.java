@@ -21,8 +21,20 @@ public abstract class PosteriorModel extends AbstractModel{
     public abstract double findDistance(PosteriorModel model1, PosteriorModel model2, Instances domain);
 
     public Instances getAllPossibleInstances() {
-        getAllPossibleInstances();
-        return allPossibleInstances;
+        getAllPossibleValues();
+        // Calculate and allocate space needed to store all possible instances
+        int nCombinations = 1;
+        for (ArrayList<String> values : xPossibleValues) {
+            nCombinations *= values.size();
+        }
+        allPossibleInstances = new Instances(dataSet, nCombinations);
+
+        // Generate set of all appeared combinations of x values
+        generateCombinations(0, new ArrayList<>());
+
+        //Suggest Garbage collector to run
+        System.gc();
+        return this.allPossibleInstances;
     }
 
     private void getAllPossibleValues() {
