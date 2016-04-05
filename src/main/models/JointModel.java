@@ -22,13 +22,13 @@ public class JointModel extends AbstractModel{
     }
 
     public void setData(Instances data) {
-        this.priorModel.setData(data);
+        this.priorModel.setDataSet(data);
         this.posteriorModel.setData(data);
     }
 
     public static double pyGvModelDistance(JointModel model1, JointModel model2) {
-        Instances domain = findIntersectionBetweenInstances(model1.priorModel.allPossibleInstances,
-                model2.priorModel.allPossibleInstances);
+        Instances domain = findIntersectionBetweenInstances(model1.posteriorModel.getAllPossibleInstances(),
+                model2.posteriorModel.getAllPossibleInstances());
         return model1.posteriorModel.findDistance(model1.posteriorModel, model2.posteriorModel, domain);
     }
 
