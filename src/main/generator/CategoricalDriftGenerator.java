@@ -25,7 +25,7 @@ import java.util.List;
 public abstract class CategoricalDriftGenerator extends AbstractOptionHandler implements InstanceStream {
 
     public IntOption nAttributes = new IntOption("nAttributes", 'n',
-	    "Number of attributes as parents of the class", 2, 1, 10);
+	    "Number of attributes as parents of the class", 2, 1, 1000);
     public IntOption nValuesPerAttribute = new IntOption("nValuesPerAttribute", 'v',
 	    "Number of values per attribute", 2, 2, 5);
     public IntOption burnInNInstances = new IntOption("burnInNInstances", 'b',
@@ -70,19 +70,18 @@ public abstract class CategoricalDriftGenerator extends AbstractOptionHandler im
     }
 
     public static void generateRandomPyGivenX(double[][] pygx, RandomDataGenerator r) {
-	for (int i = 0; i < pygx.length; i++) {
-	    double[] lineCPT = pygx[i];
-	    int chosenClass = r.nextSecureInt(0, lineCPT.length - 1);
+		for (int i = 0; i < pygx.length; i++) {
+			double[] lineCPT = pygx[i];
+			int chosenClass = r.nextSecureInt(0, lineCPT.length - 1);
 
-	    for (int c = 0; c < lineCPT.length; c++) {
-		if (c == chosenClass) {
-		    lineCPT[c] = 1.0;
-		} else {
-		    lineCPT[c] = 0.0;
+			for (int c = 0; c < lineCPT.length; c++) {
+				if (c == chosenClass) {
+					lineCPT[c] = 1.0;
+				} else {
+					lineCPT[c] = 0.0;
+				}
+			}
 		}
-	    }
-	}
-
     }
     
     public static void generateRandomPx(double[][] px, RandomDataGenerator r) {
