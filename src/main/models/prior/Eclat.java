@@ -1,5 +1,7 @@
 package main.models.prior;
 
+import main.models.sampling.AbstractSampler;
+import org.apache.commons.math3.analysis.function.Abs;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -13,9 +15,16 @@ public class Eclat extends PriorModel{
     // Frequent Set -> Transaction ID
     private HashMap<Set<String>, Set<String>> frequentItemSet;
     private int threshold = 10;
+    Instances dataSet;
+    Instances allPossibleInstances;
 
     public Eclat (Instances dataSet) {
         this.dataSet = dataSet;
+        reset();
+    }
+
+    public Eclat(AbstractSampler sampler) {
+        this.dataSet = sampler.getDataSet();
         reset();
     }
 
@@ -32,9 +41,15 @@ public class Eclat extends PriorModel{
         return new Eclat(this.dataSet);
     }
 
+    @Override
     public void setDataSet(Instances dataSet) {
         this.dataSet = dataSet;
         reset();
+    }
+
+    @Override
+    public void setSampler(AbstractSampler sampler) {
+        this.dataSet = sampler.getDataSet();
     }
 
     @Override

@@ -3,6 +3,8 @@ package main.generator;
 import main.generator.componets.BayesianNetworkGenerator;
 import main.generator.componets.TreeClassGenerator;
 import com.yahoo.labs.samoa.instances.*;
+import main.models.distance.Distance;
+import main.models.distance.TotalVariation;
 import moa.core.FastVector;
 import moa.core.InstanceExample;
 import moa.core.ObjectRepository;
@@ -14,38 +16,22 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.eclipse.recommenders.jayes.BayesNode;
 
+import java.math.BigInteger;
 import java.util.*;
 
 
 public class AbruptTreeDriftGenerator extends CategoricalDriftGenerator{
+    private InstancesHeader streamHeader;
+    private long nInstancesGeneratedSoFar;
+    private Distance distanceMetric = new TotalVariation();
 
-    protected InstancesHeader streamHeader;
-
-    /**
-     * p(x) before drift
-     */
-    double[][] pxbd;
-    BayesianNetworkGenerator bnBD;
-    /**
-     * p(y|x) before drift
-     */
-    double[][] pygxbd;
-
-    /**
-     * p(x) after drift
-     */
-    double[][] pxad;
-    BayesianNetworkGenerator bnAD;
-    /**
-     * p(y|x) after drift
-     */
-    double[][] pygxad;
-
-    RandomDataGenerator r;
-
-    long nInstancesGeneratedSoFar;
-
+    // p(x) before drift
+    private BayesianNetworkGenerator bnBD;
+    // p(y|x) before drift
     private TreeClassGenerator<String> rootbd;
+    // p(x) after drift
+    private BayesianNetworkGenerator bnAD;
+    // p(y|x) after drift
     private TreeClassGenerator<String> rootad;
 
     @Override
@@ -69,9 +55,7 @@ public class AbruptTreeDriftGenerator extends CategoricalDriftGenerator{
     }
 
     @Override
-    public void getDescription(StringBuilder sb, int indent) {
-
-    }
+    public void getDescription(StringBuilder sb, int indent) {}
 
     @Override
     public String getPurposeString() {
@@ -83,8 +67,7 @@ public class AbruptTreeDriftGenerator extends CategoricalDriftGenerator{
         return streamHeader;
     }
 
-    protected void generateHeader() {
-
+    private void generateHeader() {
         FastVector<Attribute> attributes = getHeaderAttributes(nAttributes
                 .getValue(), nValuesPerAttribute.getValue());
 
@@ -121,7 +104,7 @@ public class AbruptTreeDriftGenerator extends CategoricalDriftGenerator{
         return new InstanceExample(inst);
     }
 
-    public TreeClassGenerator<String> buildTree() {
+    private TreeClassGenerator<String> buildTree() {
         // Get list of values for each attribute and class labels
         List<List<String>> allAttributesValues = new ArrayList<>();
         // Iterate through all possible values for each attributes
@@ -137,14 +120,11 @@ public class AbruptTreeDriftGenerator extends CategoricalDriftGenerator{
         for (int classIdx = 0; classIdx < nValuesPerAttribute.getValue(); classIdx++) {
             classLabels.add(Double.toString((double)classIdx));
         }
-
-        // Start building the tree
-        TreeClassGenerator<String> tmproot = new TreeClassGenerator<>(allAttributesValues, classLabels, null);
-        //tmproot.printNodes();
-        return tmproot;
+        // Start building the tree and return it
+        return new TreeClassGenerator<>(allAttributesValues, classLabels, null);
     }
 
-    public TreeClassGenerator<String> driftTree(TreeClassGenerator<String> originalTree) {
+    private TreeClassGenerator<String> driftTree(TreeClassGenerator<String> originalTree) {
         // Gte the number of possible combinations of values
         int nCombinationsValues = 1;
         for (int a = 0; a < nAttributes.getValue(); a++) {
@@ -163,24 +143,16 @@ public class AbruptTreeDriftGenerator extends CategoricalDriftGenerator{
         System.out.println("burnIn=" + burnInNInstances.getValue());
         generateHeader();
 
-        int nCombinationsValuesForPX = 1;
+        BigInteger nCombinationsValuesForPX = new BigInteger("1");
         for (int a = 0; a < nAttributes.getValue(); a++) {
-            nCombinationsValuesForPX *= nValuesPerAttribute.getValue();
+            nCombinationsValuesForPX = nCombinationsValuesForPX.multiply(new BigInteger(String.valueOf(nValuesPerAttribute.getValue())));
         }
 
-        pxbd = new double[nAttributes.getValue()][nValuesPerAttribute.getValue()];
-        pygxbd = new double[nCombinationsValuesForPX][nValuesPerAttribute.getValue()];
-
-        RandomGenerator rg = new JDKRandomGenerator();
-        rg.setSeed(seed.getValue());
-        r = new RandomDataGenerator(rg);
-
         // generating distribution before drift
-
         // p(x)
         // Default values
         int nVariables = nAttributes.getValue();
-        int maxNParents = 5;
+        int maxNParents = nAttributes.getValue() - 1;
         int maxNValues= nValuesPerAttribute.getValue();
         int nDataPoints = 5;
         double alphaDirichlet = 5.0;
@@ -194,7 +166,6 @@ public class AbruptTreeDriftGenerator extends CategoricalDriftGenerator{
         // generating distribution after drift
         if (driftPriors.isSet()) {
             bnAD = new BayesianNetworkGenerator(bnBD);
-            double obtainedMagnitude;
             System.out.println("Sampling p(x) for required magnitude...");
             do {
                 driftNetwork(bnAD);
@@ -209,14 +180,14 @@ public class AbruptTreeDriftGenerator extends CategoricalDriftGenerator{
 
         rootad = driftConditional.isSet() ?
                 driftTree(new TreeClassGenerator<>(rootbd, null)) : new TreeClassGenerator<>(rootbd, null);
-        double exactDrift = (double)rootbd.nDifferentClasses(rootad) / (double)nCombinationsValuesForPX;
+        double exactDrift = (double)rootbd.nDifferentClasses(rootad) / nCombinationsValuesForPX.doubleValue();
         if (driftConditional.isSet()) System.out.println("exact magnitude for p(y|x)=" + exactDrift
                 + "\tasked=" + driftMagnitudeConditional.getValue());
 
         nInstancesGeneratedSoFar = 0L;
     }
 
-    public double computeMagnitudePX() {
+    private double computeMagnitudePX() {
         double driftDist = 0.0f;
 
         int[][] allCombinations = generateCombinations(0, new int[nAttributes.getValue()]);
@@ -254,7 +225,7 @@ public class AbruptTreeDriftGenerator extends CategoricalDriftGenerator{
     }
 
     // TODO: Systematically drift Network
-    public void driftNetwork(BayesianNetworkGenerator bn) {
+    private void driftNetwork(BayesianNetworkGenerator bn) {
         // Total drift so far
         double driftNeeded = driftMagnitudePrior.getValue();
         BayesNode[] nodesSorted = sortNodesDecreasingParents(bn.nodes);

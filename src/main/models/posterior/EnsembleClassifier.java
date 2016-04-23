@@ -3,6 +3,8 @@ package main.models.posterior;
 import com.yahoo.labs.samoa.instances.WekaToSamoaInstanceConverter;
 import main.models.distance.Distance;
 import main.models.distance.HellingerDistance;
+import main.models.sampling.AbstractSampler;
+import main.models.sampling.AllSamples;
 import moa.classifiers.Classifier;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -20,32 +22,34 @@ public class EnsembleClassifier extends PosteriorModel{
     private HashMap<Double, Integer> classValueToIndex = new HashMap<>();
     private WekaToSamoaInstanceConverter wekaConverter = new WekaToSamoaInstanceConverter();
 
-    public EnsembleClassifier(EnsembleClassifier baseModel, Instances dataSet) {
-        this.dataSet = dataSet;
-        this.baseClassifiers = new Classifier[baseModel.baseClassifiers.length];
-        for (int i = 0; i < baseModel.baseClassifiers.length; i++) {
-            this.baseClassifiers[i] = baseModel.baseClassifiers[i].copy();
-        }
-        this.switchPoints = baseModel.switchPoints.clone();
-        reset();
+    public EnsembleClassifier(Classifier[] baseClassifiers, double[] switchPoints, Instances dataSet) {
+        this.sampler.setDataSet(dataSet);
+        this.baseClassifiers = baseClassifiers;
+        this.switchPoints = switchPoints;
     }
 
-    public EnsembleClassifier(Classifier[] baseClassifiers, double[] switchPoints, Instances dataSet) {
-        this.dataSet = dataSet;
+    public EnsembleClassifier(Classifier[] baseClassifiers, double[] switchPoints, AbstractSampler sampler) {
+        this.sampler = sampler;
         this.baseClassifiers = baseClassifiers;
         this.switchPoints = switchPoints;
     }
 
     private void getClassLabels() {
-        for (Instance inst : this.dataSet) {
+        for (Instance inst : this.sampler.getDataSet()) {
             classValueToIndex.put(inst.classValue(), inst.classIndex());
         }
     }
 
     @Override
-    public void setData(Instances data) {
-        this.dataSet = data;
-        this.reset();
+    public void setDataSet(Instances dataSet) {
+        this.sampler.setDataSet(dataSet);
+        reset();
+    }
+
+    @Override
+    public void setSampler(AbstractSampler sampler) {
+        this.sampler = sampler;
+        reset();
     }
 
     @Override
@@ -56,7 +60,7 @@ public class EnsembleClassifier extends PosteriorModel{
             classifier_copies[i] = baseClassifiers[i].copy();
         }
         reset();
-        return new EnsembleClassifier(classifier_copies, switchPoints.clone(), dataSet);
+        return new EnsembleClassifier(classifier_copies, switchPoints.clone(), this.sampler);
     }
 
     @Override
@@ -64,7 +68,7 @@ public class EnsembleClassifier extends PosteriorModel{
         for (Classifier baseClassifier : this.baseClassifiers) {
             baseClassifier.resetLearning();
             baseClassifier.prepareForUse();
-            for (Instance inst : dataSet) {
+            for (Instance inst : this.sampler.getDataSet()) {
                 baseClassifier.trainOnInstance(wekaConverter.samoaInstance(inst));
             }
         }

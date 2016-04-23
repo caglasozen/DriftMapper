@@ -8,7 +8,11 @@ import main.models.posterior.EnsembleClassifier;
 import main.models.posterior.PosteriorModel;
 import main.models.posterior.SingleClassifier;
 import main.models.prior.BayesianNetwork;
+import main.models.prior.Eclat;
 import main.models.prior.PriorModel;
+import main.models.sampling.AbstractSampler;
+import main.models.sampling.AllSamples;
+import main.models.sampling.RandomSamples;
 import moa.classifiers.*;
 import moa.classifiers.meta.WEKAClassifier;
 import weka.classifiers.functions.Logistic;
@@ -55,7 +59,8 @@ public class scratch {
         PosteriorModel basePosterior = new SingleClassifier(
                 ensembleClassifier.copy(),dataset);
         PriorModel basePrior = new BayesianNetwork(dataset);
-        JointModel baseModel = new JointModel(basePrior, basePosterior);
+        AbstractSampler sampler = new RandomSamples(dataset, 1000, 0L);
+        JointModel baseModel = new JointModel(basePrior, basePosterior, sampler);
         try {
             if (args[0].equals("test")) {
                 System.out.println("Test");
@@ -117,7 +122,7 @@ public class scratch {
                 Instances allInstance = Experiments.convertStreamToInstances(dataStream);
                 Experiments experiment = new Experiments(baseModel, allInstance, 5000, false);
                 String[][] results = experiment.distanceToStartOverInstances();
-                writeToCSV(results, new String[]{"100", "1000", "10000", "100000", "1000000"}, "EnsembleDistance.csv");
+                writeToCSV(results, new String[]{"p(X)", "p(y|X)"}, "EnsembleDistance.csv");
             }
         }
         catch (IOException ex) {
@@ -153,7 +158,7 @@ public class scratch {
                     dataStream.restart();
                     dataStream.prepareForUse();
                     Experiments experiment = new Experiments(baseModel.copy(), dataStream);
-                    avgPygv += Double.parseDouble(experiment.distanceBetweenStartEnd()[1]);
+                    avgPygv += Double.parseDouble(experiment.distanceBetweenStartEnd()[0]);
                 }
                 avgPygv /= nTests;
                 //System.out.println("p(y|X) drift = " + avgPygv);
@@ -167,7 +172,7 @@ public class scratch {
 
     private static void configureDataSet(CategoricalDriftGenerator dataStream) {
         dataStream.nAttributes.setValue(5);
-        dataStream.nValuesPerAttribute.setValue(3);
+        dataStream.nValuesPerAttribute.setValue(2);
         dataStream.precisionDriftMagnitude.setValue(0.01);
         dataStream.driftPriors.setValue(true);
         dataStream.driftConditional.setValue(true);

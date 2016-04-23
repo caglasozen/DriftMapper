@@ -262,7 +262,8 @@ public class BayesianNetworkGenerator {
 
 			BayesNode child = nodes[eo[i]];
 			// looking for the parents of node eo[i]
-			int nParents = r.nextInt(i - 1, FastMath.min(i, maxNParents));
+			//int nParents = r.nextInt(0, FastMath.min(i, maxNParents));
+			int nParents = r.nextInt(0, FastMath.min(i, 10));
 			if(nParents>0){
 				int[] parentsIDsInEO = r.nextPermutation(i, nParents);
 

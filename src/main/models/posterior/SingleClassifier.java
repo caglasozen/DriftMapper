@@ -3,6 +3,8 @@ package main.models.posterior;
 import com.yahoo.labs.samoa.instances.WekaToSamoaInstanceConverter;
 import main.models.distance.Distance;
 import main.models.distance.HellingerDistance;
+import main.models.sampling.AbstractSampler;
+import main.models.sampling.AllSamples;
 import moa.classifiers.Classifier;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -19,34 +21,45 @@ public class SingleClassifier extends PosteriorModel{
     private Classifier baseClassifier;
 
     public SingleClassifier(Classifier baseClassifier, Instances dataSet) {
-        this.dataSet = dataSet;
+        this.sampler = new AllSamples(dataSet);
+        this.baseClassifier = baseClassifier;
+    }
+
+    public SingleClassifier(Classifier baseClassifier, AbstractSampler sampler) {
+        this.sampler = sampler;
         this.baseClassifier = baseClassifier;
     }
 
     private void trainClassifier() {
         baseClassifier.resetLearning();
         baseClassifier.prepareForUse();
-        for (Instance inst : dataSet) {
+        for (Instance inst : this.sampler.getDataSet()) {
             baseClassifier.trainOnInstance(wekaConverter.samoaInstance(inst));
         }
     }
 
     private void getClassLabels() {
-        for (Instance inst : this.dataSet) {
+        for (Instance inst : this.sampler.getDataSet()) {
             classValueToIndex.put(inst.classValue(), (int)inst.classValue());
         }
     }
 
     @Override
-    public void setData(Instances data) {
-        this.dataSet =data;
-        this.reset();
+    public void setDataSet(Instances dataSet) {
+        this.sampler.setDataSet(dataSet);
+        reset();
+    }
+
+    @Override
+    public void setSampler(AbstractSampler sampler) {
+        this.sampler = sampler;
+        reset();
     }
 
     @Override
     public SingleClassifier copy() {
         Classifier newClassifier = baseClassifier.copy();
-        return new SingleClassifier(newClassifier, dataSet);
+        return new SingleClassifier(newClassifier, this.sampler);
     }
 
     @Override
