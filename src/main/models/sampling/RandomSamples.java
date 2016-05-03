@@ -4,6 +4,7 @@ import weka.core.DenseInstance;
 import weka.core.Instances;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Random;
 
 /**
@@ -35,6 +36,7 @@ public class RandomSamples extends AbstractSampler {
     public Instances generateInstances() {
         this.sampledInstances = new Instances(this.dataSet, this.numberSamples);
         Random rng = new Random(this.seed);
+        HashSet<double[]> prevInst = new HashSet<>();
 
         while (sampledInstances.size() < this.numberSamples) {
             DenseInstance inst = new DenseInstance(this.dataSet.numAttributes());
@@ -43,7 +45,8 @@ public class RandomSamples extends AbstractSampler {
                 int valueIndex = rng.nextInt(attributeValues.size());
                 inst.setValue(i, Double.parseDouble(attributeValues.get(valueIndex)));
             }
-            sampledInstances.add(inst);
+            if (!prevInst.contains(inst.toDoubleArray())) sampledInstances.add(inst);
+            prevInst.add(inst.toDoubleArray());
         }
         return sampledInstances;
     }
