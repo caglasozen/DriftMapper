@@ -15,6 +15,7 @@ import main.models.sampling.AllSamples;
 import main.models.sampling.RandomSamples;
 import moa.classifiers.*;
 import moa.classifiers.meta.WEKAClassifier;
+import moa.tasks.WriteStreamToARFFFile;
 import weka.classifiers.functions.Logistic;
 import weka.classifiers.trees.J48;
 import weka.classifiers.trees.RandomForest;
@@ -60,6 +61,7 @@ public class scratch {
                 ensembleClassifier.copy(),dataset);
         PriorModel basePrior = new BayesianNetwork(dataset);
         AbstractSampler sampler = new RandomSamples(dataset, 1000, 0L);
+        //AbstractSampler sampler = new AllSamples(dataset);
         JointModel baseModel = new JointModel(basePrior, basePosterior, sampler);
         try {
             if (args[0].equals("test")) {
@@ -124,6 +126,57 @@ public class scratch {
                 String[][] results = experiment.distanceToStartOverInstances();
                 writeToCSV(results, new String[]{"p(X)", "p(y|X)"}, "EnsembleDistance.csv");
             }
+            else if (args[0].equals("genData")) {
+                String filename = args[1];
+                // Set data generator to use
+                AbruptTreeDriftGenerator dataStream = new AbruptTreeDriftGenerator();
+                //AbruptDriftGenerator dataStream = new AbruptDriftGenerator();
+                configureDataSet(dataStream);
+
+                WriteStreamToARFFFile writer = new WriteStreamToARFFFile();
+                writer.streamOption.setCurrentObject(dataStream);
+                writer.arffFileOption.setValue("./datasets/" + filename + ".arff");
+                writer.maxInstancesOption.setValue(dataStream.burnInNInstances.getValue()*2);
+                writer.prepareForUse();
+                writer.doTask();
+            }
+            else if (args[0].equals("genAllData")) {
+                String filename;
+                // Set data generator to use
+                AbruptTreeDriftGenerator dataStream = new AbruptTreeDriftGenerator();
+                //AbruptDriftGenerator dataStream = new AbruptDriftGenerator();
+                configureDataSet(dataStream);
+
+                int[] burnIns = new int[]{500, 1000, 2000, 5000, 8000};
+                double[] magnitudes = new double[]{0.2, 0.5, 0.8};
+
+                for (int burnIn : burnIns) {
+                    dataStream.burnInNInstances.setValue(burnIn);
+                    for (double magnitude : magnitudes) {
+                        dataStream.driftMagnitudeConditional.setValue(magnitude);
+                        dataStream.driftMagnitudePrior.setValue(magnitude);
+
+                        dataStream.driftConditional.setValue(false);
+                        dataStream.driftPriors.setValue(true);
+                        filename = "b" + Integer.toString(burnIn) + "_m" + Double.toString(magnitude) + "prior";
+                        dataStream.restart();
+                        writeDataStream(dataStream, filename);
+
+                        dataStream.driftConditional.setValue(true);
+                        dataStream.driftPriors.setValue(false);
+                        filename = "b" + Integer.toString(burnIn) + "_m" + Double.toString(magnitude) + "posterior";
+                        dataStream.restart();
+                        writeDataStream(dataStream, filename);
+
+                        dataStream.driftConditional.setValue(true);
+                        dataStream.driftPriors.setValue(true);
+                        filename = "b" + Integer.toString(burnIn) + "_m" + Double.toString(magnitude) + "both";
+                        dataStream.restart();
+                        writeDataStream(dataStream, filename);
+                    }
+                }
+
+            }
         }
         catch (IOException ex) {
             System.out.println(ex);
@@ -131,6 +184,15 @@ public class scratch {
         catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    private static void writeDataStream(CategoricalDriftGenerator dataStream, String filename) {
+        WriteStreamToARFFFile writer = new WriteStreamToARFFFile();
+        writer.streamOption.setCurrentObject(dataStream);
+        writer.arffFileOption.setValue("./datasets/" + filename + ".arff");
+        writer.maxInstancesOption.setValue(dataStream.burnInNInstances.getValue()*2);
+        writer.prepareForUse();
+        writer.doTask();
     }
 
     private static String[][] classifierDistanceTest(JointModel baseModel,
@@ -171,7 +233,7 @@ public class scratch {
     }
 
     private static void configureDataSet(CategoricalDriftGenerator dataStream) {
-        dataStream.nAttributes.setValue(5);
+        dataStream.nAttributes.setValue(20);
         dataStream.nValuesPerAttribute.setValue(2);
         dataStream.precisionDriftMagnitude.setValue(0.01);
         dataStream.driftPriors.setValue(true);
