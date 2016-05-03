@@ -10,9 +10,9 @@ import java.util.HashSet;
  **/
 public abstract class AbstractSampler {
     protected Instances dataSet;
-    protected double magnitudeScale = 0.0f;
-    protected ArrayList<ArrayList<String>> allPossibleValues;
-    protected Instances sampledInstances;
+    double magnitudeScale = 0.0f;
+    ArrayList<ArrayList<String>> allPossibleValues;
+    Instances sampledInstances;
 
     public abstract Instances generateInstances();
     public abstract AbstractSampler copy();
@@ -21,6 +21,12 @@ public abstract class AbstractSampler {
     public void reset() {
         generateAllPossibleValues();
         generateInstances();
+
+        int nCombinations = 1;
+        for (ArrayList<String> attribute : this.allPossibleValues) {
+            nCombinations *= attribute.size();
+        }
+        this.magnitudeScale = (double)nCombinations / (double)sampledInstances.size();
     }
 
     public double getMagnitudeScale() {

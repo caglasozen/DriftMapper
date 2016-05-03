@@ -11,7 +11,7 @@ public class TotalVariation extends Distance{
         for (int i = 0; i < p.length; i++) {
             driftMag += Math.abs(p[i] - q[i]);
         }
-        driftMag *= (double)1/(double)2;
+        driftMag /= (double)2;
         return driftMag;
     }
 }

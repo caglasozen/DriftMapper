@@ -40,13 +40,13 @@ public class JointModel extends AbstractModel{
     public static double pyGvModelDistance(JointModel model1, JointModel model2) {
         Instances domain = findIntersectionBetweenInstances(model1.sampler.getSampledInstances(),
                 model2.sampler.getSampledInstances());
-        return model1.posteriorModel.findDistance(model1.posteriorModel, model2.posteriorModel, domain);
+        return model1.posteriorModel.findDistance(model1.posteriorModel, model2.posteriorModel, domain)*model1.sampler.getMagnitudeScale();
     }
 
     public static double pvModelDistance(JointModel model1, JointModel model2){
         Instances domain = findIntersectionBetweenInstances(model1.sampler.getSampledInstances(),
                 model2.sampler.getSampledInstances());
-        return model1.priorModel.findDistance(model1.priorModel, model2.priorModel, domain);
+        return model1.priorModel.findDistance(model1.priorModel, model2.priorModel, domain)*model1.sampler.getMagnitudeScale();
     }
 
     @Override

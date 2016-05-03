@@ -10,20 +10,14 @@ import java.util.Random;
  * Created by Lee on 19/04/2016.
  **/
 public class RandomSamples extends AbstractSampler {
-    private int numberSamples = 0;
     private long seed;
+    private int numberSamples;
 
     public RandomSamples(Instances dataSet, int numberSamples, long seed) {
         this.seed = seed;
         this.dataSet = dataSet;
-        this.reset();
-
-        int nCombinations = 0;
         this.numberSamples = numberSamples;
-        for (ArrayList<String> attribute : this.allPossibleValues) {
-            nCombinations *= attribute.size();
-        }
-        this.magnitudeScale = nCombinations / this.numberSamples;
+        this.reset();
     }
 
     @Override
