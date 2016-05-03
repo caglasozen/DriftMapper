@@ -3,6 +3,7 @@ package main.generator;
 import main.generator.componets.BayesianNetworkGenerator;
 import main.generator.componets.TreeClassGenerator;
 import com.yahoo.labs.samoa.instances.*;
+import main.generator.drifter.bn.LinearInterpolation;
 import main.models.distance.Distance;
 import main.models.distance.TotalVariation;
 import moa.core.FastVector;
@@ -11,6 +12,7 @@ import moa.core.ObjectRepository;
 import moa.streams.InstanceStream;
 import moa.tasks.TaskMonitor;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.math3.optim.linear.LinearConstraint;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -155,7 +157,7 @@ public class AbruptTreeDriftGenerator extends CategoricalDriftGenerator{
         int maxNParents = nAttributes.getValue() - 1;
         int maxNValues= nValuesPerAttribute.getValue();
         int nDataPoints = 5;
-        double alphaDirichlet = 5.0;
+        double alphaDirichlet = 1.0;
         long seed = 3071980L;
         bnBD = new BayesianNetworkGenerator(nVariables, maxNParents,maxNValues,nDataPoints,alphaDirichlet, seed);
         bnBD.prepareForUse();
@@ -165,11 +167,15 @@ public class AbruptTreeDriftGenerator extends CategoricalDriftGenerator{
 
         // generating distribution after drift
         if (driftPriors.isSet()) {
-            bnAD = new BayesianNetworkGenerator(bnBD);
-            System.out.println("Sampling p(x) for required magnitude...");
+            LinearInterpolation drifter = new LinearInterpolation(bnBD);
+            bnAD = drifter.getBn_mid();
+            double drift  = 0.0f;
             do {
-                driftNetwork(bnAD);
-            } while (Math.abs(computeMagnitudePX() - driftMagnitudePrior.getValue()) > precisionDriftMagnitude.getValue());
+                bnBD.prepareForUse();
+                System.out.println("Sampling p(x) for required magnitude...");
+                drift = drifter.driftNetwork(driftMagnitudePrior.getValue(), precisionDriftMagnitude.getValue());
+                System.out.println("Measuring magnitude...");
+            } while (Math.abs(drift - driftMagnitudePrior.getValue()) > precisionDriftMagnitude.getValue());
 
             System.out.println("exact magnitude for p(x)="
                     + computeMagnitudePX() + "\tasked="
@@ -192,12 +198,9 @@ public class AbruptTreeDriftGenerator extends CategoricalDriftGenerator{
 
         int[][] allCombinations = generateCombinations(0, new int[nAttributes.getValue()]);
         for (int[] combination : allCombinations) {
-            driftDist += Math.pow(
-                    (Math.sqrt(bnBD.getJointProbabilityOfX(combination))-
-                            Math.sqrt(bnAD.getJointProbabilityOfX(combination))), 2);
+            driftDist += Math.abs(bnBD.getJointProbabilityOfX(combination) - bnAD.getJointProbabilityOfX(combination));
         }
-        driftDist = Math.sqrt(driftDist);
-        driftDist = driftDist * (1/Math.sqrt(2));
+        driftDist /= 2.0f;
 
         return driftDist;
     }
@@ -237,6 +240,7 @@ public class AbruptTreeDriftGenerator extends CategoricalDriftGenerator{
             List<BayesNode> parentNodes = node.getParents();
 
             driftNeeded = driftMagnitudePrior.getValue() - computeMagnitudePX();
+            System.out.println("Drifting node " + i + "...");
             if (driftNeeded > precisionDriftMagnitude.getValue()) {
                 //System.out.println("Target not reached, drifting by: " + driftNeeded);
                 double driftMade = driftCPT(node, new ArrayList<>(parentNodes), new HashMap<>(), driftNeeded);
