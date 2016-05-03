@@ -73,7 +73,7 @@ public class scratch {
                 Instances allInstances = loadAnyDataSet(filename);
                 Experiments experiment = new Experiments(baseModel, allInstances, allInstances.size()/2, true);
                 String[] dist = experiment.distanceBetweenStartEnd();
-                writeToCSV(new String[][]{dist}, new String[]{"p(X)", "p(y|X)"}, "./half_out/" + args[2] + ".txt");
+                writeToCSV(new String[][]{dist}, new String[]{"p(X)", "p(y|X)"}, "./data_out/half_out/" + args[2] + ".txt");
             }
 
             else if (args[0].equals("StartEnd")) {
@@ -81,7 +81,7 @@ public class scratch {
                 Instances allInstances = loadAnyDataSet(filename);
                 Experiments experiment = new Experiments(baseModel, allInstances, 1000, true);
                 String[] dist = experiment.distanceBetweenStartEnd();
-                writeToCSV(new String[][]{dist}, new String[]{"p(X)", "p(y|X)"}, "./se_out/" + args[2] + ".txt");
+                writeToCSV(new String[][]{dist}, new String[]{"p(X)", "p(y|X)"}, "./data_out/se_out/" + args[2] + ".txt");
             }
 
             else if (args[0].equals("AllData")) {
@@ -90,7 +90,7 @@ public class scratch {
                 Instances allInstances = loadAnyDataSet(filename);
                 Experiments experiment = new Experiments(baseModel, allInstances, windowSize, false);
                 String[][] dists = experiment.distanceToStartOverInstances();
-                writeToCSV(dists, new String[]{"p(X)", "p(y|X)", Integer.toString(windowSize)}, "./ad_out/" + args[2] + ".txt");
+                writeToCSV(dists, new String[]{"p(X)", "p(y|X)", Integer.toString(windowSize)}, "./data_out/ad_out/" + args[2] + ".txt");
             }
 
             else if (args[0].equals("AllPrevData")) {
@@ -99,7 +99,7 @@ public class scratch {
                 Instances allInstances = loadAnyDataSet(filename);
                 Experiments experiment = new Experiments(baseModel, allInstances, windowSize, false);
                 String[][] dists = experiment.distanceToPrevOverInstances();
-                writeToCSV(dists, new String[]{"p(X)", "p(y|X)", Integer.toString(windowSize)}, "./apd_out/" + args[2] + ".txt");
+                writeToCSV(dists, new String[]{"p(X)", "p(y|X)", Integer.toString(windowSize)}, "./data_out/apd_out/" + args[2] + ".txt");
             }
 
             else if (args[0].equals("modelTest")){
@@ -158,24 +158,23 @@ public class scratch {
 
                         dataStream.driftConditional.setValue(false);
                         dataStream.driftPriors.setValue(true);
-                        filename = "b" + Integer.toString(burnIn) + "_m" + Double.toString(magnitude) + "prior";
+                        filename = "b" + Integer.toString(burnIn) + "_m" + Double.toString(magnitude) + "_prior";
                         dataStream.restart();
                         writeDataStream(dataStream, filename);
 
                         dataStream.driftConditional.setValue(true);
                         dataStream.driftPriors.setValue(false);
-                        filename = "b" + Integer.toString(burnIn) + "_m" + Double.toString(magnitude) + "posterior";
+                        filename = "b" + Integer.toString(burnIn) + "_m" + Double.toString(magnitude) + "_posterior";
                         dataStream.restart();
                         writeDataStream(dataStream, filename);
 
                         dataStream.driftConditional.setValue(true);
                         dataStream.driftPriors.setValue(true);
-                        filename = "b" + Integer.toString(burnIn) + "_m" + Double.toString(magnitude) + "both";
+                        filename = "b" + Integer.toString(burnIn) + "_m" + Double.toString(magnitude) + "_both";
                         dataStream.restart();
                         writeDataStream(dataStream, filename);
                     }
                 }
-
             }
         }
         catch (IOException ex) {
