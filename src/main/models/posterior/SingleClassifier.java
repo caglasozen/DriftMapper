@@ -3,6 +3,7 @@ package main.models.posterior;
 import com.yahoo.labs.samoa.instances.WekaToSamoaInstanceConverter;
 import main.models.distance.Distance;
 import main.models.distance.HellingerDistance;
+import main.models.distance.TotalVariation;
 import main.models.sampling.AbstractSampler;
 import main.models.sampling.AllSamples;
 import moa.classifiers.Classifier;
@@ -86,7 +87,7 @@ public class SingleClassifier extends PosteriorModel{
     @Override
     public double findDistance(PosteriorModel model1, PosteriorModel model2, Instances domain) {
         Double[] classValues = this.classValueToIndex.keySet().toArray(new Double[classValueToIndex.size()]);
-        Distance distanceMetric = new HellingerDistance();
+        Distance distanceMetric = new TotalVariation();
         double driftMag = 0.0f;
 
         for (Instance inst : domain) {

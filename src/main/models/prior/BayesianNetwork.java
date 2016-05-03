@@ -4,6 +4,7 @@ import explorer.ChordalysisModelling;
 import main.generator.componets.BayesianNetworkGenerator;
 import main.models.distance.Distance;
 import main.models.distance.HellingerDistance;
+import main.models.distance.TotalVariation;
 import main.models.sampling.AbstractSampler;
 import main.models.sampling.AllSamples;
 import weka.core.DenseInstance;
@@ -83,7 +84,7 @@ public class BayesianNetwork extends PriorModel{
     public double findDistance(PriorModel model1, PriorModel model2, Instances domain) {
         // Trim last attribute as allPossibleCombinations contains a class attribute wh
         domain = trimClass(domain);
-        Distance distanceMetric = new HellingerDistance();
+        Distance distanceMetric = new TotalVariation();
 
         double[] p = new double[domain.size()];
         double[] q = new double[domain.size()];
