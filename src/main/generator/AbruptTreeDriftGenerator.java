@@ -162,11 +162,14 @@ public class AbruptTreeDriftGenerator extends CategoricalDriftGenerator{
         bnBD = new BayesianNetworkGenerator(nVariables, maxNParents,maxNValues,nDataPoints,alphaDirichlet, seed);
         bnBD.prepareForUse();
         // p(y|X)
+        System.out.println("Creating Class Tree");
         rootbd = buildTree();
+        System.out.println("Done Creating Class Tree");
 
 
         // generating distribution after drift
         if (driftPriors.isSet()) {
+            System.out.println("Creating p(x) drifter");
             LinearInterpolation drifter = new LinearInterpolation(bnBD);
             bnAD = drifter.getBn_mid();
             double drift  = 0.0f;

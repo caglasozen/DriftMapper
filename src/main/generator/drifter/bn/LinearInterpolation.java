@@ -13,6 +13,7 @@ public class LinearInterpolation extends AbstractDrift{
         this.bn_base = bn;
         this.bn_max = generateDistantBN(bn);
         this.bn_mid = new BayesianNetworkGenerator(bn_max);
+        System.out.println("Generating all Combinations");
         this.allCombinations = generateCombinations(0, new int[bn_mid.nodes.length]);
     }
 
