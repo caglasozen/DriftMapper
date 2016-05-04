@@ -8,6 +8,7 @@ import weka.core.Instances;
 /**
  * Created by loongkuan on 11/03/16.
  **/
+//TODO: Use something nicer to manage experiments
 public class Experiments {
     private JointModel[] models;
     private Instances allInstances;
