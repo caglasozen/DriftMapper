@@ -1,8 +1,12 @@
 package main.models.sampling;
 
+import org.apache.commons.math3.analysis.function.Abs;
+import weka.core.Instance;
 import weka.core.Instances;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 
 /**
@@ -60,5 +64,24 @@ public abstract class AbstractSampler {
         }
         //Suggest Garbage collector to run
         System.gc();
+    }
+
+    public static Instances findIntersectionBetweenInstances(AbstractSampler sampler1, AbstractSampler sampler2) {
+        Instances instances1 = sampler1.getSampledInstances();
+        Instances instances2 = sampler2.getSampledInstances();
+        // Create a hashed mapped set of instances1 first
+        HashMap<Integer, Instance> baseMap = new HashMap<>(instances1.size());
+        for (Instance instance : instances1) {
+            Integer hash = Arrays.hashCode(instance.toDoubleArray());
+            if (!baseMap.containsKey(hash)) baseMap.put(hash, instance);
+        }
+
+        // Check each instance in instances2, if it is in instances1's baseMap, put into final Instances to return
+        Instances finalInstances = new Instances(instances2, instances1.size() + instances2.size());
+        for (Instance instance : instances2) {
+            Integer hash = Arrays.hashCode(instance.toDoubleArray());
+            if (baseMap.containsKey(hash)) finalInstances.add(instance);
+        }
+        return finalInstances;
     }
 }
