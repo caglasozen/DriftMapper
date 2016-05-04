@@ -176,9 +176,30 @@ public class scratch {
                     }
                 }
             }
+            else if (args[0].equals("martvard")) {
+                // Set data generator to use
+                AbruptTreeDriftGenerator dataStream = new AbruptTreeDriftGenerator();
+                //AbruptDriftGenerator dataStream = new AbruptDriftGenerator();
+                configureDataSet(dataStream);
+                dataStream.prepareForUse();
+                // Get distance(s)
+
+                //Instances allInstances = Experiments.convertStreamToInstances(dataStream);
+                Instances allInstances = loadDataSet("./datasets/elecNormNew.arff");
+                Instances instances1 = new Instances(allInstances, 0, allInstances.size()/2);
+                Instances instances2 = new Instances(allInstances, allInstances.size()/2 - 1, allInstances.size()/2);
+                MarTVarD marTVarD = new MarTVarD(instances1, instances2);
+                int[][] sets = marTVarD.findOrderedNPle(2);
+                for (int[] pair : sets) {
+                    for (int i : pair) {
+                        System.out.print(i);
+                    }
+                    System.out.println("");
+                }
+            }
         }
         catch (IOException ex) {
-            System.out.println(ex);
+            ex.printStackTrace();
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -232,7 +253,7 @@ public class scratch {
     }
 
     private static void configureDataSet(CategoricalDriftGenerator dataStream) {
-        dataStream.nAttributes.setValue(20);
+        dataStream.nAttributes.setValue(5);
         dataStream.nValuesPerAttribute.setValue(2);
         dataStream.precisionDriftMagnitude.setValue(0.01);
         dataStream.driftPriors.setValue(true);
