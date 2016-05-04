@@ -11,13 +11,18 @@ import com.github.javacliparser.FlagOption;
 import com.github.javacliparser.FloatOption;
 import com.github.javacliparser.IntOption;
 import com.yahoo.labs.samoa.instances.Attribute;
+import com.yahoo.labs.samoa.instances.DenseInstance;
 import moa.core.FastVector;
 import moa.options.AbstractOptionHandler;
 import moa.options.*;
 
 import moa.streams.InstanceStream;
 import org.apache.commons.math3.random.RandomDataGenerator;
+import weka.core.Instance;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -188,5 +193,33 @@ public abstract class CategoricalDriftGenerator extends AbstractOptionHandler im
 	return classPrior;
 	
     }
+
+	public void writeDataStreamToFile(String filename) {
+        this.restart();
+		File destFile = new File(filename);
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(destFile));
+            writer.write(this.getHeader().toString());
+            writer.write("\n");
+
+            for (int i = 0; i < this.burnInNInstances.getValue()*2; i++) {
+                DenseInstance inst = (DenseInstance)this.nextInstance().getData();
+                double[] values = inst.toDoubleArray();
+                String line = "";
+                for (int j = 0; j < values.length - 1; j++) {
+                    double value = values[j] + 1;
+                    int chosenValue = (int)value;
+                    line += "v"+Integer.toString(chosenValue) + ",";
+                }
+                line += "class"+Integer.toString((int)values[values.length-1] + 1);
+                writer.write(line);
+                writer.write("\n");
+            }
+            writer.close();
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+	}
 
 }

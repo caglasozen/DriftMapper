@@ -132,13 +132,11 @@ public class scratch {
                 AbruptTreeDriftGenerator dataStream = new AbruptTreeDriftGenerator();
                 //AbruptDriftGenerator dataStream = new AbruptDriftGenerator();
                 configureDataSet(dataStream);
+                String folder = "./datasets/";
+                String extension = ".arff";
 
-                WriteStreamToARFFFile writer = new WriteStreamToARFFFile();
-                writer.streamOption.setCurrentObject(dataStream);
-                writer.arffFileOption.setValue("./datasets/" + filename + ".arff");
-                writer.maxInstancesOption.setValue(dataStream.burnInNInstances.getValue()*2);
-                writer.prepareForUse();
-                writer.doTask();
+                dataStream.prepareForUse();
+                dataStream.writeDataStreamToFile(folder+filename+extension);
             }
             else if (args[0].equals("genAllData")) {
                 String filename;
@@ -149,9 +147,18 @@ public class scratch {
 
                 int[] burnIns = new int[]{500, 1000, 2000, 5000, 8000};
                 double[] magnitudes = new double[]{0.2, 0.5, 0.8};
+                String folder = "./datasets/";
+                String extension = ".arff";
 
                 for (int burnIn : burnIns) {
+
                     dataStream.burnInNInstances.setValue(burnIn);
+                    dataStream.driftConditional.setValue(false);
+                    dataStream.driftPriors.setValue(false);
+                    filename = "b" + Integer.toString(burnIn) + "_none";
+                    dataStream.prepareForUse();
+                    dataStream.writeDataStreamToFile(folder+filename+extension);
+
                     for (double magnitude : magnitudes) {
                         dataStream.driftMagnitudeConditional.setValue(magnitude);
                         dataStream.driftMagnitudePrior.setValue(magnitude);
@@ -159,20 +166,20 @@ public class scratch {
                         dataStream.driftConditional.setValue(false);
                         dataStream.driftPriors.setValue(true);
                         filename = "b" + Integer.toString(burnIn) + "_m" + Double.toString(magnitude) + "_prior";
-                        dataStream.restart();
-                        writeDataStream(dataStream, filename);
+                        dataStream.prepareForUse();
+                        dataStream.writeDataStreamToFile(folder+filename+extension);
 
                         dataStream.driftConditional.setValue(true);
                         dataStream.driftPriors.setValue(false);
                         filename = "b" + Integer.toString(burnIn) + "_m" + Double.toString(magnitude) + "_posterior";
-                        dataStream.restart();
-                        writeDataStream(dataStream, filename);
+                        dataStream.prepareForUse();
+                        dataStream.writeDataStreamToFile(folder+filename+extension);
 
                         dataStream.driftConditional.setValue(true);
                         dataStream.driftPriors.setValue(true);
                         filename = "b" + Integer.toString(burnIn) + "_m" + Double.toString(magnitude) + "_both";
-                        dataStream.restart();
-                        writeDataStream(dataStream, filename);
+                        dataStream.prepareForUse();
+                        dataStream.writeDataStreamToFile(folder+filename+extension);
                     }
                 }
             }
@@ -185,7 +192,7 @@ public class scratch {
                 // Get distance(s)
 
                 //Instances allInstances = Experiments.convertStreamToInstances(dataStream);
-                Instances allInstances = loadDataSet("./datasets/elecNormNew.arff");
+                Instances allInstances = loadDataSet("./datasets/b8000_m0.8_prior.arff");
                 Instances instances1 = new Instances(allInstances, 0, allInstances.size()/2);
                 Instances instances2 = new Instances(allInstances, allInstances.size()/2 - 1, allInstances.size()/2);
                 MarTVarD marTVarD = new MarTVarD(instances1, instances2);
@@ -253,7 +260,7 @@ public class scratch {
     }
 
     private static void configureDataSet(CategoricalDriftGenerator dataStream) {
-        dataStream.nAttributes.setValue(5);
+        dataStream.nAttributes.setValue(20);
         dataStream.nValuesPerAttribute.setValue(2);
         dataStream.precisionDriftMagnitude.setValue(0.01);
         dataStream.driftPriors.setValue(true);
