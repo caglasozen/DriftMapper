@@ -74,9 +74,7 @@ public abstract class AbstractSampler {
         System.gc();
     }
 
-    public static Instances findIntersectionBetweenInstances(AbstractSampler sampler1, AbstractSampler sampler2) {
-        Instances instances1 = sampler1.getSampledInstances();
-        Instances instances2 = sampler2.getSampledInstances();
+    public static Instances findIntersectionBetweenInstances(Instances instances1, Instances instances2) {
         // Create a hashed mapped set of instances1 first
         HashMap<Integer, Instance> baseMap = new HashMap<>(instances1.size());
         for (Instance instance : instances1) {
