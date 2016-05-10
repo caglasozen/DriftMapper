@@ -49,9 +49,10 @@ public class MarTVarD {
             Instances instances2 = seperateVariables(this.dataSet2, indices);
             PriorModel model2 = new BayesianNetwork(instances2);
             Instances allInstances = AbstractSampler.findIntersectionBetweenInstances(instances1, instances2);
-            AbstractSampler sampler = new RandomSamples(allInstances, 1000, 0);
+            // TODO: Find suitable sample size
+            AbstractSampler sampler = new RandomSamples(allInstances, allInstances.size() / 1000, 0);
 
-            double distance = model1.findDistance(model1, model2, sampler);
+            double distance = model1.findDistance(model1, model2, sampler) * sampler.getMagnitudeScale();
             sets.put(indices, distance);
         }
 
@@ -104,7 +105,7 @@ public class MarTVarD {
     }
 
     private int factorial(int n) {
-        if (n == 0) return 1;
+        if (n <= 0) return 1;
         else {
             return (n * factorial(n-1));
         }
