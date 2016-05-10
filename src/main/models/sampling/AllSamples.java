@@ -12,14 +12,19 @@ import java.util.ArrayList;
 public class AllSamples extends AbstractSampler {
 
     public AllSamples(Instances dataSet) {
-        this.magnitudeScale = 1.0;
-        this.dataSet = dataSet;
-        this.nInstances = dataSet.size();
         this.setDataSet(dataSet);
+        this.reset();
+    }
+
+    public AllSamples(AllSamples samples1, AllSamples samples2) {
+        this.setDataSet(AbstractSampler.findIntersectionBetweenInstances(samples1.getDataSet(), samples2.getDataSet()));
+        this.reset();
     }
 
     @Override
     public void reset() {
+        this.magnitudeScale = 1.0;
+        this.nInstances = this.dataSet.size();
         this.nInstancesGeneratedSoFar = 0;
     }
 

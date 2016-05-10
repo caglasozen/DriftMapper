@@ -18,15 +18,21 @@ public class RandomSamples extends AbstractSampler {
 
     public RandomSamples(Instances dataSet, int nInstances, long seed) {
         this.seed = seed;
-        this.dataSet = dataSet;
         this.nInstances = nInstances;
-        this.rng = new Random(this.seed);
-        this.prevInst = new HashSet<>();
         this.setDataSet(dataSet);
+        this.reset();
+    }
+
+    public RandomSamples(RandomSamples samples1, RandomSamples samples2) {
+        this.seed = (samples1.getSeed() + samples2.getSeed()) / 2;
+        this.nInstances = (samples1.getNInstances() + samples2.getNInstances()) / 2;
+        this.setDataSet(AbstractSampler.findIntersectionBetweenInstances(samples1.getDataSet(), samples2.getDataSet()));
+        this.reset();
     }
 
     @Override
     public void reset() {
+        this.rng = new Random(this.seed);
         this.prevInst = new HashSet<>();
         this.nInstancesGeneratedSoFar = 0;
     }
@@ -67,5 +73,9 @@ public class RandomSamples extends AbstractSampler {
         this.prevInst.add(inst.toDoubleArray());
         this.nInstancesGeneratedSoFar += 1;
         return inst;
+    }
+
+    public long getSeed() {
+        return this.seed;
     }
 }

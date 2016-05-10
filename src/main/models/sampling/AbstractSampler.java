@@ -31,13 +31,12 @@ public abstract class AbstractSampler {
     public void setDataSet(Instances dataSet) {
         this.dataSet = dataSet;
         generateAllPossibleValues();
-        generateAllInstances();
 
         int nCombinations = 1;
         for (ArrayList<String> attribute : this.allPossibleValues) {
             nCombinations *= attribute.size();
         }
-        this.magnitudeScale = (double)nCombinations / (double)sampledInstances.size();
+        this.magnitudeScale = (double)nCombinations / (double)this.nInstances;
     }
 
 
