@@ -3,6 +3,7 @@ package main;
 import main.models.prior.BayesianNetwork;
 import main.models.prior.PriorModel;
 import main.models.sampling.AbstractSampler;
+import main.models.sampling.AllSamples;
 import main.models.sampling.RandomSamples;
 import moa.recommender.rc.utils.Hash;
 import org.apache.commons.lang3.ArrayUtils;
@@ -50,7 +51,8 @@ public class MarTVarD {
             PriorModel model2 = new BayesianNetwork(instances2);
             Instances allInstances = AbstractSampler.findIntersectionBetweenInstances(instances1, instances2);
             // TODO: Find suitable sample size
-            AbstractSampler sampler = new RandomSamples(allInstances, allInstances.size() / 1000, 0);
+            //AbstractSampler sampler = new RandomSamples(allInstances, allInstances.size() / 1000, 0);
+            AbstractSampler sampler = new AllSamples(allInstances);
 
             double distance = model1.findDistance(model1, model2, sampler) * sampler.getMagnitudeScale();
             sets.put(indices, distance);
