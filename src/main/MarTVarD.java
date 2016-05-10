@@ -36,7 +36,7 @@ public class MarTVarD {
      * @param n The number of variables in a n-ple, (2 = tuple, 3 = triple, and so on)
      * @return An ordered list of n-ples
      */
-    public int[][] findOrderedNPle(int n) {
+    public String[][] findOrderedNPle(int n) {
         int[] elements = new int[dataSet1.numAttributes() - 1];
         for (int i = 0; i < dataSet1.numAttributes() - 1; i++) elements[i] = i;
 
@@ -59,7 +59,16 @@ public class MarTVarD {
 
         int[][] orderedSets;
         orderedSets = sets.keySet().toArray(new int[nCombination][n]);
-        return orderedSets;
+        String[][] results = new String[orderedSets.length][2];
+        for (int i = 0; i < orderedSets.length; i++) {
+            int[] set = orderedSets[i];
+            results[i][0] = "";
+            for (int j = 0; j < set.length; j++) {
+                results[i][0] += Integer.toString(set[j]);
+            }
+            results[i][1] = Double.toString(sets.get(set));
+        }
+        return results;
     }
 
     public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue( Map<K, V> map ) {
