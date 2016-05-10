@@ -46,13 +46,12 @@ public class MarTVarD {
             int[] indices = getKthCombination(i, elements, n);
             Instances instances1 = seperateVariables(this.dataSet1, indices);
             PriorModel model1 = new BayesianNetwork(instances1);
-            AbstractSampler sampler1 = new RandomSamples(instances1, 1000, 0);
             Instances instances2 = seperateVariables(this.dataSet2, indices);
             PriorModel model2 = new BayesianNetwork(instances2);
-            AbstractSampler sampler2 = new RandomSamples(instances2, 1000, 0);
+            Instances allInstances = AbstractSampler.findIntersectionBetweenInstances(instances1, instances2);
+            AbstractSampler sampler = new RandomSamples(allInstances, 1000, 0);
 
-            Instances domain = AbstractSampler.findIntersectionBetweenInstances(sampler1, sampler2);
-            double distance = model1.findDistance(model1, model2, domain);
+            double distance = model1.findDistance(model1, model2, sampler);
             sets.put(indices, distance);
         }
 

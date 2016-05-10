@@ -3,6 +3,8 @@ package main.models;
 import main.models.posterior.PosteriorModel;
 import main.models.prior.PriorModel;
 import main.models.sampling.AbstractSampler;
+import main.models.sampling.RandomSamples;
+import weka.core.Debug;
 import weka.core.Instances;
 
 /**
@@ -44,9 +46,8 @@ public class JointModel extends AbstractModel{
     }
 
     public static double pvModelDistance(JointModel model1, JointModel model2){
-        Instances domain = findIntersectionBetweenInstances(model1.sampler.getSampledInstances(),
-                model2.sampler.getSampledInstances());
-        return model1.priorModel.findDistance(model1.priorModel, model2.priorModel, domain)*model1.sampler.getMagnitudeScale();
+        RandomSamples sample = new RandomSamples((RandomSamples)model1.sampler, (RandomSamples)model2.sampler);
+        return model1.priorModel.findDistance(model1.priorModel, model2.priorModel, sample)*sample.getMagnitudeScale();
     }
 
     @Override

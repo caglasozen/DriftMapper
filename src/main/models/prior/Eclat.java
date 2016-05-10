@@ -61,17 +61,18 @@ public class Eclat extends PriorModel{
     }
 
     @Override
-    public double findDistance(PriorModel model1, PriorModel model2, Instances domain) {
-        if (domain.size() == 0) return 0.0f;
-        domain = trimClass(domain);
+    public double findDistance(PriorModel model1, PriorModel model2, AbstractSampler sample) {
+        if (sample.getNInstances() == 0) return 0.0f;
         double averageFrequency1 = 0;
         double averageFrequency2 = 0;
-        for (Instance inst : domain) {
+        sample.reset();
+        for (int i = 0; i < sampler.getNInstances(); i++) {
+            Instance inst = sample.nextInstance();
             averageFrequency1 += model1.findPv(inst.toDoubleArray());
             averageFrequency2 += model2.findPv(inst.toDoubleArray());
         }
-        averageFrequency1 /= (double)domain.size();
-        averageFrequency2 /= (double)domain.size();
+        averageFrequency1 /= (double)sample.getNInstances();
+        averageFrequency2 /= (double)sample.getNInstances();
         return Math.abs(averageFrequency1 - averageFrequency2);
     }
 

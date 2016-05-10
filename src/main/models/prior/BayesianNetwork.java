@@ -7,6 +7,7 @@ import main.models.distance.HellingerDistance;
 import main.models.distance.TotalVariation;
 import main.models.sampling.AbstractSampler;
 import main.models.sampling.AllSamples;
+import org.apache.commons.lang3.ArrayUtils;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -81,17 +82,17 @@ public class BayesianNetwork extends PriorModel{
     }
 
     @Override
-    public double findDistance(PriorModel model1, PriorModel model2, Instances domain) {
+    public double findDistance(PriorModel model1, PriorModel model2, AbstractSampler sample) {
         // Trim last attribute as allPossibleCombinations contains a class attribute wh
-        domain = trimClass(domain);
         Distance distanceMetric = new TotalVariation();
 
-        double[] p = new double[domain.size()];
-        double[] q = new double[domain.size()];
-        for (int i = 0; i < domain.size(); i++) {
-            Instance inst = domain.get(i);
-            p[i] = model1.findPv(Arrays.copyOfRange(inst.toDoubleArray(), 0, domain.numAttributes()));
-            q[i] = model2.findPv(Arrays.copyOfRange(inst.toDoubleArray(), 0, domain.numAttributes()));
+        double[] p = new double[sample.getNInstances()];
+        double[] q = new double[sample.getNInstances()];
+        sample.reset();
+        for (int i = 0; i < sample.getNInstances(); i++) {
+            Instance inst = sample.nextInstance();
+            p[i] = model1.findPv(Arrays.copyOfRange(inst.toDoubleArray(), 0, inst.numAttributes() - 1));
+            q[i] = model2.findPv(Arrays.copyOfRange(inst.toDoubleArray(), 0, inst.numAttributes() - 1));
         }
         return distanceMetric.findDistance(p, q);
     }

@@ -18,6 +18,6 @@ public abstract class PriorModel extends AbstractModel {
     public abstract void setDataSet(Instances dataSet);
     public abstract void setSampler(AbstractSampler sampler);
     public abstract double findPv(double[] vector);
-    public abstract double findDistance(PriorModel model1, PriorModel model2, Instances domain);
+    public abstract double findDistance(PriorModel model1, PriorModel model2, AbstractSampler sample);
 
 }
