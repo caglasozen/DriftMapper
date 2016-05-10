@@ -184,24 +184,18 @@ public class scratch {
                 }
             }
             else if (args[0].equals("martvard")) {
-                // Set data generator to use
-                AbruptTreeDriftGenerator dataStream = new AbruptTreeDriftGenerator();
-                //AbruptDriftGenerator dataStream = new AbruptDriftGenerator();
-                configureDataSet(dataStream);
-                dataStream.prepareForUse();
-                // Get distance(s)
+                String[] files = new String[]{"elecNormNew", "sensor", "airlines"};
+                for (String file : files) {
+                    Instances allInstances = loadAnyDataSet("./datasets/"+file+".arff");
+                    Instances instances1 = new Instances(allInstances, 0, allInstances.size()/2);
+                    Instances instances2 = new Instances(allInstances, allInstances.size()/2 - 1, allInstances.size()/2);
 
-                //Instances allInstances = Experiments.convertStreamToInstances(dataStream);
-                Instances allInstances = loadDataSet("./datasets/b8000_m0.8_prior.arff");
-                Instances instances1 = new Instances(allInstances, 0, allInstances.size()/2);
-                Instances instances2 = new Instances(allInstances, allInstances.size()/2 - 1, allInstances.size()/2);
-                MarTVarD marTVarD = new MarTVarD(instances1, instances2);
-                int[][] sets = marTVarD.findOrderedNPle(2);
-                for (int[] pair : sets) {
-                    for (int i : pair) {
-                        System.out.print(i);
+                    MarTVarD marTVarD = new MarTVarD(instances1, instances2);
+                    for (int i = 2; i <= 4; i++) {
+                        System.out.println("Finding " + file + i + "-ple order");
+                        String[][] results = marTVarD.findOrderedNPle(i);
+                        writeToCSV(results, new String[]{i + "-ple", "Distance"}, "./data_out/nple/" + file + "_" + i + "-ple.csv");
                     }
-                    System.out.println("");
                 }
             }
         }
