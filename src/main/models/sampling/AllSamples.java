@@ -14,6 +14,7 @@ public class AllSamples extends AbstractSampler {
     public AllSamples(Instances dataSet) {
         this.magnitudeScale = 1.0;
         this.dataSet = dataSet;
+        this.nInstances = dataSet.size();
         this.reset();
     }
 

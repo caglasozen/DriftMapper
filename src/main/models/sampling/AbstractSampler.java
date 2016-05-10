@@ -17,10 +17,15 @@ public abstract class AbstractSampler {
     double magnitudeScale = 0.0f;
     ArrayList<ArrayList<String>> allPossibleValues;
     Instances sampledInstances;
+    int nInstances;
 
     public abstract Instances generateInstances();
     public abstract AbstractSampler copy();
     public abstract void setDataSet(Instances dataSet);
+
+    public int getNInstances() {
+        return this.nInstances;
+    }
 
     public void reset() {
         generateAllPossibleValues();

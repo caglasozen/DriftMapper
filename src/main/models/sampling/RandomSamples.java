@@ -12,18 +12,17 @@ import java.util.Random;
  **/
 public class RandomSamples extends AbstractSampler {
     private long seed;
-    private int numberSamples;
 
-    public RandomSamples(Instances dataSet, int numberSamples, long seed) {
+    public RandomSamples(Instances dataSet, int nInstances, long seed) {
         this.seed = seed;
         this.dataSet = dataSet;
-        this.numberSamples = numberSamples;
+        this.nInstances = nInstances;
         this.reset();
     }
 
     @Override
     public AbstractSampler copy(){
-        return new RandomSamples(this.dataSet, this.numberSamples, this.seed);
+        return new RandomSamples(this.dataSet, this.nInstances, this.seed);
     }
 
     @Override
@@ -34,11 +33,11 @@ public class RandomSamples extends AbstractSampler {
 
     @Override
     public Instances generateInstances() {
-        this.sampledInstances = new Instances(this.dataSet, this.numberSamples);
+        this.sampledInstances = new Instances(this.dataSet, this.nInstances);
         Random rng = new Random(this.seed);
         HashSet<double[]> prevInst = new HashSet<>();
 
-        while (sampledInstances.size() < this.numberSamples) {
+        while (sampledInstances.size() < this.nInstances) {
             DenseInstance inst = new DenseInstance(this.dataSet.numAttributes());
             for (int i = 0; i < this.allPossibleValues.size(); i++) {
                 ArrayList<String> attributeValues = this.allPossibleValues.get(i);
