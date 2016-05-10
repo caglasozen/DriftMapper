@@ -15,7 +15,12 @@ public class AllSamples extends AbstractSampler {
         this.magnitudeScale = 1.0;
         this.dataSet = dataSet;
         this.nInstances = dataSet.size();
-        this.reset();
+        this.setDataSet(dataSet);
+    }
+
+    @Override
+    public void reset() {
+        this.nInstancesGeneratedSoFar = 0;
     }
 
     @Override
@@ -24,13 +29,7 @@ public class AllSamples extends AbstractSampler {
     }
 
     @Override
-    public void setDataSet(Instances dataSet) {
-        this.dataSet = dataSet;
-        this.reset();
-    }
-
-    @Override
-    public Instances generateInstances() {
+    public Instances generateAllInstances() {
         int nCombinations = 1;
         for (ArrayList<String> values : this.allPossibleValues) {
             nCombinations *= values.size();
@@ -38,6 +37,20 @@ public class AllSamples extends AbstractSampler {
         this.sampledInstances = new Instances(this.dataSet, nCombinations);
         generateCombinations(0, new ArrayList<>());
         return sampledInstances;
+    }
+
+    @Override
+    public Instance nextInstance() {
+        DenseInstance inst = new DenseInstance(this.dataSet.numAttributes());
+        int instanceIndex = this.nInstancesGeneratedSoFar;
+        for (int i = 0; i < this.allPossibleValues.size(); i++) {
+            ArrayList<String> attributeValues = this.allPossibleValues.get(i);
+            int valueIndex = instanceIndex % attributeValues.size();
+            instanceIndex = instanceIndex / attributeValues.size();
+            inst.setValue(i, Double.parseDouble(attributeValues.get(valueIndex)));
+        }
+        this.nInstancesGeneratedSoFar += 1;
+        return inst;
     }
 
     private void generateCombinations(int currentIndex, ArrayList<Double> auxCombination){

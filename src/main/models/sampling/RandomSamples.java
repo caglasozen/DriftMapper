@@ -1,6 +1,7 @@
 package main.models.sampling;
 
 import weka.core.DenseInstance;
+import weka.core.Instance;
 import weka.core.Instances;
 
 import java.util.ArrayList;
@@ -12,12 +13,22 @@ import java.util.Random;
  **/
 public class RandomSamples extends AbstractSampler {
     private long seed;
+    private Random rng;
+    private HashSet<double[]> prevInst;
 
     public RandomSamples(Instances dataSet, int nInstances, long seed) {
         this.seed = seed;
         this.dataSet = dataSet;
         this.nInstances = nInstances;
-        this.reset();
+        this.rng = new Random(this.seed);
+        this.prevInst = new HashSet<>();
+        this.setDataSet(dataSet);
+    }
+
+    @Override
+    public void reset() {
+        this.prevInst = new HashSet<>();
+        this.nInstancesGeneratedSoFar = 0;
     }
 
     @Override
@@ -26,15 +37,8 @@ public class RandomSamples extends AbstractSampler {
     }
 
     @Override
-    public void setDataSet(Instances dataSet) {
-        this.dataSet = dataSet;
-        this.reset();
-    }
-
-    @Override
-    public Instances generateInstances() {
+    public Instances generateAllInstances() {
         this.sampledInstances = new Instances(this.dataSet, this.nInstances);
-        Random rng = new Random(this.seed);
         HashSet<double[]> prevInst = new HashSet<>();
 
         while (sampledInstances.size() < this.nInstances) {
@@ -48,5 +52,20 @@ public class RandomSamples extends AbstractSampler {
             prevInst.add(inst.toDoubleArray());
         }
         return sampledInstances;
+    }
+
+    @Override
+    public Instance nextInstance() {
+        DenseInstance inst = new DenseInstance(this.dataSet.numAttributes());
+        do {
+            for (int i = 0; i < this.allPossibleValues.size(); i++) {
+                ArrayList<String> attributeValues = this.allPossibleValues.get(i);
+                int valueIndex = rng.nextInt(attributeValues.size());
+                inst.setValue(i, Double.parseDouble(attributeValues.get(valueIndex)));
+            }
+        } while (this.prevInst.contains(inst.toDoubleArray()));
+        this.prevInst.add(inst.toDoubleArray());
+        this.nInstancesGeneratedSoFar += 1;
+        return inst;
     }
 }

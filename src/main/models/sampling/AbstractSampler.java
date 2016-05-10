@@ -1,6 +1,5 @@
 package main.models.sampling;
 
-import org.apache.commons.math3.analysis.function.Abs;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -18,18 +17,21 @@ public abstract class AbstractSampler {
     ArrayList<ArrayList<String>> allPossibleValues;
     Instances sampledInstances;
     int nInstances;
+    int nInstancesGeneratedSoFar;
 
-    public abstract Instances generateInstances();
+    public abstract Instances generateAllInstances();
+    public abstract Instance nextInstance();
     public abstract AbstractSampler copy();
-    public abstract void setDataSet(Instances dataSet);
+    public abstract void reset();
 
     public int getNInstances() {
         return this.nInstances;
     }
 
-    public void reset() {
+    public void setDataSet(Instances dataSet) {
+        this.dataSet = dataSet;
         generateAllPossibleValues();
-        generateInstances();
+        generateAllInstances();
 
         int nCombinations = 1;
         for (ArrayList<String> attribute : this.allPossibleValues) {
@@ -37,6 +39,7 @@ public abstract class AbstractSampler {
         }
         this.magnitudeScale = (double)nCombinations / (double)sampledInstances.size();
     }
+
 
     public double getMagnitudeScale() {
         return this.magnitudeScale;
