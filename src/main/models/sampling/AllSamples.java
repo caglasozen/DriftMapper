@@ -24,7 +24,11 @@ public class AllSamples extends AbstractSampler {
     @Override
     public void reset() {
         this.magnitudeScale = 1.0;
-        this.nInstances = this.dataSet.size();
+        int nCombinations = 1;
+        for (ArrayList<String> values : this.allPossibleValues) {
+            nCombinations *= values.size();
+        }
+        this.nInstances = nCombinations;
         this.nInstancesGeneratedSoFar = 0;
     }
 
@@ -35,11 +39,7 @@ public class AllSamples extends AbstractSampler {
 
     @Override
     public Instances generateAllInstances() {
-        int nCombinations = 1;
-        for (ArrayList<String> values : this.allPossibleValues) {
-            nCombinations *= values.size();
-        }
-        this.sampledInstances = new Instances(this.dataSet, nCombinations);
+        this.sampledInstances = new Instances(this.dataSet, this.nInstances);
         generateCombinations(0, new ArrayList<>());
         return sampledInstances;
     }
