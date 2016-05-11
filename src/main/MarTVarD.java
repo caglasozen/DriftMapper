@@ -102,7 +102,12 @@ public class MarTVarD {
     }
 
     private int nCr(int n, int r) {
-        return factorial(n) / (factorial(r) * factorial(n-r));
+        if (r <= 0){
+            return 1;
+        }
+        else {
+            return this.nCr(n, r-1) * ((n - r + 1) / r);
+        }
     }
 
     private int factorial(int n) {
