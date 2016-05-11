@@ -184,7 +184,7 @@ public class scratch {
                 }
             }
             else if (args[0].equals("martvard")) {
-                String[] files = new String[]{"elecNormNew", "sensor", "airlines"};
+                String[] files = new String[]{"gas-sensor", "elecNormNew", "sensor", "airlines"};
                 for (String file : files) {
                     Instances allInstances = loadAnyDataSet("./datasets/"+file+".arff");
                     Instances instances1 = new Instances(allInstances, 0, allInstances.size()/2);
