@@ -194,7 +194,7 @@ public class scratch {
                     for (int i = 2; i <= 4; i++) {
                         System.out.println("Finding " + file + i + "-ple order");
                         String[][] results = marTVarD.findOrderedNPle(i);
-                        writeToCSV(results, new String[]{i + "-ple", "Distance"}, "./data_out/nple/" + file + "_" + i + "-ple.csv");
+                        writeToCSV(results, new String[]{"Distance", "Attributes"}, "./data_out/nple/" + file + "_" + i + "-ple.csv");
                     }
                 }
             }
@@ -265,7 +265,7 @@ public class scratch {
     }
 
     public static void writeToCSV(String[][] data, String[] header, String filename) throws IOException{
-        CSVWriter writer = new CSVWriter(new FileWriter(filename), '\t');
+        CSVWriter writer = new CSVWriter(new FileWriter(filename), ',');
         // feed in your array (or convert your data to an array)
         writer.writeNext(header);
         for (String[] dataLine : data) {

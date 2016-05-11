@@ -62,14 +62,13 @@ public class MarTVarD {
 
         int[][] orderedSets;
         orderedSets = sets.keySet().toArray(new int[nCombination][n]);
-        String[][] results = new String[orderedSets.length][2];
+        String[][] results = new String[orderedSets.length][n+1];
         for (int i = 0; i < orderedSets.length; i++) {
             int[] set = orderedSets[i];
-            results[i][0] = "";
+            results[i][0] = Double.toString(sets.get(set));
             for (int j = 0; j < set.length; j++) {
-                results[i][0] += Integer.toString(set[j]);
+                results[i][1+j] = dataSet1.attribute(set[j]).name();
             }
-            results[i][1] = Double.toString(sets.get(set));
         }
         return results;
     }
