@@ -184,7 +184,7 @@ public class scratch {
                 }
             }
             else if (args[0].equals("martvard")) {
-                String[] files = new String[]{"gas-sensor", "elecNormNew", "sensor", "airlines"};
+                String[] files = new String[]{"elecNormNew", "sensor", "airlines"};
                 for (String file : files) {
                     Instances allInstances = loadAnyDataSet("./datasets/"+file+".arff");
                     Instances instances1 = new Instances(allInstances, 0, allInstances.size()/2);
@@ -194,7 +194,7 @@ public class scratch {
                     for (int i = 2; i <= 4; i++) {
                         System.out.println("Finding " + file + i + "-ple order");
                         String[][] results = marTVarD.findOrderedNPle(i);
-                        writeToCSV(results, new String[]{"Distance", "Attributes"}, "./data_out/nple/" + file + "_" + i + "-ple.csv");
+                        writeToCSV(results, new String[]{"Distance", "mean", "sd", "max", "min", "Attributes"}, "./data_out/nple/" + file + "_" + i + "-ple.csv");
                     }
                 }
             }

@@ -1,6 +1,7 @@
 package main;
 
 import main.models.prior.BayesianNetwork;
+import main.models.prior.NaiveMatrix;
 import main.models.prior.PriorModel;
 import main.models.sampling.AbstractSampler;
 import main.models.sampling.AllSamples;
@@ -22,6 +23,12 @@ public class MarTVarD {
     private Instances dataSet2;
     private Instances dataSet;
     private AbstractSampler sampler;
+    private String[][] orderedNple;
+    private double[] distances;
+    private double[] mean;
+    private double[] sd;
+    private double[][] localMax;
+    private double[][] localMin;
 
     public MarTVarD(Instances dataSet1, Instances dataSet2) {
         this.dataSet1 = dataSet1;
@@ -43,12 +50,16 @@ public class MarTVarD {
 
         int nCombination = nCr(dataSet1.numAttributes() - 1, n);
         Map<int[], Double> sets = new HashMap<>();
+        Map<int[], Double> means = new HashMap<>();
+        Map<int[], Double> sds = new HashMap<>();
+        Map<int[], double[]> maximums = new HashMap<>();
+        Map<int[], double[]> minimums = new HashMap<>();
         for (int i = 0; i < nCombination; i++) {
             int[] indices = getKthCombination(i, elements, n);
             Instances instances1 = seperateVariables(this.dataSet1, indices);
-            PriorModel model1 = new BayesianNetwork(instances1);
+            NaiveMatrix model1 = new NaiveMatrix(instances1);
             Instances instances2 = seperateVariables(this.dataSet2, indices);
-            PriorModel model2 = new BayesianNetwork(instances2);
+            NaiveMatrix model2 = new NaiveMatrix(instances2);
             Instances allInstances = AbstractSampler.findIntersectionBetweenInstances(instances1, instances2);
             // TODO: Find suitable sample size
             //AbstractSampler sampler = new RandomSamples(allInstances, allInstances.size() / 1000, 0);
@@ -56,18 +67,48 @@ public class MarTVarD {
 
             double distance = model1.findDistance(model1, model2, sampler) * sampler.getMagnitudeScale();
             sets.put(indices, distance);
+            means.put(indices, model1.getMean());
+            sds.put(indices, model1.getSd());
+            maximums.put(indices, model1.getMax());
+            minimums.put(indices, model1.getMin());
         }
 
         sets = sortByValue(sets);
+        this.distances = new double[nCombination];
+        this.mean = new double[nCombination];
+        this.sd = new double[nCombination];
+        this.localMin = new double[nCombination][n+1];
+        this.localMax = new double[nCombination][n+1];
+        this.orderedNple = new String[nCombination][n];
 
         int[][] orderedSets;
         orderedSets = sets.keySet().toArray(new int[nCombination][n]);
-        String[][] results = new String[orderedSets.length][n+1];
-        for (int i = 0; i < orderedSets.length; i++) {
-            int[] set = orderedSets[i];
-            results[i][0] = Double.toString(sets.get(set));
-            for (int j = 0; j < set.length; j++) {
-                results[i][1+j] = dataSet1.attribute(set[j]).name();
+        for (int i = 0; i < nCombination; i++) {
+            this.distances[i] = sets.get(orderedSets[i]);
+            this.mean[i] = means.get(orderedSets[i]);
+            this.sd[i] = sds.get(orderedSets[i]);
+            this.localMax[i] = maximums.get(orderedSets[i]);
+            this.localMin[i] = minimums.get(orderedSets[i]);
+            for (int j = 0; j < orderedSets[i].length; j++) {
+                this.orderedNple[i][j] = dataSet1.attribute(orderedSets[i][j]).name();
+            }
+        }
+        return this.generateOutput();
+    }
+
+    private String[][] generateOutput() {
+        String[][] results = new String[this.orderedNple.length][6];
+        for (int i = 0; i < this.orderedNple.length; i++) {
+            results[i][0] = Double.toString(this.distances[i]);
+            results[i][1] = Double.toString(this.mean[i]);
+            results[i][2] = Double.toString(this.sd[i]);
+            results[i][3] = Double.toString(this.localMax[i][0]);
+            results[i][4] = Double.toString(this.localMin[i][0]);
+            results[i][5] = "";
+            for (int j = 0; j < this.orderedNple[i].length; j++) {
+                results[i][3] += "_" + this.orderedNple[i][j] + "=" + this.localMax[i][1+j];
+                results[i][4] += "_" + this.orderedNple[i][j] + "=" + this.localMin[i][1+j];
+                results[i][5] += "_" + this.orderedNple[i][j];
             }
         }
         return results;
@@ -94,20 +135,21 @@ public class MarTVarD {
         if (choices == 0) return new int[]{};
         else if (elements.length == choices) return  elements;
         else {
-            int nCombinations = nCr(elements.length - 1, choices);
-            if (k < nCombinations) return getKthCombination(k, ArrayUtils.subarray(elements, 1, elements.length), choices);
-            else return ArrayUtils.addAll(ArrayUtils.subarray(elements, 0, 1),
-                    getKthCombination(k - nCombinations, ArrayUtils.subarray(elements, 1, elements.length), choices - 1));
+            int nCombinations = nCr(elements.length - 1, choices - 1);
+            if (k < nCombinations) return ArrayUtils.addAll(ArrayUtils.subarray(elements, 0, 1),
+                    getKthCombination(k, ArrayUtils.subarray(elements, 1, elements.length), choices - 1));
+            else return getKthCombination(k - nCombinations, ArrayUtils.subarray(elements, 1, elements.length), choices);
         }
     }
 
     private int nCr(int n, int r) {
-        if (r <= 0){
-            return 1;
+        if (r >= n /2) r = n - r;
+        int ans = 1;
+        for (int i = 1; i <= r; i++) {
+            ans *= n - r + i;
+            ans /= i;
         }
-        else {
-            return this.nCr(n, r-1) * ((n - r + 1) / r);
-        }
+        return ans;
     }
 
     private int factorial(int n) {
