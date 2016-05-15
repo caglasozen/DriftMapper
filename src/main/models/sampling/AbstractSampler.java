@@ -89,4 +89,21 @@ public abstract class AbstractSampler {
         }
         return finalInstances;
     }
+
+    public static Instances findUnionBetweenInstances(Instances instances1, Instances instances2) {
+        Instances allInstance = new Instances(instances1);
+        allInstance.addAll(instances2);
+
+        // Create a hashed mapped set of instances1 first
+        Instances finalInstances = new Instances(instances1, instances1.size() + instances2.size());
+        HashMap<Integer, Instance> baseMap = new HashMap<>(instances1.size());
+        for (Instance instance : allInstance) {
+            Integer hash = Arrays.hashCode(instance.toDoubleArray());
+            if (!baseMap.containsKey(hash)) {
+                baseMap.put(hash, instance);
+                finalInstances.add(instance);
+            }
+        }
+        return finalInstances;
+    }
 }

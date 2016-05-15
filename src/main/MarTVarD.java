@@ -60,7 +60,7 @@ public class MarTVarD {
             NaiveMatrix model1 = new NaiveMatrix(instances1);
             Instances instances2 = seperateVariables(this.dataSet2, indices);
             NaiveMatrix model2 = new NaiveMatrix(instances2);
-            Instances allInstances = AbstractSampler.findIntersectionBetweenInstances(instances1, instances2);
+            Instances allInstances = AbstractSampler.findUnionBetweenInstances(instances1, instances2);
             // TODO: Find suitable sample size
             //AbstractSampler sampler = new RandomSamples(allInstances, allInstances.size() / 1000, 0);
             AbstractSampler sampler = new AllSamples(allInstances);
