@@ -20,6 +20,7 @@ import weka.classifiers.functions.Logistic;
 import weka.classifiers.trees.J48;
 import weka.classifiers.trees.RandomForest;
 import weka.classifiers.trees.RandomTree;
+import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.filters.Filter;
@@ -184,11 +185,21 @@ public class scratch {
                 }
             }
             else if (args[0].equals("martvard")) {
-                String[] files = new String[]{"elecNormNew", "sensor", "airlines", "gas-sensor"};
+                String[] files = new String[]{"gas-sensor"};
                 for (String file : files) {
                     Instances allInstances = loadAnyDataSet("./datasets/"+file+".arff");
                     if (file.equals("elecNormNew")) {
                         allInstances.deleteAttributeAt(0);
+                    }
+                    if (file.equals("gas-sensor")) {
+                        double[] classAttVals = allInstances.attributeToDoubleArray(0);
+                        Attribute classAtt = allInstances.attribute(0);
+                        allInstances.deleteAttributeAt(0);
+                        allInstances.insertAttributeAt(classAtt, allInstances.numAttributes());
+                        allInstances.setClassIndex(allInstances.numAttributes() - 1);
+                        for (int i = 0; i < classAttVals.length; i++) {
+                            allInstances.get(i).setValue(allInstances.classIndex(), classAttVals[i]);
+                        }
                     }
                     Instances instances1 = new Instances(allInstances, 0, allInstances.size()/2);
                     Instances instances2 = new Instances(allInstances, allInstances.size()/2 - 1, allInstances.size()/2);
