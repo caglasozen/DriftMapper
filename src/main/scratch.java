@@ -187,6 +187,9 @@ public class scratch {
                 String[] files = new String[]{"elecNormNew", "sensor", "airlines", "gas-sensor"};
                 for (String file : files) {
                     Instances allInstances = loadAnyDataSet("./datasets/"+file+".arff");
+                    if (file.equals("elecNormNew")) {
+                        allInstances.deleteAttributeAt(0);
+                    }
                     Instances instances1 = new Instances(allInstances, 0, allInstances.size()/2);
                     Instances instances2 = new Instances(allInstances, allInstances.size()/2 - 1, allInstances.size()/2);
 
