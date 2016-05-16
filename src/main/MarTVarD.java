@@ -97,18 +97,20 @@ public class MarTVarD {
     }
 
     private String[][] generateOutput() {
-        String[][] results = new String[this.orderedNple.length][6];
+        String[][] results = new String[this.orderedNple.length][8];
         for (int i = 0; i < this.orderedNple.length; i++) {
             results[i][0] = Double.toString(this.distances[i]);
             results[i][1] = Double.toString(this.mean[i]);
             results[i][2] = Double.toString(this.sd[i]);
             results[i][3] = Double.toString(this.localMax[i][0]);
-            results[i][4] = Double.toString(this.localMin[i][0]);
-            results[i][5] = "";
+            results[i][4] = "";
+            results[i][5] = Double.toString(this.localMin[i][0]);
+            results[i][6] = "";
+            results[i][7] = "";
             for (int j = 0; j < this.orderedNple[i].length; j++) {
-                results[i][3] += "_" + this.orderedNple[i][j] + "=" + this.localMax[i][1+j];
-                results[i][4] += "_" + this.orderedNple[i][j] + "=" + this.localMin[i][1+j];
-                results[i][5] += "_" + this.orderedNple[i][j];
+                results[i][4] += "_" + this.orderedNple[i][j] + "=" + this.localMax[i][1+j];
+                results[i][6] += "_" + this.orderedNple[i][j] + "=" + this.localMin[i][1+j];
+                results[i][7] += "_" + this.orderedNple[i][j];
             }
         }
         return results;
