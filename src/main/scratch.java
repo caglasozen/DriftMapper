@@ -185,21 +185,13 @@ public class scratch {
                 }
             }
             else if (args[0].equals("martvard")) {
-                String[] files = new String[]{"gas-sensor"};
+                String[] files = new String[]{"elecNormNew", "airlines", "sensor", "gas-sensor"};
                 for (String file : files) {
                     Instances allInstances = loadAnyDataSet("./datasets/"+file+".arff");
                     if (file.equals("elecNormNew")) {
                         allInstances.deleteAttributeAt(0);
                     }
                     if (file.equals("gas-sensor")) {
-                        double[] classAttVals = allInstances.attributeToDoubleArray(0);
-                        Attribute classAtt = allInstances.attribute(0);
-                        allInstances.deleteAttributeAt(0);
-                        allInstances.insertAttributeAt(classAtt, allInstances.numAttributes());
-                        allInstances.setClassIndex(allInstances.numAttributes() - 1);
-                        for (int i = 0; i < classAttVals.length; i++) {
-                            allInstances.get(i).setValue(allInstances.classIndex(), classAttVals[i]);
-                        }
                     }
                     Instances instances1 = new Instances(allInstances, 0, allInstances.size()/2);
                     Instances instances2 = new Instances(allInstances, allInstances.size()/2 - 1, allInstances.size()/2);
@@ -310,7 +302,16 @@ public class scratch {
 
     public static Instances loadAnyDataSet(String filename) throws Exception{
         Instances continuousData = loadDataSet(filename);
-        if (filename.equals("../datasets/gas-sensor.arff")) continuousData.setClassIndex(0);
+        if (filename.equals("./datasets/gas-sensor.arff")) {
+            double[] classAttVals = continuousData.attributeToDoubleArray(0);
+            Attribute classAtt = continuousData.attribute(0);
+            continuousData.deleteAttributeAt(0);
+            continuousData.insertAttributeAt(classAtt, continuousData.numAttributes());
+            continuousData.setClassIndex(continuousData.numAttributes() - 1);
+            for (int i = 0; i < classAttVals.length; i++) {
+                continuousData.get(i).setValue(continuousData.classIndex(), classAttVals[i]);
+            }
+        }
 
         ArrayList<Integer> continuousIndex = new ArrayList<>();
         for (int i = 0; i < continuousData.numAttributes(); i++) {

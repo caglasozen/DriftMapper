@@ -1,12 +1,9 @@
 package main;
 
-import main.models.prior.BayesianNetwork;
-import main.models.prior.NaiveMatrix;
-import main.models.prior.PriorModel;
+import main.models.NaiveMatrix;
 import main.models.sampling.AbstractSampler;
 import main.models.sampling.AllSamples;
 import main.models.sampling.RandomSamples;
-import moa.recommender.rc.utils.Hash;
 import org.apache.commons.lang3.ArrayUtils;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
