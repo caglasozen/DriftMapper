@@ -185,7 +185,7 @@ public class scratch {
                 }
             }
             else if (args[0].equals("martvard")) {
-                String[] files = new String[]{"elecNormNew", "airlines", "sensor", "gas-sensor"};
+                String[] files = new String[]{"elecNormNew", "airlines", "sensor", "gas-sensor", "train_seed0"};
                 for (String file : files) {
                     Instances allInstances = loadAnyDataSet("./datasets/"+file+".arff");
                     if (file.equals("elecNormNew")) {
@@ -197,10 +197,11 @@ public class scratch {
                     Instances instances2 = new Instances(allInstances, allInstances.size()/2 - 1, allInstances.size()/2);
 
                     MarTVarD marTVarD = new MarTVarD(instances1, instances2);
-                    for (int i = 1; i <= 4; i++) {
+                    for (int i = 1; i <= 3; i++) {
                         System.out.println("Finding " + file + i + "-ple order");
-                        String[][] results = marTVarD.findOrderedNPle(i);
-                        writeToCSV(results, new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"}, "./data_out/nple/" + file + "_" + i + "-ple.csv");
+                        String[][][] results = marTVarD.findOrderedNPle(i);
+                        writeToCSV(results[0], new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"}, "./data_out/nple/" + file + "_" + i + "-ple_prior.csv");
+                        writeToCSV(results[1], new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"}, "./data_out/nple/" + file + "_" + i + "-ple_posterior.csv");
                     }
                 }
             }

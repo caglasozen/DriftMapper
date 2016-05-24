@@ -55,7 +55,7 @@ public class AllSamples extends AbstractSampler {
             inst.setValue(i, Double.parseDouble(attributeValues.get(valueIndex)));
         }
         this.nInstancesGeneratedSoFar += 1;
-        return inst;
+        return this.dataSet.get(this.nInstancesGeneratedSoFar % this.dataSet.size());
     }
 
     private void generateCombinations(int currentIndex, ArrayList<Double> auxCombination){

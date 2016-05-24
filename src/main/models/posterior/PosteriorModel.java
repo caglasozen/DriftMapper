@@ -12,4 +12,5 @@ public interface PosteriorModel {
     void setSampler(AbstractSampler sampler);
     double findPyGv(double classValue, Instance vector);
     double findDistance(PosteriorModel model1, PosteriorModel model2, Instances domain);
+    PosteriorModel copy();
 }
