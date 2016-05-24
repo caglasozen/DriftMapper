@@ -1,6 +1,7 @@
 package main.models;
 
 import main.models.prior.PriorModel;
+import main.models.sampling.AbstractSampler;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -15,6 +16,7 @@ import java.util.HashMap;
  */
 public abstract class AbstractModel {
     // TODO: Change method to copy
+    protected AbstractSampler sampler;
     public abstract AbstractModel copy();
     public abstract void reset();
 

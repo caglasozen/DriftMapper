@@ -13,8 +13,6 @@ import java.util.HashSet;
  * Created by loongkuan on 1/04/16.
  **/
 public abstract class PosteriorModel extends AbstractModel{
-    protected AbstractSampler sampler;
-
     public abstract void setDataSet(Instances data);
     public abstract void setSampler(AbstractSampler sampler);
     public abstract double findPyGv(double classValue, Instance vector);

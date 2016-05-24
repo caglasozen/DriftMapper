@@ -13,7 +13,6 @@ import weka.core.Instances;
 public class JointModel extends AbstractModel{
     private PriorModel priorModel;
     private PosteriorModel posteriorModel;
-    private AbstractSampler sampler;
 
     public JointModel(PriorModel priorModel, PosteriorModel posteriorModel, AbstractSampler sampler) {
         this.priorModel = (PriorModel) priorModel.copy();

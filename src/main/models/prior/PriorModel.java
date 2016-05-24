@@ -13,8 +13,6 @@ import java.util.HashSet;
  * Created by loongkuan on 1/04/16.
  */
 public abstract class PriorModel extends AbstractModel {
-    AbstractSampler sampler;
-
     public abstract void setDataSet(Instances dataSet);
     public abstract void setSampler(AbstractSampler sampler);
     public abstract double findPv(double[] vector);
