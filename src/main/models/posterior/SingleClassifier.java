@@ -1,6 +1,7 @@
 package main.models.posterior;
 
 import com.yahoo.labs.samoa.instances.WekaToSamoaInstanceConverter;
+import main.models.AbstractModel;
 import main.models.distance.Distance;
 import main.models.distance.HellingerDistance;
 import main.models.distance.TotalVariation;
@@ -16,7 +17,7 @@ import java.util.stream.DoubleStream;
 /**
  * Created by loongkuan on 1/04/16.
 **/
-public class SingleClassifier extends PosteriorModel{
+public class SingleClassifier extends AbstractModel implements PosteriorModel{
     private HashMap<Double, Integer> classValueToIndex = new HashMap<>();
     private WekaToSamoaInstanceConverter wekaConverter = new WekaToSamoaInstanceConverter();
     private Classifier baseClassifier;

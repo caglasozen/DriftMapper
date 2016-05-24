@@ -1,6 +1,8 @@
 package main.models.posterior;
 
 import com.yahoo.labs.samoa.instances.WekaToSamoaInstanceConverter;
+import javafx.geometry.Pos;
+import main.models.AbstractModel;
 import main.models.distance.Distance;
 import main.models.distance.HellingerDistance;
 import main.models.distance.TotalVariation;
@@ -16,7 +18,7 @@ import java.util.stream.DoubleStream;
 /**
  * Created by loongkuan on 1/04/16.
 **/
-public class EnsembleClassifier extends PosteriorModel{
+public class EnsembleClassifier extends AbstractModel implements PosteriorModel{
     private Classifier currentClassifier;
     private Classifier[] baseClassifiers;
     private double[] switchPoints;
