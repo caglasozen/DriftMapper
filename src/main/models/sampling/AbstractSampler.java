@@ -15,6 +15,7 @@ public abstract class AbstractSampler {
     protected Instances dataSet;
     double magnitudeScale = 0.0f;
     ArrayList<ArrayList<String>> allPossibleValues;
+    ArrayList<String> allClasses;
     Instances sampledInstances;
     int nInstances;
     int nInstancesGeneratedSoFar;
@@ -56,10 +57,14 @@ public abstract class AbstractSampler {
         return allPossibleValues;
     }
 
+    public ArrayList<String> getAllClasses() {
+        return allClasses;
+    }
+
     protected void generateAllPossibleValues() {
         allPossibleValues = new ArrayList<>();
         // NOTE: j represents x_n
-        for (int j = 0; j < dataSet.numAttributes() - 1; j++) {
+        for (int j = 0; j < dataSet.numAttributes(); j++) {
             // Initialise local variables for this loop (aka. data for this X variable)
             HashSet<String> possibleValues = new HashSet<>();
             for (int i = 0; i < dataSet.size(); i++) {
@@ -67,7 +72,12 @@ public abstract class AbstractSampler {
                 if (!possibleValues.contains(curKey)) possibleValues.add(curKey);
             }
             // Add all the keys/Possible values to allPossibleValues
-            allPossibleValues.add(new ArrayList<>(possibleValues));
+            if (j != dataSet.classIndex()) {
+                allPossibleValues.add(new ArrayList<>(possibleValues));
+            }
+            else {
+                this.allClasses = new ArrayList<>(possibleValues);
+            }
         }
         //Suggest Garbage collector to run
         System.gc();
