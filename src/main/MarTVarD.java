@@ -76,20 +76,19 @@ public class MarTVarD {
         }
 
         xSets = sortByValue(xSets);
-        ySets = sortByValue(ySets);
         this.distances = new double[nCombination];
         this.mean = new double[nCombination];
         this.sd = new double[nCombination];
         this.localMin = new double[nCombination][n+1];
         this.localMax = new double[nCombination][n+1];
-        this.orderedNple = new String[nCombination][n+1];
+        this.orderedNple = new String[nCombination][n];
 
         int[][] orderedSets;
         String[][][] outs = new String[2][this.orderedNple.length][8];
         for (int i = 0; i < 2; i++) {
             orderedSets = i == 0 ? xSets.keySet().toArray(new int[nCombination][n]) : ySets.keySet().toArray(new int[nCombination][n]);
             for (int j = 0; j < nCombination; j++) {
-                this.distances[j] = i == 0 ? xSets.get(orderedSets[j]) : ySets.get(orderedSets[j]);
+                this.distances[j] = xSets.get(orderedSets[j]);
                 this.mean[j] = means.get(orderedSets[j])[i];
                 this.sd[j] = sds.get(orderedSets[j])[i];
                 this.localMax[j] = maximums.get(orderedSets[j])[i];
@@ -97,7 +96,6 @@ public class MarTVarD {
                 for (int k = 0; k < orderedSets[j].length; k++) {
                     this.orderedNple[j][k] = dataSet1.attribute(orderedSets[j][k]).name();
                 }
-                this.orderedNple[j][orderedSets[j].length] = dataSet1.attribute(dataSet1.numAttributes() - 1).name();
             }
             outs[i] = this.generateOutput();
         }
