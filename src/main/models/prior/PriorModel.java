@@ -17,4 +17,5 @@ public interface PriorModel {
     void setSampler(AbstractSampler sampler);
     double findPv(double[] vector);
     double findDistance(PriorModel model1, PriorModel model2, AbstractSampler sample);
+    PriorModel copy();
 }

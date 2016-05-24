@@ -41,16 +41,17 @@ public class MarTVarD {
      * @param n The number of variables in a n-ple, (2 = tuple, 3 = triple, and so on)
      * @return An ordered list of n-ples
      */
-    public String[][] findOrderedNPle(int n) {
+    public String[][][] findOrderedNPle(int n) {
         int[] elements = new int[dataSet1.numAttributes() - 1];
         for (int i = 0; i < dataSet1.numAttributes() - 1; i++) elements[i] = i;
 
         int nCombination = nCr(dataSet1.numAttributes() - 1, n);
-        Map<int[], Double> sets = new HashMap<>();
-        Map<int[], Double> means = new HashMap<>();
-        Map<int[], Double> sds = new HashMap<>();
-        Map<int[], double[]> maximums = new HashMap<>();
-        Map<int[], double[]> minimums = new HashMap<>();
+        Map<int[], Double> xSets = new HashMap<>();
+        Map<int[], Double> ySets = new HashMap<>();
+        Map<int[], double[]> means = new HashMap<>();
+        Map<int[], double[]> sds = new HashMap<>();
+        Map<int[], double[][]> maximums = new HashMap<>();
+        Map<int[], double[][]> minimums = new HashMap<>();
         for (int i = 0; i < nCombination; i++) {
             int[] indices = getKthCombination(i, elements, n);
             Instances instances1 = seperateVariables(this.dataSet1, indices);
@@ -62,35 +63,45 @@ public class MarTVarD {
             //AbstractSampler sampler = new RandomSamples(allInstances, allInstances.size() / 1000, 0);
             AbstractSampler sampler = new AllSamples(allInstances);
 
-            double distance = model1.findDistance(model1, model2, sampler) * sampler.getMagnitudeScale();
-            sets.put(indices, distance);
-            means.put(indices, model1.getMean());
-            sds.put(indices, model1.getSd());
-            maximums.put(indices, model1.getMax());
-            minimums.put(indices, model1.getMin());
+            double[] distances = model1.findDistance(model1, model2, sampler);
+            distances[0] *= sampler.getMagnitudeScale();
+
+            xSets.put(indices, distances[0]);
+            ySets.put(indices, distances[1]);
+            means.put(indices, model1.getMean().clone());
+            sds.put(indices, model1.getSd().clone());
+            maximums.put(indices, model1.getMax().clone());
+            minimums.put(indices, model1.getMin().clone());
+            System.gc();
         }
 
-        sets = sortByValue(sets);
+        xSets = sortByValue(xSets);
+        ySets = sortByValue(ySets);
         this.distances = new double[nCombination];
         this.mean = new double[nCombination];
         this.sd = new double[nCombination];
         this.localMin = new double[nCombination][n+1];
         this.localMax = new double[nCombination][n+1];
-        this.orderedNple = new String[nCombination][n];
+        this.orderedNple = new String[nCombination][n+1];
 
         int[][] orderedSets;
-        orderedSets = sets.keySet().toArray(new int[nCombination][n]);
-        for (int i = 0; i < nCombination; i++) {
-            this.distances[i] = sets.get(orderedSets[i]);
-            this.mean[i] = means.get(orderedSets[i]);
-            this.sd[i] = sds.get(orderedSets[i]);
-            this.localMax[i] = maximums.get(orderedSets[i]);
-            this.localMin[i] = minimums.get(orderedSets[i]);
-            for (int j = 0; j < orderedSets[i].length; j++) {
-                this.orderedNple[i][j] = dataSet1.attribute(orderedSets[i][j]).name();
+        String[][][] outs = new String[2][this.orderedNple.length][8];
+        for (int i = 0; i < 2; i++) {
+            orderedSets = i == 0 ? xSets.keySet().toArray(new int[nCombination][n]) : ySets.keySet().toArray(new int[nCombination][n]);
+            for (int j = 0; j < nCombination; j++) {
+                this.distances[j] = i == 0 ? xSets.get(orderedSets[j]) : ySets.get(orderedSets[j]);
+                this.mean[j] = means.get(orderedSets[j])[i];
+                this.sd[j] = sds.get(orderedSets[j])[i];
+                this.localMax[j] = maximums.get(orderedSets[j])[i];
+                this.localMin[j] = minimums.get(orderedSets[j])[i];
+                for (int k = 0; k < orderedSets[j].length; k++) {
+                    this.orderedNple[j][k] = dataSet1.attribute(orderedSets[j][k]).name();
+                }
+                this.orderedNple[j][orderedSets[j].length] = dataSet1.attribute(dataSet1.numAttributes() - 1).name();
             }
+            outs[i] = this.generateOutput();
         }
-        return this.generateOutput();
+        return outs;
     }
 
     private String[][] generateOutput() {
@@ -178,9 +189,9 @@ public class MarTVarD {
             for (int i = 0; i < variableIndices.length; i++) {
                 inst[i] = instance.value(variableIndices[i]);
             }
+            inst[inst.length - 1] = instance.classValue();
             Instance newInstance = new DenseInstance(1, inst);
             newInstance.setDataset(newInstances);
-            newInstance.setClassMissing();
             newInstances.add(newInstance);
         }
 
