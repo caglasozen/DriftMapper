@@ -12,10 +12,9 @@ import java.util.HashSet;
 /**
  * Created by loongkuan on 1/04/16.
  */
-public abstract class PriorModel extends AbstractModel {
-    public abstract void setDataSet(Instances dataSet);
-    public abstract void setSampler(AbstractSampler sampler);
-    public abstract double findPv(double[] vector);
-    public abstract double findDistance(PriorModel model1, PriorModel model2, AbstractSampler sample);
-
+public interface PriorModel {
+    void setDataSet(Instances dataSet);
+    void setSampler(AbstractSampler sampler);
+    double findPv(double[] vector);
+    double findDistance(PriorModel model1, PriorModel model2, AbstractSampler sample);
 }

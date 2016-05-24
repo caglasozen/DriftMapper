@@ -2,6 +2,7 @@ package main.models.prior;
 
 import explorer.ChordalysisModelling;
 import main.generator.componets.BayesianNetworkGenerator;
+import main.models.AbstractModel;
 import main.models.distance.Distance;
 import main.models.distance.HellingerDistance;
 import main.models.distance.TotalVariation;
@@ -17,7 +18,7 @@ import java.util.*;
 /**
  * Created by loongkuan on 1/04/16.
  **/
-public class BayesianNetwork extends PriorModel{
+public class BayesianNetwork extends AbstractModel implements PriorModel{
     private BayesianNetworkGenerator bnModel;
 
     public BayesianNetwork(Instances dataSet) {

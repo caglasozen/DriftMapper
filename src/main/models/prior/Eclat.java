@@ -1,5 +1,6 @@
 package main.models.prior;
 
+import main.models.AbstractModel;
 import main.models.sampling.AbstractSampler;
 import org.apache.commons.math3.analysis.function.Abs;
 import weka.core.DenseInstance;
@@ -11,7 +12,7 @@ import java.util.*;
 /**
  * Created by loongkuan on 31/03/16.
  **/
-public class Eclat extends PriorModel{
+public class Eclat extends AbstractModel implements PriorModel{
     // Frequent Set -> Transaction ID
     private HashMap<Set<String>, Set<String>> frequentItemSet;
     private int threshold = 10;
