@@ -1,6 +1,5 @@
 package main.models;
 
-import javafx.geometry.Pos;
 import main.models.distance.Distance;
 import main.models.distance.TotalVariation;
 import main.models.posterior.PosteriorModel;
@@ -100,8 +99,8 @@ public class NaiveMatrix extends AbstractModel implements PriorModel, PosteriorM
         double[] dVector = Arrays.copyOfRange(vector.toDoubleArray(), 0, vector.numAttributes() - 1);
         int classIndex = this.convertClassToHash(vector.toDoubleArray()[vector.numAttributes() - 1]);
         return this.vectorExists(dVector) && classIndex != -1?
-                (double)this.combinationFreq[this.convertInstToHash(dVector)][classIndex]/
-                        (double)this.sampler.getDataSet().size() : 0.0f;
+                (double)this.combinationFreq[this.convertInstToHash(dVector)][1+classIndex]/
+                        (double)this.combinationFreq[this.convertInstToHash(dVector)][0]: 0.0f;
     }
 
     @Override

@@ -1,7 +1,6 @@
 package main.models.posterior;
 
 import com.yahoo.labs.samoa.instances.WekaToSamoaInstanceConverter;
-import javafx.geometry.Pos;
 import main.models.AbstractModel;
 import main.models.distance.Distance;
 import main.models.distance.HellingerDistance;
