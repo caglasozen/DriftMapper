@@ -49,7 +49,9 @@ public abstract class AbstractSampler {
         return dataSet;
     }
 
+    // TODO: Remove sampledInstances attribute?
     public Instances getSampledInstances(){
+        generateAllInstances();
         return sampledInstances;
     }
 
