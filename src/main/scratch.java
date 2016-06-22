@@ -185,7 +185,7 @@ public class scratch {
                 }
             }
             else if (args[0].equals("martvard")) {
-                String[] files = new String[]{"elecNormNew", "airlines", "sensor", "gas-sensor", "train_seed0"};
+                String[] files = new String[]{"elecNormNew", "train_seed0"};
                 for (String file : files) {
                     Instances allInstances = loadAnyDataSet("./datasets/"+file+".arff");
                     if (file.equals("elecNormNew")) {
@@ -248,7 +248,7 @@ public class scratch {
                     dataStream.restart();
                     dataStream.prepareForUse();
                     Experiments experiment = new Experiments(baseModel.copy(), dataStream);
-                    avgPygv += Double.parseDouble(experiment.distanceBetweenStartEnd()[0]);
+                    avgPygv += Double.parseDouble(experiment.distanceBetweenStartEnd()[1]);
                 }
                 avgPygv /= nTests;
                 //System.out.println("p(y|X) drift = " + avgPygv);
@@ -261,7 +261,7 @@ public class scratch {
     }
 
     private static void configureDataSet(CategoricalDriftGenerator dataStream) {
-        dataStream.nAttributes.setValue(20);
+        dataStream.nAttributes.setValue(5);
         dataStream.nValuesPerAttribute.setValue(2);
         dataStream.precisionDriftMagnitude.setValue(0.01);
         dataStream.driftPriors.setValue(true);
