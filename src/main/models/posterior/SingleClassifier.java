@@ -82,7 +82,8 @@ public class SingleClassifier extends AbstractModel implements PosteriorModel{
         for (int i = 0; i < votesForInstance.length; i++) {
             normVotes[i] = (sumVotes == 0.0) ? 0.0f : votesForInstance[i] / sumVotes;
         }
-        return normVotes[this.classValueToIndex.get(classValue)];
+        int classIdx = this.classValueToIndex.get(classValue);
+        return (classIdx >= normVotes.length) ? 0.0f : normVotes[this.classValueToIndex.get(classValue)];
     }
 
     @Override
