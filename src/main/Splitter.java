@@ -83,7 +83,6 @@ public class Splitter {
                     splitDataSets[i].add(new DenseInstance(1.0, attributesValues[i]));
                 }
                 data.delete(0);
-                System.gc();
             }
 
             // Write splitDataSets to separate files
