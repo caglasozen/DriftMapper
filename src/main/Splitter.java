@@ -90,7 +90,7 @@ public class Splitter {
                 System.out.println("Creating " + splitDataSets[i].relationName() + " file...");
                 ArffSaver saver = new ArffSaver();
                 saver.setInstances(splitDataSets[i]);
-                saver.setFile(new File("./datasets/" + splitDataSets[i].relationName() + ".arff"));
+                saver.setFile(new File("./datasets/train_seed/" + splitDataSets[i].relationName() + ".arff"));
                 //saver.setDestination(new File("./datasets/" + splitDataSets[i].relationName()));
                 saver.writeBatch();
             }
