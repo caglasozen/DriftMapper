@@ -8,9 +8,12 @@
 !lib/*
 !src
 !src/*
+!data_out/nple
+!data_out/nple/*
 !src/*/*
 !src/*/*/*
 !src/*/*/*/*
 !src/*/*/*/*/*
 !src/*/*/*/*/*/*
 !src/*/*/*/*/*/*/*
+
