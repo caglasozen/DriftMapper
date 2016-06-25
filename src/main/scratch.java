@@ -140,7 +140,48 @@ public class scratch {
                 dataStream.writeDataStreamToFile(folder+filename+extension);
             }
             else if (args[0].equals("genAllData")) {
-                String filename;
+                generateData();
+            }
+            else if (args[0].equals("compare")) {
+                Instances instances1 = loadAnyDataSet("./datasets/train_seed/"+args[1]+".arff");
+                Instances instances2 = loadAnyDataSet("./datasets/train_seed/"+args[2]+".arff");
+                martvard(instances1, instances2, args[1] + "_" + args[2]);
+            }
+            else if (args[0].equals("martvard")) {
+                String[] files = new String[]{"elecNormNew", "train_seed0"};
+                for (String file : files) {
+                    Instances allInstances = loadAnyDataSet("./datasets/"+file+".arff");
+                    if (file.equals("elecNormNew")) {
+                        allInstances.deleteAttributeAt(0);
+                    }
+                    if (file.equals("gas-sensor")) {
+                    }
+                    Instances instances1 = new Instances(allInstances, 0, allInstances.size()/2);
+                    Instances instances2 = new Instances(allInstances, allInstances.size()/2 - 1, allInstances.size()/2);
+                    martvard(instances1, instances2, file);
+                }
+            }
+        }
+        catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private static void martvard(Instances instances1, Instances instances2, String name) throws IOException{
+        MarTVarD marTVarD = new MarTVarD(instances1, instances2);
+        for (int i = 1; i <= 3; i++) {
+            System.out.println("Finding " + name + i + "-ple order");
+            String[][][] results = marTVarD.findOrderedNPle(i);
+            writeToCSV(results[0], new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"}, "./data_out/nple/" + name + "_" + i + "-ple_prior.csv");
+            writeToCSV(results[1], new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"}, "./data_out/nple/" + name + "_" + i + "-ple_posterior.csv");
+        }
+    }
+
+    private static void generateData() {
+        String filename;
                 // Set data generator to use
                 AbruptTreeDriftGenerator dataStream = new AbruptTreeDriftGenerator();
                 //AbruptDriftGenerator dataStream = new AbruptDriftGenerator();
@@ -183,35 +224,6 @@ public class scratch {
                         dataStream.writeDataStreamToFile(folder+filename+extension);
                     }
                 }
-            }
-            else if (args[0].equals("martvard")) {
-                String[] files = new String[]{"elecNormNew", "train_seed0"};
-                for (String file : files) {
-                    Instances allInstances = loadAnyDataSet("./datasets/"+file+".arff");
-                    if (file.equals("elecNormNew")) {
-                        allInstances.deleteAttributeAt(0);
-                    }
-                    if (file.equals("gas-sensor")) {
-                    }
-                    Instances instances1 = new Instances(allInstances, 0, allInstances.size()/2);
-                    Instances instances2 = new Instances(allInstances, allInstances.size()/2 - 1, allInstances.size()/2);
-
-                    MarTVarD marTVarD = new MarTVarD(instances1, instances2);
-                    for (int i = 1; i <= 3; i++) {
-                        System.out.println("Finding " + file + i + "-ple order");
-                        String[][][] results = marTVarD.findOrderedNPle(i);
-                        writeToCSV(results[0], new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"}, "./data_out/nple/" + file + "_" + i + "-ple_prior.csv");
-                        writeToCSV(results[1], new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"}, "./data_out/nple/" + file + "_" + i + "-ple_posterior.csv");
-                    }
-                }
-            }
-        }
-        catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-        }
     }
 
     private static void writeDataStream(CategoricalDriftGenerator dataStream, String filename) {
