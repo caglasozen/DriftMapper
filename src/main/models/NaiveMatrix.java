@@ -98,7 +98,8 @@ public class NaiveMatrix extends AbstractModel implements PriorModel, PosteriorM
     public double findPyGv(double classValue, Instance vector) {
         double[] dVector = Arrays.copyOfRange(vector.toDoubleArray(), 0, vector.numAttributes() - 1);
         int classIndex = this.convertClassToHash(vector.toDoubleArray()[vector.numAttributes() - 1]);
-        return this.vectorExists(dVector) && classIndex != -1 || this.combinationFreq[this.convertInstToHash(dVector)][0] == 0 ?
+        // TODO: Make freq be grater than 0 a requirement for a vector to "exist"
+        return this.vectorExists(dVector) && classIndex != -1 && this.combinationFreq[this.convertInstToHash(dVector)][0] != 0 ?
                 (double)this.combinationFreq[this.convertInstToHash(dVector)][1+classIndex]/
                         (double)this.combinationFreq[this.convertInstToHash(dVector)][0]: 0.0f;
     }

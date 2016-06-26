@@ -146,6 +146,13 @@ public class scratch {
                 Instances instances1 = loadAnyDataSet("./datasets/train_seed/"+args[1]+".arff");
                 Instances instances2 = loadAnyDataSet("./datasets/train_seed/"+args[2]+".arff");
                 martvard(instances1, instances2, args[1] + "_" + args[2]);
+                /*
+                MarTVarD marTVarD = new MarTVarD(instances1, instances2);
+                String name = args[1] + "_" + args[2];
+                System.out.println("Finding " + name + 3 + "-ple order");
+                String[][][] results = marTVarD.findOrderedNPle(3);
+                writeToCSV(results[1], new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"}, "./data_out/nple/" + name + "_" + 3 + "-ple_posterior.csv");
+                */
             }
             else if (args[0].equals("martvard")) {
                 String[] files = new String[]{"elecNormNew", "train_seed0"};
