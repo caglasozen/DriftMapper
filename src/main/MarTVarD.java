@@ -72,7 +72,6 @@ public class MarTVarD {
             sds.put(indices, model1.getSd().clone());
             maximums.put(indices, model1.getMax().clone());
             minimums.put(indices, model1.getMin().clone());
-            System.gc();
         }
 
         xSets = sortByValue(xSets);
