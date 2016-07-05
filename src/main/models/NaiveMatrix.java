@@ -94,6 +94,16 @@ public class NaiveMatrix extends AbstractModel implements PriorModel, PosteriorM
                         (double)this.sampler.getDataSet().size() : 0.0f;
     }
 
+    public double findPy(double classValue) {
+        int classIndex = this.convertClassToHash(classValue);
+        if (classIndex == -1) return 0.0f;
+        int nOccurrences = 0;
+        for (int i = 0; i < this.combinationFreq.length; i++) {
+            nOccurrences += this.combinationFreq[i][classIndex];
+        }
+        return (double)nOccurrences / (double)this.sampler.getDataSet().size();
+    }
+
     @Override
     public double findPyGv(double classValue, Instance vector) {
         double[] dVector = Arrays.copyOfRange(vector.toDoubleArray(), 0, vector.numAttributes() - 1);
