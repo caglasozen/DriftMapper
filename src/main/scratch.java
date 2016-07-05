@@ -320,6 +320,25 @@ public class scratch {
         return result;
     }
 
+    public static Instances discretizeDataSet(Instances dataSet) throws Exception{
+        ArrayList<Integer> continuousIndex = new ArrayList<>();
+        for (int i = 0; i < dataSet.numAttributes(); i++) {
+            if (dataSet.attribute(i).isNumeric()) continuousIndex.add(i);
+        }
+        int[] attIndex = new int[continuousIndex.size()];
+        for (int i = 0; i < continuousIndex.size(); i++) {
+            attIndex[i] = continuousIndex.get(i);
+        }
+
+        Discretize filter = new Discretize();
+        filter.setUseEqualFrequency(true);
+        filter.setBins(5);
+        filter.setAttributeIndicesArray(attIndex);
+        filter.setInputFormat(dataSet);
+
+        return Filter.useFilter(dataSet, filter);
+    }
+
     public static Instances loadAnyDataSet(String filename) throws Exception{
         Instances continuousData = loadDataSet(filename);
         if (filename.equals("./datasets/gas-sensor.arff")) {
@@ -332,23 +351,7 @@ public class scratch {
                 continuousData.get(i).setValue(continuousData.classIndex(), classAttVals[i]);
             }
         }
-
-        ArrayList<Integer> continuousIndex = new ArrayList<>();
-        for (int i = 0; i < continuousData.numAttributes(); i++) {
-            if (continuousData.attribute(i).isNumeric()) continuousIndex.add(i);
-        }
-        int[] attIndex = new int[continuousIndex.size()];
-        for (int i = 0; i < continuousIndex.size(); i++) {
-            attIndex[i] = continuousIndex.get(i);
-        }
-
-        Discretize filter = new Discretize();
-        filter.setUseEqualFrequency(true);
-        filter.setBins(5);
-        filter.setAttributeIndicesArray(attIndex);
-        filter.setInputFormat(continuousData);
-
-        return Filter.useFilter(continuousData, filter);
+        return discretizeDataSet(continuousData);
     }
 
 }
