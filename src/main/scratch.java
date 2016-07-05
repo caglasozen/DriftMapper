@@ -145,6 +145,11 @@ public class scratch {
             else if (args[0].equals("compare")) {
                 Instances instances1 = loadAnyDataSet("./datasets/train_seed/"+args[1]+".arff");
                 Instances instances2 = loadAnyDataSet("./datasets/train_seed/"+args[2]+".arff");
+                Instances instances3 = new Instances(instances1);
+                instances3.addAll(instances2);
+                instances3 = discretizeDataSet(instances3);
+                instances1 = new Instances(instances3, 0, instances1.size());
+                instances2 = new Instances(instances3, instances1.size(), instances2.size());
                 martvard(instances1, instances2, args[1] + "_" + args[2]);
                 /*
                 MarTVarD marTVarD = new MarTVarD(instances1, instances2);
