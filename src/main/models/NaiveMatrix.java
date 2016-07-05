@@ -113,6 +113,17 @@ public class NaiveMatrix extends AbstractModel implements PriorModel, PosteriorM
                         (double)this.combinationFreq[this.convertInstToHash(dVector)][0]: 0.0f;
     }
 
+    public double findPvGy(double classValue, Instance vector) {
+        double[] dVector = Arrays.copyOfRange(vector.toDoubleArray(), 0, vector.numAttributes() - 1);
+        int classIndex = this.convertClassToHash(classValue);
+        if (!this.vectorExists(dVector) || classIndex == -1) return 0.0f;
+        int nClassOccurrences = 0;
+        for (int i = 0; i < this.combinationFreq.length; i++) {
+            nClassOccurrences += this.combinationFreq[i][classIndex];
+        }
+        return (double)this.combinationFreq[this.convertInstToHash(dVector)][1+classIndex] / (double)nClassOccurrences;
+    }
+
     @Override
     public double findDistance(PriorModel model1, PriorModel model2, AbstractSampler sample) {
         // Trim last attribute as allPossibleCombinations contains a class attribute wh
