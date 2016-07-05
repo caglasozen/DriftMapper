@@ -59,9 +59,9 @@ public class NaiveMatrix extends AbstractModel implements PriorModel, PosteriorM
         this.sd = new double[2];
         for (int i = 0; i< 2; i ++) {
             this.max[i] = new double[sampler.getAllPossibleValues().size() + 1];
-            this.max[i][0] = 0.0f;
+            this.max[i][0] = -1.0f;
             this.min[i] = new double[sampler.getAllPossibleValues().size() + 1];
-            this.min[i][0] = 1.0f;
+            this.min[i][0] = 2.0f;
             for (int j = 1; j < max[i].length; j++) {
                 this.max[i][1] = -1.0;
                 this.min[i][1] = -1.0;
