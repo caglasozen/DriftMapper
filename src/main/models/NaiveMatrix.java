@@ -161,6 +161,20 @@ public class NaiveMatrix extends AbstractModel implements PriorModel, PosteriorM
         return 0.0f;
     }
 
+    private void findMeanSd(double[] allDist, int index) {
+        this.mean[index] = 0.0f;
+        for (int j = 0; j < allDist.length; j++) {
+            mean[index] += allDist[j];
+        }
+        mean[index] /= allDist.length;
+        this.sd[index] = 0.0f;
+        for (int j = 0; j < allDist.length; j++) {
+            sd[index] += Math.pow((allDist[j] - mean[index]), 2);
+        }
+        sd[index] /= allDist.length - 1;
+        sd[index] = Math.sqrt(sd[3]);
+    }
+
     public double[] findDistance(NaiveMatrix model1, NaiveMatrix model2, AbstractSampler sample) {
         Distance distanceMetric = new TotalVariation();
         int nClasses = sample.getAllClasses().size();
