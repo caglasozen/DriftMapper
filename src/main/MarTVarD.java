@@ -46,8 +46,10 @@ public class MarTVarD {
         for (int i = 0; i < dataSet1.numAttributes() - 1; i++) elements[i] = i;
 
         int nCombination = nCr(dataSet1.numAttributes() - 1, n);
-        Map<int[], Double> xSets = new HashMap<>();
-        Map<int[], Double> ySets = new HashMap<>();
+        ArrayList<Map<int[], Double>> setDistMap = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            setDistMap.add(new HashMap<>());
+        }
         Map<int[], double[]> means = new HashMap<>();
         Map<int[], double[]> sds = new HashMap<>();
         Map<int[], double[][]> maximums = new HashMap<>();
@@ -64,31 +66,34 @@ public class MarTVarD {
             AbstractSampler sampler = new AllSamples(allInstances);
 
             double[] distances = model1.findDistance(model1, model2, sampler);
-            distances[0] *= sampler.getMagnitudeScale();
 
-            xSets.put(indices, distances[0]);
-            ySets.put(indices, distances[1]);
+            for (int j = 0; j < distances.length; j++) {
+                setDistMap.get(j).put(indices, distances[j]);
+            }
             means.put(indices, model1.getMean().clone());
             sds.put(indices, model1.getSd().clone());
             maximums.put(indices, model1.getMax().clone());
             minimums.put(indices, model1.getMin().clone());
         }
 
-        xSets = sortByValue(xSets);
-        ySets = sortByValue(ySets);
+        for (int i = 0; i < 4; i++) {
+            setDistMap.set(i, sortByValue(setDistMap.get(i)));
+        }
         this.distances = new double[nCombination];
         this.mean = new double[nCombination];
         this.sd = new double[nCombination];
-        this.localMin = new double[nCombination][n+1];
-        this.localMax = new double[nCombination][n+1];
+        // min and max need extra 2 for both distance and class
+        this.localMin = new double[nCombination][n+2];
+        this.localMax = new double[nCombination][n+2];
+        // need extra 1 space for class
         this.orderedNple = new String[nCombination][n+1];
 
         int[][] orderedSets;
-        String[][][] outs = new String[2][this.orderedNple.length][8];
-        for (int i = 0; i < 2; i++) {
-            orderedSets = i == 0 ? xSets.keySet().toArray(new int[nCombination][n]) : ySets.keySet().toArray(new int[nCombination][n]);
+        String[][][] outs = new String[4][this.orderedNple.length][8];
+        for (int i = 0; i < 4; i++) {
+            orderedSets = setDistMap.get(i).keySet().toArray(new int[nCombination][n]);
             for (int j = 0; j < nCombination; j++) {
-                this.distances[j] = i == 0 ? xSets.get(orderedSets[j]) : ySets.get(orderedSets[j]);
+                this.distances[j] = setDistMap.get(i).get(orderedSets[j]);
                 this.mean[j] = means.get(orderedSets[j])[i];
                 this.sd[j] = sds.get(orderedSets[j])[i];
                 this.localMax[j] = maximums.get(orderedSets[j])[i];
@@ -115,8 +120,12 @@ public class MarTVarD {
             results[i][6] = "";
             results[i][7] = "";
             for (int j = 0; j < this.orderedNple[i].length; j++) {
-                results[i][4] += "_" + this.orderedNple[i][j] + "=" + dataSet.attribute(this.orderedNple[i][j]).value((int)this.localMax[i][1 + j]);
-                results[i][6] += "_" + this.orderedNple[i][j] + "=" + dataSet.attribute(this.orderedNple[i][j]).value((int)this.localMin[i][1 + j]);
+                String minVal = (int)this.localMin[i][1 + j] < 0 ? "*" :
+                        dataSet.attribute(this.orderedNple[i][j]).value((int)this.localMin[i][1 + j]);
+                String maxVal = (int)this.localMax[i][1 + j] < 0 ? "*" :
+                        dataSet.attribute(this.orderedNple[i][j]).value((int)this.localMax[i][1 + j]);
+                results[i][4] += "_" + this.orderedNple[i][j] + "=" + maxVal;
+                results[i][6] += "_" + this.orderedNple[i][j] + "=" + minVal;
                 results[i][7] += "_" + this.orderedNple[i][j];
             }
         }

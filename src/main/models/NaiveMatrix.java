@@ -53,18 +53,19 @@ public class NaiveMatrix extends AbstractModel implements PriorModel, PosteriorM
         }
 
         // Reset statistics
-        this.max = new double[2][3];
-        this.min = new double[2][3];
-        this.mean = new double[2];
-        this.sd = new double[2];
-        for (int i = 0; i< 2; i ++) {
-            this.max[i] = new double[sampler.getAllPossibleValues().size() + 1];
+        this.max = new double[4][0];
+        this.min = new double[4][0];
+        this.mean = new double[4];
+        this.sd = new double[4];
+        for (int i = 0; i < 4; i ++) {
+            // Add 2 to size for both distance and class
+            this.max[i] = new double[sampler.getAllPossibleValues().size() + 2];
+            this.min[i] = new double[sampler.getAllPossibleValues().size() + 2];
             this.max[i][0] = -1.0f;
-            this.min[i] = new double[sampler.getAllPossibleValues().size() + 1];
             this.min[i][0] = 2.0f;
             for (int j = 1; j < max[i].length; j++) {
-                this.max[i][1] = -1.0;
-                this.min[i][1] = -1.0;
+                this.max[i][j] = -1.0;
+                this.min[i][j] = -1.0;
             }
             this.mean[i] = 0.0f;
             this.sd[i] = 0.0f;
@@ -126,34 +127,7 @@ public class NaiveMatrix extends AbstractModel implements PriorModel, PosteriorM
 
     @Override
     public double findDistance(PriorModel model1, PriorModel model2, AbstractSampler sample) {
-        // Trim last attribute as allPossibleCombinations contains a class attribute wh
-        Distance distanceMetric = new TotalVariation();
-
-        double[] p = new double[sample.getNInstances()];
-        double[] q = new double[sample.getNInstances()];
-        double[] dist = new double[sample.getNInstances()];
-        sample.reset();
-        for (int i = 0; i < sample.getNInstances(); i++) {
-            Instance inst = sample.nextInstance();
-            p[i] = model1.findPv(Arrays.copyOfRange(inst.toDoubleArray(), 0, inst.numAttributes() - 1));
-            q[i] = model2.findPv(Arrays.copyOfRange(inst.toDoubleArray(), 0, inst.numAttributes() - 1));
-            dist[i] = distanceMetric.findDistance(new double[]{p[i]}, new double[]{q[i]});
-            if (dist[i] > max[0][0]) max[0] = ArrayUtils.addAll(new double[]{dist[i]}, inst.toDoubleArray());
-            if (dist[i] < min[0][0]) min[0] = ArrayUtils.addAll(new double[]{dist[i]}, inst.toDoubleArray());
-        }
-        double finalDist = distanceMetric.findDistance(p, q);
-        this.mean[0] = 0.0f;
-        for (int i = 0; i < sample.getNInstances(); i++) {
-            mean[0] += dist[i];
-        }
-        mean[0] /= sample.getNInstances();
-        this.sd[0] = 0.0f;
-        for (int i = 0; i < sample.getNInstances(); i++) {
-            sd[0] += Math.pow((dist[i] - mean[0]), 2);
-        }
-        sd[0] /= sample.getNInstances() - 1;
-        sd[0] = Math.sqrt(sd[0]);
-        return finalDist;
+        return 0.0f;
     }
 
     @Override
@@ -178,38 +152,102 @@ public class NaiveMatrix extends AbstractModel implements PriorModel, PosteriorM
     public double[] findDistance(NaiveMatrix model1, NaiveMatrix model2, AbstractSampler sample) {
         Distance distanceMetric = new TotalVariation();
         int nClasses = sample.getAllClasses().size();
-        double finalDist = 0.0f;
+        double[] p;
+        double[] q;
+        double[] dist;
+        int infoIndex;
 
+        // Find p(y|v)
+        infoIndex = 3;
+        double finalPyGvDist = 0.0f;
+        dist = new double[nClasses * sample.getNInstances()];
         sample.reset();
         for (int i = 0; i < sample.getNInstances(); i++) {
             Instance inst = sample.nextInstance();
-            double[] p = new double[nClasses];
-            double[] q = new double[nClasses];
-            double[] dist = new double[nClasses];
-            double weight = model1.findPv(Arrays.copyOfRange(inst.toDoubleArray(), 0, inst.numAttributes() - 1)) +
-                    model2.findPv(Arrays.copyOfRange(inst.toDoubleArray(), 0, inst.numAttributes() - 1));
+            p = new double[nClasses];
+            q = new double[nClasses];
+            double weight = (model1.findPv(Arrays.copyOfRange(inst.toDoubleArray(), 0, inst.numAttributes() - 1)) +
+                    model2.findPv(Arrays.copyOfRange(inst.toDoubleArray(), 0, inst.numAttributes() - 1))) / 2;
             for (int j = 0; j < nClasses; j++) {
                 double yClass = Double.parseDouble(sample.getAllClasses().get(j));
                 p[j] = model1.findPyGv(yClass, inst);
                 q[j] = model2.findPyGv(yClass, inst);
-                dist[j] = distanceMetric.findDistance(new double[]{p[j]}, new double[]{q[j]}) * weight;
-                if (dist[j] > max[1][0]) max[1] = ArrayUtils.addAll(new double[]{dist[j]}, inst.toDoubleArray());
-                if (dist[j] < min[1][0]) min[1] = ArrayUtils.addAll(new double[]{dist[j]}, inst.toDoubleArray());
+                dist[(i * nClasses) + j] = distanceMetric.findDistance(new double[]{p[j]}, new double[]{q[j]}) * weight;
+                if (dist[(i * nClasses) + j] > max[infoIndex][0]) max[infoIndex] = ArrayUtils.addAll(new double[]{dist[(i * nClasses) + j]}, inst.toDoubleArray());
+                if (dist[(i * nClasses) + j] < min[infoIndex][0]) min[infoIndex] = ArrayUtils.addAll(new double[]{dist[(i * nClasses) + j]}, inst.toDoubleArray());
             }
-            finalDist += distanceMetric.findDistance(p, q) * weight;
-            this.mean[1] = 0.0f;
-            for (int j = 0; j < nClasses; j++) {
-                mean[1] += dist[j];
-            }
-            mean[1] /= nClasses;
-            this.sd[1] = 0.0f;
-            for (int j = 0; j < nClasses; j++) {
-                sd[1] += Math.pow((dist[j] - mean[1]), 2);
-            }
-            sd[1] /= nClasses - 1;
-            sd[1] = Math.sqrt(sd[1]);
+            finalPyGvDist += distanceMetric.findDistance(p, q) * weight;
         }
-        return new double[]{this.findDistance((PriorModel)model1, (PriorModel)model2, sample), finalDist/(double)sample.getNInstances()};
+        findMeanSd(dist, infoIndex);
+
+        // Find p(v|y)
+        infoIndex = 1;
+        double finalPvGyDist = 0.0f;
+        dist = new double[nClasses * sample.getNInstances()];
+        for (int i = 0; i < nClasses; i++) {
+            double yClass = Double.parseDouble(sample.getAllClasses().get(i));
+            p = new double[sample.getNInstances()];
+            q = new double[sample.getNInstances()];
+            double weight = (model1.findPy(yClass) + model2.findPy(yClass)) / 2;
+            sample.reset();
+            for (int j = 0; j < sample.getNInstances(); j++) {
+                Instance inst = sample.nextInstance();
+                p[j] = model1.findPvGy(yClass, inst);
+                q[j] = model2.findPvGy(yClass, inst);
+                dist[(i * sample.getNInstances()) + j] = distanceMetric.findDistance(new double[]{p[j]}, new double[]{q[j]}) * weight;
+                if (dist[(i * sample.getNInstances()) + j] > max[infoIndex][0]) max[infoIndex] = ArrayUtils.addAll(new double[]{dist[(i * sample.getNInstances()) + j]}, inst.toDoubleArray());
+                if (dist[(i * sample.getNInstances()) + j] < min[infoIndex][0]) min[infoIndex] = ArrayUtils.addAll(new double[]{dist[(i * sample.getNInstances()) + j]}, inst.toDoubleArray());
+            }
+            finalPvGyDist += distanceMetric.findDistance(p, q) * weight;
+        }
+        findMeanSd(dist, infoIndex);
+
+        // Find p(y)
+        infoIndex = 2;
+        p = new double[nClasses];
+        q = new double[nClasses];
+        dist = new double[nClasses];
+        for (int j = 0; j < nClasses; j++) {
+            double yClass = Double.parseDouble(sample.getAllClasses().get(j));
+            p[j] = model1.findPy(yClass);
+            q[j] = model2.findPy(yClass);
+            dist[j] = distanceMetric.findDistance(new double[]{p[j]}, new double[]{q[j]});
+            if (dist[j] > max[infoIndex][0]) {
+                max[infoIndex][0] = dist[j];
+                max[infoIndex][1] = yClass;
+            }
+            if (dist[j] < min[infoIndex][0]) {
+                min[infoIndex][0] = dist[j];
+                min[infoIndex][1] = yClass;
+            }
+        }
+        double pyDist = distanceMetric.findDistance(p, q);
+        findMeanSd(dist, infoIndex);
+
+        // Find p(v)
+        infoIndex = 0;
+        p = new double[sample.getNInstances()];
+        q = new double[sample.getNInstances()];
+        dist = new double[sample.getNInstances()];
+        sample.reset();
+        for (int i = 0; i < sample.getNInstances(); i++) {
+            Instance inst = sample.nextInstance();
+            p[i] = model1.findPv(Arrays.copyOfRange(inst.toDoubleArray(), 0, inst.numAttributes() - 1));
+            q[i] = model2.findPv(Arrays.copyOfRange(inst.toDoubleArray(), 0, inst.numAttributes() - 1));
+            dist[i] = distanceMetric.findDistance(new double[]{p[i]}, new double[]{q[i]});
+            if (dist[i] > max[infoIndex][0]) {
+                max[infoIndex] = ArrayUtils.addAll(new double[]{dist[i]}, inst.toDoubleArray());
+                max[infoIndex][max[infoIndex].length - 1] = -1.0;
+            }
+            if (dist[i] < min[infoIndex][0]) {
+                min[infoIndex] = ArrayUtils.addAll(new double[]{dist[i]}, inst.toDoubleArray());
+                min[infoIndex][min[infoIndex].length - 1] = -1.0;
+            }
+        }
+        double pvDist = distanceMetric.findDistance(p, q) * sampler.getMagnitudeScale();
+        findMeanSd(dist, infoIndex);
+
+        return new double[]{pvDist, finalPvGyDist, pyDist, finalPyGvDist};
     }
 
     public double[][] getMax(){

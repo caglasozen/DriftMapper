@@ -188,7 +188,9 @@ public class scratch {
             System.out.println("Finding " + name + i + "-ple order");
             String[][][] results = marTVarD.findOrderedNPle(i);
             writeToCSV(results[0], new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"}, "./data_out/nple/" + name + "_" + i + "-ple_prior.csv");
-            writeToCSV(results[1], new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"}, "./data_out/nple/" + name + "_" + i + "-ple_posterior.csv");
+            writeToCSV(results[1], new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"}, "./data_out/nple/" + name + "_" + i + "-ple_cond_prior.csv");
+            writeToCSV(results[2], new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"}, "./data_out/nple/" + name + "_" + i + "-ple_class.csv");
+            writeToCSV(results[3], new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"}, "./data_out/nple/" + name + "_" + i + "-ple_posterior.csv");
         }
     }
 
