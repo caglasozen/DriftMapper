@@ -115,8 +115,8 @@ public class MarTVarD {
             results[i][6] = "";
             results[i][7] = "";
             for (int j = 0; j < this.orderedNple[i].length; j++) {
-                results[i][4] += "_" + this.orderedNple[i][j] + "=" + this.localMax[i][j];
-                results[i][6] += "_" + this.orderedNple[i][j] + "=" + this.localMin[i][j];
+                results[i][4] += "_" + this.orderedNple[i][j] + "=" + dataSet.attribute(this.orderedNple[i][j]).value((int)this.localMax[i][1 + j]);
+                results[i][6] += "_" + this.orderedNple[i][j] + "=" + dataSet.attribute(this.orderedNple[i][j]).value((int)this.localMin[i][1 + j]);
                 results[i][7] += "_" + this.orderedNple[i][j];
             }
         }
