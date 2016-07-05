@@ -81,8 +81,6 @@ public abstract class AbstractSampler {
                 this.allClasses = new ArrayList<>(possibleValues);
             }
         }
-        //Suggest Garbage collector to run
-        System.gc();
     }
 
     public static Instances findIntersectionBetweenInstances(Instances instances1, Instances instances2) {
