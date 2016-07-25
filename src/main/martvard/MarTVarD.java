@@ -1,4 +1,4 @@
-package main;
+package main.martvard;
 
 import main.models.NaiveMatrix;
 import main.models.sampling.AbstractSampler;
@@ -126,7 +126,7 @@ public class MarTVarD {
                         dataSet.attribute(this.orderedNple[i][j]).value((int)this.localMax[i][1 + j]);
                 results[i][4] += "_" + this.orderedNple[i][j] + "=" + maxVal;
                 results[i][6] += "_" + this.orderedNple[i][j] + "=" + minVal;
-                results[i][7] += "_" + this.orderedNple[i][j];
+                if (j < this.orderedNple[i].length - 1) results[i][7] += "_" + this.orderedNple[i][j];
             }
         }
         return results;
