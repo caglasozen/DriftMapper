@@ -1,8 +1,0 @@
-"Distance","mean","sd","max_val","max_att","min_val","min_att","Attributes"
-"0.002584483188882935","0.0","0.0","0.006461207972207338","_transfer=2.0_class=0.0","0.0","_transfer=1.0_class=1.0","_transfer_class"
-"0.0028590621631260755","0.0","0.0","0.005050802443526672","_day=3.0_class=0.0","0.0","_day=1.0_class=1.0","_day_class"
-"0.008653937611741278","0.0","0.0","0.011212253693396514","_period=1.0_class=0.0","0.0","_period=0.0_class=1.0","_period_class"
-"0.010099688281817346","0.0","0.0","0.024289056550475356","_nswdemand=0.0_class=0.0","0.0","_nswdemand=0.0_class=1.0","_nswdemand_class"
-"0.011502712237696696","0.0","0.0","0.02398529422588262","_nswprice=3.0_class=0.0","0.0","_nswprice=1.0_class=1.0","_nswprice_class"
-"0.011528308008509429","0.0","0.0","0.028820770021273572","_vicprice=0.0_class=0.0","0.0","_vicprice=3.0_class=1.0","_vicprice_class"
-"0.012666727553813189","0.0","0.0","0.023658630970285425","_vicdemand=0.0_class=0.0","0.0","_vicdemand=2.0_class=1.0","_vicdemand_class"

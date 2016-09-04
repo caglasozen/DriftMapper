@@ -15,13 +15,11 @@ import java.util.*;
  * Created by LoongKuan on 31/07/2016.
  **/
 public abstract class Experiment {
-    public double distance;
-    public ExperimentResult resultSummary;
-    private Map<int[], ExperimentResult> resultMap;
-    private int nAttributesActive;
-    private Instance sampleInstance;
-    protected Distance distanceMetric = new TotalVariation();
-    abstract ExperimentResult getResults(NaiveMatrix model1, NaiveMatrix model2, Instances allInstances);
+    Map<int[], ArrayList<ExperimentResult>> resultMap;
+    int nAttributesActive;
+    Instance sampleInstance;
+    Distance distanceMetric = new TotalVariation();
+    abstract ArrayList<ExperimentResult> getResults(NaiveMatrix model1, NaiveMatrix model2, Instances allInstances);
 
     public Experiment(Instances instances1, Instances instances2, int nAttributesActive) {
         // List of 0 to n where n is the number of attributes
@@ -53,10 +51,14 @@ public abstract class Experiment {
     }
 
     public String[][] getResultTable() {
+        return this.getResultTable(0);
+    }
+
+    public String[][] getResultTable(int classIndex) {
         int[][] attributeSubSets = this.resultMap.keySet().toArray(new int[this.resultMap.size()][this.nAttributesActive]);
        String[][] results = new String[attributeSubSets.length][8];
         for (int i = 0; i < attributeSubSets.length; i++) {
-            ExperimentResult currentResult = this.resultMap.get(attributeSubSets[i]);
+            ExperimentResult currentResult = this.resultMap.get(attributeSubSets[i]).get(classIndex);
             results[i][0] = Double.toString(currentResult.actualResult);
             results[i][1] = Double.toString(currentResult.mean);
             results[i][2] = Double.toString(currentResult.sd);
@@ -175,20 +177,20 @@ public abstract class Experiment {
         return ans;
     }
 
-    private static Map<int[], ExperimentResult> sortByValue( Map<int[], ExperimentResult> map ) {
-        List<Map.Entry<int[], ExperimentResult>> list = new LinkedList<>(map.entrySet());
-        Collections.sort( list, new Comparator<Map.Entry<int[], ExperimentResult>>() {
-            public int compare( Map.Entry<int[], ExperimentResult> o1, Map.Entry<int[], ExperimentResult> o2 )
+    private static Map<int[], ArrayList<ExperimentResult>> sortByValue( Map<int[], ArrayList<ExperimentResult>> map ) {
+        List<Map.Entry<int[], ArrayList<ExperimentResult>>> list = new LinkedList<>(map.entrySet());
+        Collections.sort( list, new Comparator<Map.Entry<int[], ArrayList<ExperimentResult>>>() {
+            public int compare( Map.Entry<int[], ArrayList<ExperimentResult>> o1, Map.Entry<int[], ArrayList<ExperimentResult>> o2 )
             {
-                double value = o1.getValue().actualResult - o2.getValue().actualResult;
+                double value = o1.getValue().get(0).actualResult - o2.getValue().get(0).actualResult;
                 if (value == 0.0f) return 0;
                 else if(value < 0.0f) return -1;
                 else return 1;
             }
         } );
 
-        Map<int[], ExperimentResult> result = new LinkedHashMap<>();
-        for (Map.Entry<int[], ExperimentResult> entry : list)
+        Map<int[], ArrayList<ExperimentResult>> result = new LinkedHashMap<>();
+        for (Map.Entry<int[], ArrayList<ExperimentResult>> entry : list)
         {
             result.put( entry.getKey(), entry.getValue() );
         }

@@ -6,6 +6,8 @@ import main.models.NaiveMatrix;
 import weka.core.Instance;
 import weka.core.Instances;
 
+import java.util.ArrayList;
+
 /**
  * Created by LoongKuan on 31/07/2016.
  **/
@@ -16,7 +18,7 @@ public class CovariateDistance extends Experiment{
     }
 
     @Override
-    public ExperimentResult getResults(NaiveMatrix model1, NaiveMatrix model2, Instances allInstances) {
+    public ArrayList<ExperimentResult> getResults(NaiveMatrix model1, NaiveMatrix model2, Instances allInstances) {
         double[] p = new double[allInstances.size()];
         double[] q = new double[allInstances.size()];
         double[] separateDistance = new double[allInstances.size()];
@@ -29,6 +31,9 @@ public class CovariateDistance extends Experiment{
             instanceValues[i][allInstances.classIndex()] = -1.0f;
         }
         double finalDistance = this.distanceMetric.findDistance(p, q);
-        return(new ExperimentResult(finalDistance, separateDistance, instanceValues));
+        ExperimentResult finalResult = new ExperimentResult(finalDistance, separateDistance, instanceValues);
+        ArrayList<ExperimentResult> returnResults = new ArrayList<>();
+        returnResults.add(finalResult);
+        return returnResults;
     }
 }

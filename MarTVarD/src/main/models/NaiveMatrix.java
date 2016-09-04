@@ -39,6 +39,7 @@ public class NaiveMatrix {
         frequencyMatrix = new int[nCombinations][nClasses];
         instanceSum = new int[nCombinations];
         classSum = new int[nClasses];
+        System.out.println("Populating Frequency Matrix");
         for (Instance inst : dataSet) {
             int instHash = convertInstToHash(inst);
             int classHash = convertClassToHash(inst);
@@ -49,6 +50,7 @@ public class NaiveMatrix {
             // Frequency Matrix
             this.frequencyMatrix[instHash][classHash] += 1;
         }
+        System.out.println("Done Populating Frequency Matrix");
     }
 
     public Instances getAllInstances() {

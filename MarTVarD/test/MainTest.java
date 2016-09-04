@@ -21,46 +21,63 @@ import java.util.ArrayList;
 
 public class MainTest {
     public static void main(String[] args) {
-        args = new String[]{"all", "20130622", "20131129"};
+        String[] standardFiles = new String[]{"airlines", "elecNormNew", "gas-sensor", "sensor"};
+        args = new String[]{"standardAll"};
+        //args = new String[]{"all", "20130622", "20131129"};
         if (args[0].equals("prior")) {
             Instances[] dataSets = loadPairData(args[1], args[2]);
             for (int i = 0; i < 5; i++) {
                 CovariateDistance experiment = new CovariateDistance(dataSets[0], dataSets[1], i);
                 writeToCSV(experiment.getResultTable(),
                         new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"},
-                        "./data_out/nple/" + args[1] + "_" + args[2]+ "_" + i + "-ple_prior.csv");
+                        "./data_out/martvard/" + args[1] + "_" + args[2]+ "_" + i + "-ple_prior.csv");
             }
         }
         else if (args[0].equals("all")) {
-            testAll(new int[]{0, 5}, args[1], args[2]);
+            Instances[] dataSets = loadPairData(args[1], args[2]);
+            testAll(new int[]{0, 5}, dataSets, args[1] + "_" + args[2]);
+        }
+        else if (args[0].equals("standardAll")) {
+            for (String file : standardFiles) {
+                Instances allInstances = loadAnyDataSet("./datasets/"+ file +".arff");
+                Instances[] dataSet = new Instances[2];
+                dataSet[0] = new Instances(allInstances, 0, allInstances.size()/2);
+                dataSet[1] = new Instances(allInstances, allInstances.size()/2 - 1, allInstances.size()/2);
+                testAll(new int[]{0, 5}, dataSet, file);
+            }
         }
     }
 
-    private static void testAll(int[] nInterval, String file1, String file2) {
-        Instances[] dataSets = loadPairData(file1, file2);
+    private static void testAll(int[] nInterval, Instances[] dataSets, String name) {
+        System.out.println("Data Loaded");
+
         for (int i = nInterval[0]; i < nInterval[1]; i++) {
+            System.out.println("Running Covariate");
             CovariateDistance experiment = new CovariateDistance(dataSets[0], dataSets[1], i);
             writeToCSV(experiment.getResultTable(),
                     new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"},
-                    "./data_out/nple/" + file1 + "_" + file2 + "_" + i + "-ple_prior.csv");
+                    "./data_out/martvard/" + name + "_" + i + "-ple_prior.csv");
         }
         for (int i = nInterval[0]; i < nInterval[1]; i++) {
+            System.out.println("Running ConditionedCovariate");
             ConditionedCovariateDistance experiment = new ConditionedCovariateDistance(dataSets[0], dataSets[1], i);
             writeToCSV(experiment.getResultTable(),
                     new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"},
-                    "./data_out/nple/" + file1 + "_" + file2 + "_" + i + "-ple_ConditionedCovariate.csv");
+                    "./data_out/martvard/" + name + "_" + i + "-ple_ConditionedCovariate.csv");
         }
         for (int i = nInterval[0]; i < nInterval[1]; i++) {
+            System.out.println("Running Posterior");
             PosteriorDistance experiment = new PosteriorDistance(dataSets[0], dataSets[1], i);
             writeToCSV(experiment.getResultTable(),
                     new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"},
-                    "./data_out/nple/" + file1 + "_" + file2 + "_" + i + "-ple_posterior.csv");
+                    "./data_out/martvard/" + name + "_" + i + "-ple_posterior.csv");
         }
         for (int i = nInterval[0]; i < nInterval[1]; i++) {
+            System.out.println("Running Class");
             ClassDistance experiment = new ClassDistance(dataSets[0], dataSets[1], i);
             writeToCSV(experiment.getResultTable(),
                     new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"},
-                    "./data_out/nple/" + file1 + "_" + file2 + "_" + i + "-ple_class.csv");
+                    "./data_out/martvard/" + name + "_" + i + "-ple_class.csv");
         }
     }
 
@@ -126,5 +143,26 @@ public class MainTest {
         filter.setInputFormat(dataSet);
 
         return Filter.useFilter(dataSet, filter);
+    }
+
+    private static Instances loadAnyDataSet(String filename) {
+        try {
+            Instances continuousData = loadDataSet(filename);
+            if (filename.equals("./datasets/gas-sensor.arff")) {
+                double[] classAttVals = continuousData.attributeToDoubleArray(0);
+                Attribute classAtt = continuousData.attribute(0);
+                continuousData.deleteAttributeAt(0);
+                continuousData.insertAttributeAt(classAtt, continuousData.numAttributes());
+                continuousData.setClassIndex(continuousData.numAttributes() - 1);
+                for (int i = 0; i < classAttVals.length; i++) {
+                    continuousData.get(i).setValue(continuousData.classIndex(), classAttVals[i]);
+                }
+            }
+            return discretizeDataSet(continuousData);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            return new Instances("E", new ArrayList<Attribute>(), 0);
+        }
     }
 }
