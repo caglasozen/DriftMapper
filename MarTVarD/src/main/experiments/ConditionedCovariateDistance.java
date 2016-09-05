@@ -37,22 +37,27 @@ public class ConditionedCovariateDistance extends Experiment{
         ArrayList<ExperimentResult> results = new ArrayList<>();
         for (int i = 0; i < nClasses; i++) {
             int[] instancesIndex = new int[instanceIndexPerClass.get(i).size()];
-            for (int j = 0; j < instanceIndexPerClass.get(i).size(); j++) {
-                instancesIndex[j] = instanceIndexPerClass.get(i).get(j);
+            if (instancesIndex.length > 0) {
+                for (int j = 0; j < instanceIndexPerClass.get(i).size(); j++) {
+                    instancesIndex[j] = instanceIndexPerClass.get(i).get(j);
+                }
+                double[] pGy = new double[instancesIndex.length];
+                double[] qGy = new double[instancesIndex.length];
+                double[] separateDistanceGy = new double[instancesIndex.length];
+                double[][] instanceValuesGy = new double[instancesIndex.length][allInstances.numAttributes()];
+                for (int j = 0; j < instancesIndex.length; j++) {
+                    int index = instancesIndex[j];
+                    pGy[j] = p[index];
+                    qGy[j] = q[index];
+                    separateDistanceGy[j] = separateDistance[index];
+                    instanceValuesGy[j] = instanceValues[index];
+                }
+                double finalDistance = this.distanceMetric.findDistance(pGy, qGy);
+                results.add(i, new ExperimentResult(finalDistance, separateDistanceGy, instanceValuesGy));
             }
-            double[] pGy = new double[instancesIndex.length];
-            double[] qGy = new double[instancesIndex.length];
-            double[] separateDistanceGy = new double[instancesIndex.length];
-            double[][] instanceValuesGy = new double[instancesIndex.length][allInstances.numAttributes()];
-            for (int j = 0; j < instancesIndex.length; j++) {
-                int index = instancesIndex[j];
-                pGy[j] = p[index];
-                qGy[j] = q[index];
-                separateDistanceGy[j] = separateDistance[index];
-                instanceValuesGy[j] = instanceValues[index];
+            else {
+                results.add(i, new ExperimentResult(Double.POSITIVE_INFINITY, null, null));
             }
-            double finalDistance = this.distanceMetric.findDistance(pGy, qGy);
-            results.add(i, new ExperimentResult(finalDistance, separateDistanceGy, instanceValuesGy));
         }
         return results;
     }

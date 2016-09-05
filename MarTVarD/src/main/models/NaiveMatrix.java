@@ -6,14 +6,15 @@ import weka.core.Instances;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * Created by loongkuan on 11/05/16.
  **/
 public class NaiveMatrix {
     private Instances allInstances;
-    private int[][] frequencyMatrix;
-    private int[] instanceSum;
+    private HashMap<Integer, int[]> frequencyTable;
+    private HashMap<Integer, Integer> instanceSum;
     private int[] classSum;
     private int sampleSize;
 
@@ -36,21 +37,24 @@ public class NaiveMatrix {
         this.sampleSize = dataSet.size();
 
         // Populate the Frequency Matrix and Sum tables
-        frequencyMatrix = new int[nCombinations][nClasses];
-        instanceSum = new int[nCombinations];
+        frequencyTable = new HashMap<>();
+        instanceSum = new HashMap<>();
         classSum = new int[nClasses];
-        System.out.println("Populating Frequency Matrix");
         for (Instance inst : dataSet) {
             int instHash = convertInstToHash(inst);
             int classHash = convertClassToHash(inst);
-            // Instance Sum
-            this.instanceSum[instHash] += 1;
             // Class Sum
             this.classSum[classHash] += 1;
+            // Check if the instance hash is registered in the lookup tables
+            if (!this.vectorExists(inst)) {
+                this.instanceSum.put(instHash, 0);
+                this.frequencyTable.put(instHash, new int[nClasses]);
+            }
+            // Instance Sum
+            this.instanceSum.put(instHash, this.instanceSum.get(instHash) + 1);
             // Frequency Matrix
-            this.frequencyMatrix[instHash][classHash] += 1;
+            this.frequencyTable.get(instHash)[classHash] += 1;
         }
-        System.out.println("Done Populating Frequency Matrix");
     }
 
     public Instances getAllInstances() {
@@ -115,7 +119,8 @@ public class NaiveMatrix {
         for (int i = 0; i < instance.numAttributes(); i++) {
             exists = exists && instance.value(i) < this.allInstances.attribute(i).numValues();
         }
-        return exists && this.frequencyMatrix[convertInstToHash(instance)][0] > 0.0f ;
+        Integer covariateHash = convertInstToHash(instance);
+        return exists && this.frequencyTable.containsKey(covariateHash);
     }
 
     private boolean partialVectorExists(Instance instance) {
@@ -123,7 +128,8 @@ public class NaiveMatrix {
         for (int i = 0; i < instance.numAttributes(); i++) {
             if (!instance.isMissing(i) && instance.value(i) >= this.allInstances.attribute(i).numValues()) return false;
         }
-        return true;
+        Integer covariateHash = convertInstToHash(instance);
+        return this.frequencyTable.containsKey(covariateHash);
     }
 
     private int getPartialInstanceFrequency(Instance instance) {
@@ -135,7 +141,9 @@ public class NaiveMatrix {
         ArrayList<Integer> instanceHashes = convertPartialInstToHashes(instance);
         int classHash = convertClassToHash(instance);
         for (int hash : instanceHashes) {
-            totalFrequency += classSpecific ? this.frequencyMatrix[hash][classHash] : this.instanceSum[hash];
+            if (this.frequencyTable.containsKey(hash)) {
+                totalFrequency += classSpecific ? this.frequencyTable.get(hash)[classHash] : this.instanceSum.get(hash);
+            }
         }
         return totalFrequency;
     }

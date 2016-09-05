@@ -42,11 +42,12 @@ public abstract class Experiment {
         int nCombination = nCr(instances1.numAttributes() - 1, nAttributesActive);
         resultMap = new HashMap<>();
         for (int i = 0; i < nCombination; i++) {
-            System.out.println("Running experiment " + i + "/" + nCombination);
+            System.out.print("\rRunning experiment " + (i + 1) + "/" + nCombination);
             // Get combination between attributes
             int[] indices = getKthCombination(i, attributeIndices, nAttributesActive);
             resultMap.put(indices, getResults(model1, model2, generatePartialInstances(allInstances, indices)));
         }
+        System.out.print("\n");
         this.resultMap = sortByValue(this.resultMap);
     }
 
@@ -67,22 +68,29 @@ public abstract class Experiment {
             results[i][5] = Double.toString(currentResult.maxDist);
             results[i][6] = "";
             results[i][7] = "";
-            for (int j = 0; j < attributeSubSets[i].length; j++) {
-                String minVal = (int)currentResult.minValues[j] < 0 ? "*" :
-                        this.sampleInstance.attribute(attributeSubSets[i][j]).value((int)currentResult.minValues[attributeSubSets[i][j]]);
-                String maxVal = (int)currentResult.maxValues[j] < 0 ? "*" :
-                        this.sampleInstance.attribute(attributeSubSets[i][j]).value((int)currentResult.maxValues[attributeSubSets[i][j]]);
-                results[i][4] += "_" + this.sampleInstance.attribute(attributeSubSets[i][j]).name() + "=" + maxVal;
-                results[i][6] += "_" + this.sampleInstance.attribute(attributeSubSets[i][j]).name() + "=" + minVal;
-                results[i][7] += "_" + this.sampleInstance.attribute(attributeSubSets[i][j]).name();
+            if (!Double.isInfinite(currentResult.actualResult)) {
+                for (int j = 0; j < attributeSubSets[i].length; j++) {
+                    String minVal = Double.isNaN(currentResult.minValues[j]) || (int)currentResult.minValues[j] < 0 ? "*" :
+                            this.sampleInstance.attribute(attributeSubSets[i][j]).value((int)currentResult.minValues[attributeSubSets[i][j]]);
+                    String maxVal = Double.isNaN(currentResult.minValues[j]) || (int)currentResult.maxValues[j] < 0 ? "*" :
+                            this.sampleInstance.attribute(attributeSubSets[i][j]).value((int)currentResult.maxValues[attributeSubSets[i][j]]);
+                    results[i][4] += "_" + this.sampleInstance.attribute(attributeSubSets[i][j]).name() + "=" + maxVal;
+                    results[i][6] += "_" + this.sampleInstance.attribute(attributeSubSets[i][j]).name() + "=" + minVal;
+                    results[i][7] += "_" + this.sampleInstance.attribute(attributeSubSets[i][j]).name();
+                }
+                // Add class info
+                String minVal = (int)currentResult.minValues[this.sampleInstance.classIndex()] < 0 ? "*" :
+                        this.sampleInstance.attribute(this.sampleInstance.classIndex()).value((int)currentResult.minValues[this.sampleInstance.classIndex()]);
+                String maxVal = (int)currentResult.maxValues[this.sampleInstance.classIndex()] < 0 ? "*" :
+                        this.sampleInstance.attribute(this.sampleInstance.classIndex()).value((int)currentResult.maxValues[this.sampleInstance.classIndex()]);
+                results[i][4] += "_" + this.sampleInstance.attribute(this.sampleInstance.classIndex()).name() + "=" + maxVal;
+                results[i][6] += "_" + this.sampleInstance.attribute(this.sampleInstance.classIndex()).name() + "=" + minVal;
             }
-            // Add class info
-            String minVal = (int)currentResult.minValues[this.sampleInstance.classIndex()] < 0 ? "*" :
-                    this.sampleInstance.attribute(this.sampleInstance.classIndex()).value((int)currentResult.minValues[this.sampleInstance.classIndex()]);
-            String maxVal = (int)currentResult.maxValues[this.sampleInstance.classIndex()] < 0 ? "*" :
-                    this.sampleInstance.attribute(this.sampleInstance.classIndex()).value((int)currentResult.maxValues[this.sampleInstance.classIndex()]);
-            results[i][4] += "_" + this.sampleInstance.attribute(this.sampleInstance.classIndex()).name() + "=" + maxVal;
-            results[i][6] += "_" + this.sampleInstance.attribute(this.sampleInstance.classIndex()).name() + "=" + minVal;
+            else {
+                results[i][4] = "Does not exist";
+                results[i][6] = "Does not exist";
+                results[i][7] = "Does not exist";
+            }
         }
         return results;
     }

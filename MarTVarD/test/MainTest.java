@@ -43,42 +43,41 @@ public class MainTest {
                 Instances[] dataSet = new Instances[2];
                 dataSet[0] = new Instances(allInstances, 0, allInstances.size()/2);
                 dataSet[1] = new Instances(allInstances, allInstances.size()/2 - 1, allInstances.size()/2);
-                testAll(new int[]{0, 5}, dataSet, file);
+                testAll(new int[]{1, 4}, dataSet, file);
             }
         }
     }
 
     private static void testAll(int[] nInterval, Instances[] dataSets, String name) {
-        System.out.println("Data Loaded");
+        System.out.println("Running Tests on " + name);
+        System.out.println("For " + nInterval[0] + " to " + nInterval[1] + " attributes");
 
+        System.out.println("Running Covariate");
         for (int i = nInterval[0]; i < nInterval[1]; i++) {
-            System.out.println("Running Covariate");
             CovariateDistance experiment = new CovariateDistance(dataSets[0], dataSets[1], i);
             writeToCSV(experiment.getResultTable(),
                     new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"},
-                    "./data_out/martvard/" + name + "_" + i + "-ple_prior.csv");
+                    "./data_out/martvard/" + name + "_" + i + "-attributes_prior.csv");
         }
+        System.out.println("Running ConditionedCovariate");
         for (int i = nInterval[0]; i < nInterval[1]; i++) {
-            System.out.println("Running ConditionedCovariate");
             ConditionedCovariateDistance experiment = new ConditionedCovariateDistance(dataSets[0], dataSets[1], i);
             writeToCSV(experiment.getResultTable(),
                     new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"},
-                    "./data_out/martvard/" + name + "_" + i + "-ple_ConditionedCovariate.csv");
+                    "./data_out/martvard/" + name + "_" + i + "-attributes_ConditionedCovariate.csv");
         }
+        System.out.println("Running Posterior");
         for (int i = nInterval[0]; i < nInterval[1]; i++) {
-            System.out.println("Running Posterior");
             PosteriorDistance experiment = new PosteriorDistance(dataSets[0], dataSets[1], i);
             writeToCSV(experiment.getResultTable(),
                     new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"},
-                    "./data_out/martvard/" + name + "_" + i + "-ple_posterior.csv");
+                    "./data_out/martvard/" + name + "_" + i + "-attributes_posterior.csv");
         }
-        for (int i = nInterval[0]; i < nInterval[1]; i++) {
-            System.out.println("Running Class");
-            ClassDistance experiment = new ClassDistance(dataSets[0], dataSets[1], i);
-            writeToCSV(experiment.getResultTable(),
-                    new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"},
-                    "./data_out/martvard/" + name + "_" + i + "-ple_class.csv");
-        }
+        System.out.println("Running Class");
+        ClassDistance experiment = new ClassDistance(dataSets[0], dataSets[1], 0);
+        writeToCSV(experiment.getResultTable(),
+                new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"},
+                "./data_out/martvard/" + name + "_class.csv");
     }
 
     private static Instances[] loadPairData(String filename1, String filename2) {

@@ -16,35 +16,44 @@ public class ExperimentResult {
     public ExperimentResult(double actualResult, double[] data, double[][] instanceValues) {
         // Store actual result
         this.actualResult = actualResult;
-
-        // Calculate Mean
-        double sum = 0.0f;
-        for (double datum : data) {
-            sum += datum;
+        if (Double.isInfinite(this.actualResult)) {
+            this.mean = Double.POSITIVE_INFINITY;
+            this.sd = Double.POSITIVE_INFINITY;
+            this.maxDist = Double.POSITIVE_INFINITY;
+            this.maxValues = new double[]{};
+            this.minDist = Double.POSITIVE_INFINITY;
+            this.minValues = new double[]{};
         }
-        this.mean = sum / data.length;
+        else {
+            // Calculate Mean
+            double sum = 0.0f;
+            for (double datum : data) {
+                sum += datum;
+            }
+            this.mean = sum / data.length;
 
-        // Calculate tmpSd
-        double tmpSd = 0.0f;
-        for (double datum: data) {
-            tmpSd = tmpSd + Math.pow(datum - this.mean, 2);
+            // Calculate tmpSd
+            double tmpSd = 0.0f;
+            for (double datum: data) {
+                tmpSd = tmpSd + Math.pow(datum - this.mean, 2);
+            }
+            tmpSd = tmpSd / (data.length - 1);
+            tmpSd = Math.sqrt(tmpSd);
+            this.sd = tmpSd;
+
+            int minIndex = 0;
+            int maxIndex = 0;
+            for (int i = 0; i < data.length; i++) {
+                minIndex = (data[i] < data[minIndex]) ? i : minIndex;
+                maxIndex = (data[i] > data[maxIndex]) ? i : maxIndex;
+            }
+            // Get minimum
+            this.minValues = instanceValues[minIndex];
+            this.minDist = data[minIndex];
+
+            // Get maximum
+            this.maxValues = instanceValues[maxIndex];
+            this.maxDist = data[maxIndex];
         }
-        tmpSd = tmpSd / (data.length - 1);
-        tmpSd = Math.sqrt(tmpSd);
-        this.sd = tmpSd;
-
-        int minIndex = 0;
-        int maxIndex = 0;
-        for (int i = 0; i < data.length; i++) {
-            minIndex = (data[i] < data[minIndex]) ? i : minIndex;
-            maxIndex = (data[i] > data[maxIndex]) ? i : maxIndex;
-        }
-        // Get minimum
-        this.minValues = instanceValues[minIndex];
-        this.minDist = data[minIndex];
-
-        // Get maximum
-        this.maxValues = instanceValues[maxIndex];
-        this.maxDist = data[maxIndex];
     }
 }
