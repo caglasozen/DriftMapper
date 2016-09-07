@@ -1,0 +1,6 @@
+"Distance","mean","sd","max_val","max_att","min_val","min_att","attributes"
+"0.0","0.0","0.0","0.0","_Humidity=*_Class=19","0.0","_Humidity=*_Class=19","_Humidity"
+"0.0","0.0","0.0","0.0","_Rcdminutes='(-inf-288.5]'_Class=19","0.0","_Rcdminutes='(-inf-288.5]'_Class=19","_Rcdminutes"
+"0.0","0.0","0.0","0.0","_Light='(10.58-106.72]'_Class=19","0.0","_Light='(10.58-106.72]'_Class=19","_Light"
+"0.0","0.0","0.0","0.0","_Voltage='(2.645535-inf)'_Class=19","0.0","_Voltage='(2.645535-inf)'_Class=19","_Voltage"
+"0.0","0.0","0.0","0.0","_Temperature='(-inf-19.9737]'_Class=19","0.0","_Temperature='(-inf-19.9737]'_Class=19","_Temperature"

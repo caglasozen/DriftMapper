@@ -1,0 +1,8 @@
+"Distance","mean","sd","max_val","max_att","min_val","min_att","attributes"
+"0.0","0.0","0.0","0.0","_Flight=*_Delay=*","0.0","_Flight=*_Delay=*","_Flight"
+"0.0","0.0","0.0","0.0","_Time=*_Delay=*","0.0","_Time=*_Delay=*","_Time"
+"0.0","0.0","0.0","0.0","_Airline=CO_Delay=*","0.0","_Airline=CO_Delay=*","_Airline"
+"0.0","0.0","0.0","0.0","_DayOfWeek=*_Delay=*","0.0","_DayOfWeek=*_Delay=*","_DayOfWeek"
+"0.0","0.0","0.0","0.0","_AirportTo=*_Delay=*","0.0","_AirportTo=*_Delay=*","_AirportTo"
+"0.0","0.0","0.0","0.0","_Length=*_Delay=*","0.0","_Length=*_Delay=*","_Length"
+"7.415894486653244E-6","1.2655110045483352E-8","2.164353659181502E-7","0.0","_AirportFrom=*_Delay=*","3.707947243326622E-6","_AirportFrom=*_Delay=*","_AirportFrom"
