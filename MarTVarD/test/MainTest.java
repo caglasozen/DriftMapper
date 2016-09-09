@@ -23,10 +23,11 @@ public class MainTest {
     public static void main(String[] args) {
         String[] standardFiles = new String[]{"airlines", "elecNormNew", "sensor"};
         //args = new String[]{"standardAll"};
-        args = new String[]{"all", "20130622", "20131129"};
+        //args = new String[]{"all", "20130622", "20131129"};
+        args = new String[]{"prior", "20130622", "20131129"};
         if (args[0].equals("prior")) {
             Instances[] dataSets = loadPairData(args[1], args[2]);
-            for (int i = 0; i < 5; i++) {
+            for (int i = 1; i < 2; i++) {
                 CovariateDistance experiment = new CovariateDistance(dataSets[0], dataSets[1], i);
                 writeToCSV(experiment.getResultTable(),
                         new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"},
