@@ -88,6 +88,7 @@ public class MainTest {
             Instances instances2 = loadDataSet("./datasets/train_seed/"+filename2+".arff");
             Instances instances3 = new Instances(instances1);
             instances3.addAll(instances2);
+            instances3.deleteAttributeAt(0);
             instances3 = discretizeDataSet(instances3);
             instances1 = new Instances(instances3, 0, instances1.size());
             instances2 = new Instances(instances3, instances1.size(), instances2.size());
