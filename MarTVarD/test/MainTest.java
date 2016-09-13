@@ -24,7 +24,8 @@ public class MainTest {
         String[] standardFiles = new String[]{"airlines", "elecNormNew", "sensor"};
         //args = new String[]{"standardAll"};
         //args = new String[]{"all", "20130622", "20131129"};
-        args = new String[]{"prior", "20130622", "20131129"};
+        //args = new String[]{"prior", "20130622", "20131129"};
+        args = new String[]{"priorTest", "elecNormNew"};
         if (args[0].equals("prior")) {
             Instances[] dataSets = loadPairData(args[1], args[2]);
             for (int i = 1; i < 2; i++) {
@@ -33,6 +34,16 @@ public class MainTest {
                         new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"},
                         "./data_out/martvard/" + args[1] + "_" + args[2]+ "_" + i + "-ple_prior.csv");
             }
+        }
+        else if (args[0].equals("priorTest")) {
+            Instances allInstances = loadAnyDataSet("./datasets/"+ args[1] +".arff");
+            Instances[] dataSet = new Instances[2];
+            dataSet[0] = new Instances(allInstances, 0, allInstances.size()/2);
+            dataSet[1] = new Instances(allInstances, allInstances.size()/2 - 1, allInstances.size()/2);
+            CovariateDistance experiment = new CovariateDistance(dataSet[0], dataSet[1], 1);
+            writeToCSV(experiment.getResultTable(),
+                    new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"},
+                    "./data_out/test.csv");
         }
         else if (args[0].equals("all")) {
             Instances[] dataSets = loadPairData(args[1], args[2]);
