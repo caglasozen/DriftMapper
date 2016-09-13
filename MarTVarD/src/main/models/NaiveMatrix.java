@@ -125,6 +125,7 @@ public class NaiveMatrix {
             for (int attVal = 0; attVal < instance.attribute(currentAttributeIndex).numValues(); attVal++) {
                 instance.setValue(currentAttributeIndex, (float)attVal);
                 hashesSoFar = convertPartialInstToHashes(instance, currentAttributeIndex + 1, hashesSoFar);
+                instance.setMissing(currentAttributeIndex);
             }
             return(hashesSoFar);
         }
