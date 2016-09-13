@@ -82,6 +82,27 @@ public class NaiveMatrix {
         return hash;
     }
 
+    private Instance convertHashToInst(int hash) {
+        DenseInstance instance = new DenseInstance(allInstances.get(0));
+        instance.setDataset(allInstances);
+        for (int i = instance.numAttributes() - 1; i >= 0; i--) {
+            if (i == instance.classIndex()) {
+                instance.setMissing(i);
+            }
+            else {
+                int current_value = 1;
+                for (int j = i - 1; j >= 0; j--) {
+                    current_value *= this.allInstances.attribute(j).numValues();
+                }
+                int value = hash / current_value;
+                value = value < instance.attribute(i).numValues() ? value : instance.attribute(i).numValues() - 1;
+                instance.setValue(i, (double) value);
+                hash = hash - (current_value * value);
+            }
+        }
+        return instance;
+    }
+
     private static boolean isPartialInstance(Instance instance) {
         return instance.hasMissingValue();
     }
