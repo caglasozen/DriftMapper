@@ -8,6 +8,7 @@ import weka.core.Instances;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * Created by loongkuan on 11/05/16.
@@ -111,12 +112,12 @@ public class NaiveMatrix {
     private static ArrayList<Integer> convertPartialInstToHashes(Instance instance) {
         DenseInstance copyInstance = new DenseInstance(instance);
         copyInstance.setDataset(instance.dataset());
-        return(convertPartialInstToHashes(copyInstance, 0, new ArrayList<>()));
+        return(new ArrayList<>(convertPartialInstToHashes(copyInstance, 0, new HashSet<>())));
     }
 
-    private static ArrayList<Integer> convertPartialInstToHashes(Instance instance,
+    private static HashSet<Integer> convertPartialInstToHashes(Instance instance,
                                                                  int currentAttributeIndex,
-                                                                 ArrayList<Integer> hashesSoFar) {
+                                                                 HashSet<Integer> hashesSoFar) {
         if (currentAttributeIndex >= instance.numAttributes()) {
             hashesSoFar.add(convertInstToHash(instance));
             return(hashesSoFar);
