@@ -1,6 +1,7 @@
 package main.models;
 
 import org.apache.commons.lang3.ArrayUtils;
+import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -108,13 +109,15 @@ public class NaiveMatrix {
     }
 
     private static ArrayList<Integer> convertPartialInstToHashes(Instance instance) {
-        return(convertPartialInstToHashes(instance, 0, new ArrayList<>()));
+        DenseInstance copyInstance = new DenseInstance(instance);
+        copyInstance.setDataset(instance.dataset());
+        return(convertPartialInstToHashes(copyInstance, 0, new ArrayList<>()));
     }
 
     private static ArrayList<Integer> convertPartialInstToHashes(Instance instance,
                                                                  int currentAttributeIndex,
                                                                  ArrayList<Integer> hashesSoFar) {
-        if (currentAttributeIndex == instance.numAttributes() - 1) {
+        if (currentAttributeIndex >= instance.numAttributes()) {
             hashesSoFar.add(convertInstToHash(instance));
             return(hashesSoFar);
         }
@@ -149,8 +152,7 @@ public class NaiveMatrix {
         for (int i = 0; i < instance.numAttributes(); i++) {
             if (!instance.isMissing(i) && instance.value(i) >= this.allInstances.attribute(i).numValues()) return false;
         }
-        Integer covariateHash = convertInstToHash(instance);
-        return this.frequencyTable.containsKey(covariateHash);
+        return true;
     }
 
     private int getPartialInstanceFrequency(Instance instance) {
