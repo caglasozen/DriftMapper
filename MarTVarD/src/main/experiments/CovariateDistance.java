@@ -13,8 +13,9 @@ import java.util.ArrayList;
  **/
 public class CovariateDistance extends Experiment{
 
-    public CovariateDistance(Instances instances1, Instances instances2, int nAttributesActive){
-        super(instances1, instances2, nAttributesActive);
+    public CovariateDistance(Instances instances1, Instances instances2, int nAttributesActive, int[] attributeIndices){
+        // List of 0 to n where n is the number of attributes
+        super(instances1, instances2, nAttributesActive, attributeIndices);
     }
 
     @Override

@@ -10,8 +10,8 @@ import java.util.ArrayList;
  **/
 public class ClassDistance extends Experiment{
 
-    public ClassDistance(Instances instances1, Instances instances2, int nAttributesActive){
-        super(instances1, instances2, nAttributesActive);
+    public ClassDistance(Instances instances1, Instances instances2, int nAttributesActive, int[] attributeIndices){
+        super(instances1, instances2, nAttributesActive, attributeIndices);
     }
 
     @Override

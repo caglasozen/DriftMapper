@@ -21,10 +21,7 @@ public abstract class Experiment {
     Distance distanceMetric = new TotalVariation();
     abstract ArrayList<ExperimentResult> getResults(NaiveMatrix model1, NaiveMatrix model2, Instances allInstances);
 
-    public Experiment(Instances instances1, Instances instances2, int nAttributesActive) {
-        // List of 0 to n where n is the number of attributes
-        int[] attributeIndices = new int[instances1.numAttributes() - 1];
-        for (int i = 0; i < instances1.numAttributes() - 1; i++) attributeIndices[i] = i;
+    public Experiment(Instances instances1, Instances instances2, int nAttributesActive, int[] attributeIndices) {
 
         // Generate base models for each data set
         NaiveMatrix model1 = new NaiveMatrix(instances1);
@@ -39,7 +36,7 @@ public abstract class Experiment {
         this.nAttributesActive = nAttributesActive;
 
         // Get number of combinations from choosing nAttributesActive of attributes from instances there are
-        int nCombination = nCr(instances1.numAttributes() - 1, nAttributesActive);
+        int nCombination = nCr(attributeIndices.length, nAttributesActive);
         resultMap = new HashMap<>();
         for (int i = 0; i < nCombination; i++) {
             System.out.print("\rRunning experiment " + (i + 1) + "/" + nCombination);
@@ -105,7 +102,7 @@ public abstract class Experiment {
             // Iterate over attributes in instance
             for (int j = 0; j < instances.numAttributes(); j ++) {
                 // If not class or active attribute set missing
-                if (instances.classIndex() != j && !ArrayUtils.contains(attributesIndices, j)) {
+                if (!ArrayUtils.contains(attributesIndices, j)) {
                     instance.setMissing(j);
                 }
                 // Else calculate hash of attribute value and add to total partial instance hash
