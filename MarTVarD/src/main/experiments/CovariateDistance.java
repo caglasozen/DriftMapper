@@ -15,7 +15,7 @@ public class CovariateDistance extends Experiment{
 
     public CovariateDistance(Instances instances1, Instances instances2, int nAttributesActive, int[] attributeIndices){
         // List of 0 to n where n is the number of attributes
-        super(instances1, instances2, nAttributesActive, attributeIndices);
+        super(instances1, instances2, nAttributesActive, attributeIndices, new int[]{});
     }
 
     @Override
@@ -29,7 +29,6 @@ public class CovariateDistance extends Experiment{
             q[i] = model2.findPv(allInstances.get(i));
             separateDistance[i] = this.distanceMetric.findDistance(new double[]{p[i]}, new double[]{q[i]});
             instanceValues[i] = allInstances.get(i).toDoubleArray();
-            instanceValues[i][allInstances.classIndex()] = -1.0f;
         }
         double finalDistance = this.distanceMetric.findDistance(p, q);
         ExperimentResult finalResult = new ExperimentResult(finalDistance, separateDistance, instanceValues);

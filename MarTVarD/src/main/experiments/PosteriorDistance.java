@@ -11,7 +11,7 @@ import java.util.ArrayList;
 public class PosteriorDistance extends Experiment{
 
     public PosteriorDistance(Instances instances1, Instances instances2, int nAttributesActive, int[] attributeIndices){
-        super(instances1, instances2, nAttributesActive, attributeIndices);
+        super(instances1, instances2, nAttributesActive, attributeIndices, new int[]{instances1.classIndex()});
     }
 
     @Override

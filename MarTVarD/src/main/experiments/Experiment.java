@@ -21,7 +21,7 @@ public abstract class Experiment {
     Distance distanceMetric = new TotalVariation();
     abstract ArrayList<ExperimentResult> getResults(NaiveMatrix model1, NaiveMatrix model2, Instances allInstances);
 
-    public Experiment(Instances instances1, Instances instances2, int nAttributesActive, int[] attributeIndices) {
+    public Experiment(Instances instances1, Instances instances2, int nAttributesActive, int[] attributeIndices, int[] classIndices) {
 
         // Generate base models for each data set
         NaiveMatrix model1 = new NaiveMatrix(instances1);
@@ -42,6 +42,7 @@ public abstract class Experiment {
             System.out.print("\rRunning experiment " + (i + 1) + "/" + nCombination);
             // Get combination between attributes
             int[] indices = getKthCombination(i, attributeIndices, nAttributesActive);
+            indices = ArrayUtils.addAll(indices, classIndices);
             resultMap.put(indices, getResults(model1, model2, generatePartialInstances(allInstances, indices)));
         }
         System.out.print("\n");

@@ -17,7 +17,7 @@ public class NaiveMatrix {
     private Instances allInstances;
     private HashMap<Integer, int[]> frequencyTable;
     private HashMap<Integer, Integer> instanceSum;
-    private int[] classSum;
+    private int[][] attributeSum;       // Maps attribute index to a list of value frequency
     private int sampleSize;
 
     public NaiveMatrix(Instances dataSet) {
@@ -41,12 +41,18 @@ public class NaiveMatrix {
         // Populate the Frequency Matrix and Sum tables
         frequencyTable = new HashMap<>();
         instanceSum = new HashMap<>();
-        classSum = new int[nClasses];
+        // Build attributeSum ragged array
+        attributeSum = new int[dataSet.numAttributes()][];
+        for (int i = 0; i < dataSet.numAttributes(); i++) {
+            attributeSum[i] = new int[dataSet.attribute(i).numValues()];
+        }
         for (Instance inst : dataSet) {
             int instHash = convertInstToHash(inst);
             int classHash = convertClassToHash(inst);
-            // Class Sum
-            this.classSum[classHash] += 1;
+            // Attribute Sum
+            for (int i = 0; i < inst.numAttributes(); i++) {
+                attributeSum[i][(int)inst.value(i)] += 1;
+            }
             // Check if the instance hash is registered in the lookup tables
             if (!this.vectorExists(inst)) {
                 this.instanceSum.put(instHash, 0);
@@ -66,20 +72,17 @@ public class NaiveMatrix {
     private static int convertInstToHash(Instance instance) {
         int hash = 0;
         for (int i = 0; i < instance.numAttributes(); i++) {
-            // Do not include the class in hash
-            if (i != instance.classIndex()) {
-                int current_hash = 1;
-                // Get weight of current digit
-                for (int j = 0; j < i; j++) {
-                    // Do not include class in hash
-                    if (j != instance.classIndex())
-                        current_hash *= instance.attribute(j).numValues();
-                }
-                // Multiply weight of current digit with value of current digit
-                current_hash *= (int)instance.value(i);
-                // Add weighted value of current digit to hash
-                hash += current_hash;
+            int current_hash = 1;
+            // Get weight of current digit
+            for (int j = 0; j < i; j++) {
+                // Do not include class in hash
+                if (j != instance.classIndex())
+                    current_hash *= instance.attribute(j).numValues();
             }
+            // Multiply weight of current digit with value of current digit
+            current_hash *= (int)instance.value(i);
+            // Add weighted value of current digit to hash
+            hash += current_hash;
         }
         return hash;
     }
@@ -88,19 +91,14 @@ public class NaiveMatrix {
         DenseInstance instance = new DenseInstance(allInstances.get(0));
         instance.setDataset(allInstances);
         for (int i = instance.numAttributes() - 1; i >= 0; i--) {
-            if (i == instance.classIndex()) {
-                instance.setMissing(i);
+            int current_value = 1;
+            for (int j = i - 1; j >= 0; j--) {
+                current_value *= this.allInstances.attribute(j).numValues();
             }
-            else {
-                int current_value = 1;
-                for (int j = i - 1; j >= 0; j--) {
-                    current_value *= this.allInstances.attribute(j).numValues();
-                }
-                int value = hash / current_value;
-                value = value < instance.attribute(i).numValues() ? value : instance.attribute(i).numValues() - 1;
-                instance.setValue(i, (double) value);
-                hash = hash - (current_value * value);
-            }
+            int value = hash / current_value;
+            value = value < instance.attribute(i).numValues() ? value : instance.attribute(i).numValues() - 1;
+            instance.setValue(i, (double) value);
+            hash = hash - (current_value * value);
         }
         return instance;
     }
@@ -109,13 +107,13 @@ public class NaiveMatrix {
         return instance.hasMissingValue();
     }
 
-    private static ArrayList<Integer> convertPartialInstToHashes(Instance instance) {
+    private ArrayList<Integer> convertPartialInstToHashes(Instance instance) {
         DenseInstance copyInstance = new DenseInstance(instance);
         copyInstance.setDataset(instance.dataset());
         return(new ArrayList<>(convertPartialInstToHashes(copyInstance, 0, new HashSet<>())));
     }
 
-    private static HashSet<Integer> convertPartialInstToHashes(Instance instance,
+    private HashSet<Integer> convertPartialInstToHashes(Instance instance,
                                                                  int currentAttributeIndex,
                                                                  HashSet<Integer> hashesSoFar) {
         if (currentAttributeIndex >= instance.numAttributes()) {
@@ -124,9 +122,11 @@ public class NaiveMatrix {
         }
         else if (instance.isMissing(currentAttributeIndex)) {
             for (int attVal = 0; attVal < instance.attribute(currentAttributeIndex).numValues(); attVal++) {
-                instance.setValue(currentAttributeIndex, (float)attVal);
-                hashesSoFar = convertPartialInstToHashes(instance, currentAttributeIndex + 1, hashesSoFar);
-                instance.setMissing(currentAttributeIndex);
+                if (this.attributeSum[currentAttributeIndex][attVal] > 0) {
+                    instance.setValue(currentAttributeIndex, (float)attVal);
+                    hashesSoFar = convertPartialInstToHashes(instance, currentAttributeIndex + 1, hashesSoFar);
+                    instance.setMissing(currentAttributeIndex);
+                }
             }
             return(hashesSoFar);
         }
@@ -179,7 +179,7 @@ public class NaiveMatrix {
 
     public double findPy(Instance instance) {
         int classHash= convertClassToHash(instance);
-        return classHash != -1 ? (double)this.classSum[classHash] / (double)this.sampleSize : 0.0f;
+        return classHash != -1 ? (double)this.attributeSum[instance.classIndex()][classHash] / (double)this.sampleSize : 0.0f;
     }
 
     public double findPyGv(Instance instance) {
@@ -190,7 +190,7 @@ public class NaiveMatrix {
 
     public double findPvGy(Instance instance) {
         if (convertClassToHash(instance) == -1) return 0.0f;
-        int classFrequency = this.classSum[convertClassToHash(instance)];
+        int classFrequency = this.attributeSum[instance.classIndex()][convertClassToHash(instance)];
         return classFrequency > 0 ?
                 (double) this.getPartialInstanceFrequency(instance, true) / (double) classFrequency : 0.0f;
     }
