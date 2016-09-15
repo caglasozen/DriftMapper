@@ -157,17 +157,55 @@ public class NaiveMatrix {
         return true;
     }
 
+    private int getNumberFullInstance(Instance partialInstance) {
+        int nFullInstance = 1;
+        for (int i = 0; i < partialInstance.numAttributes(); i++) {
+            if (partialInstance.isMissing(i)) {
+                int nValues = 0;
+                for (int j = 0; j < partialInstance.attribute(i).numValues(); j++) {
+                    nValues += this.attributeSum[i][j] > 0 ? 1 : 0;
+                }
+                nFullInstance *= nValues;
+            }
+        }
+        return nFullInstance;
+    }
+
+    private boolean isPartialInstancePossible(Instance partialInstance) {
+        for (int i = 0; i < partialInstance.numAttributes(); i++) {
+            if (!partialInstance.isMissing(i)) {
+                if (!(this.attributeSum[i][(int)partialInstance.value(i)] > 0)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     private int getPartialInstanceFrequency(Instance instance) {
         return this.getPartialInstanceFrequency(instance, false);
     }
     private int getPartialInstanceFrequency(Instance instance, boolean classSpecific) {
         if (!partialVectorExists(instance)) return 0;
         int totalFrequency = 0;
-        ArrayList<Integer> instanceHashes = convertPartialInstToHashes(instance);
-        int classHash = convertClassToHash(instance);
-        for (int hash : instanceHashes) {
-            if (this.frequencyTable.containsKey(hash)) {
-                totalFrequency += classSpecific ? this.frequencyTable.get(hash)[classHash] : this.instanceSum.get(hash);
+        int nFullInstance = getNumberFullInstance(instance);
+        if (!isPartialInstancePossible(instance)) return 0;
+        if (nFullInstance < this.allInstances.size()) {
+            ArrayList<Integer> instanceHashes = convertPartialInstToHashes(instance);
+            int classHash = convertClassToHash(instance);
+            for (int hash : instanceHashes) {
+                if (this.frequencyTable.containsKey(hash)) {
+                    totalFrequency += classSpecific ? this.frequencyTable.get(hash)[classHash] : this.instanceSum.get(hash);
+                }
+            }
+        }
+        else {
+            for (Instance dataInst : this.allInstances) {
+                boolean isMatch = true;
+                for (int j = 0; j < dataInst.numAttributes(); j++) {
+                    isMatch = isMatch && (instance.isMissing(j) || dataInst.value(j) == instance.value(j));
+                }
+                totalFrequency += isMatch ? 1 : 0;
             }
         }
         return totalFrequency;
