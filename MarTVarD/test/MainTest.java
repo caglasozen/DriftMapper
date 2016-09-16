@@ -21,15 +21,19 @@ import java.util.ArrayList;
 
 public class MainTest {
     public static void main(String[] args) {
-        String[] standardFiles = new String[]{"airlines", "elecNormNew", "sensor"};
+        String[] standardFiles = new String[]{"elecNormNew", "sensor" };
+        //String[] standardFiles = new String[]{"sensor"};
         //args = new String[]{"standardAll"};
-        //args = new String[]{"all", "20130622", "20131129"};
+        args = new String[]{"all", "20130708", "20131129"};
         //args = new String[]{"prior", "20130622", "20131129"};
-        args = new String[]{"priorTest", "elecNormNew"};
+        //args = new String[]{"priorTest", "elecNormNew"};
         if (args[0].equals("prior")) {
             Instances[] dataSets = loadPairData(args[1], args[2]);
+            int[] attributeIndices = new int[dataSets[0].numAttributes()];
+            for (int i = 0; i < dataSets[0].numAttributes(); i++) attributeIndices[i] = i;
+
             for (int i = 1; i < 2; i++) {
-                CovariateDistance experiment = new CovariateDistance(dataSets[0], dataSets[1], i);
+                CovariateDistance experiment = new CovariateDistance(dataSets[0], dataSets[1], i, attributeIndices);
                 writeToCSV(experiment.getResultTable(),
                         new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"},
                         "./data_out/martvard/" + args[1] + "_" + args[2]+ "_" + i + "-ple_prior.csv");
@@ -37,10 +41,13 @@ public class MainTest {
         }
         else if (args[0].equals("priorTest")) {
             Instances allInstances = loadAnyDataSet("./datasets/"+ args[1] +".arff");
-            Instances[] dataSet = new Instances[2];
-            dataSet[0] = new Instances(allInstances, 0, allInstances.size()/2);
-            dataSet[1] = new Instances(allInstances, allInstances.size()/2 - 1, allInstances.size()/2);
-            CovariateDistance experiment = new CovariateDistance(dataSet[0], dataSet[1], 1);
+            Instances[] dataSets = new Instances[2];
+            dataSets[0] = new Instances(allInstances, 0, allInstances.size()/2);
+            dataSets[1] = new Instances(allInstances, allInstances.size()/2 - 1, allInstances.size()/2);
+
+            int[] attributeIndices = new int[dataSets[0].numAttributes()];
+            for (int i = 0; i < dataSets[0].numAttributes(); i++) attributeIndices[i] = i;
+            CovariateDistance experiment = new CovariateDistance(dataSets[0], dataSets[1], 1, attributeIndices);
             writeToCSV(experiment.getResultTable(),
                     new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"},
                     "./data_out/test.csv");
@@ -64,31 +71,38 @@ public class MainTest {
         System.out.println("Running Tests on " + name);
         System.out.println("For " + nInterval[0] + " to " + nInterval[1] + " attributes");
 
+
+        int[] attributeIndices = new int[dataSets[0].numAttributes() - 1];
+        for (int i = 0; i < dataSets[0].numAttributes() - 1; i++) attributeIndices[i] = i;
+
+        int[] attributeIndicesCov = new int[dataSets[0].numAttributes()];
+        for (int i = 0; i < dataSets[0].numAttributes(); i++) attributeIndicesCov[i] = i;
+
         System.out.println("Running Covariate");
         for (int i = nInterval[0]; i < nInterval[1]; i++) {
-            CovariateDistance experiment = new CovariateDistance(dataSets[0], dataSets[1], i);
+            CovariateDistance experiment = new CovariateDistance(dataSets[0], dataSets[1], i, attributeIndicesCov);
             writeToCSV(experiment.getResultTable(),
-                    new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes"},
+                    new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes", "class_values"},
                     "./data_out/martvard/" + name + "_" + i + "-attributes_prior.csv");
         }
         System.out.println("Running ConditionedCovariate");
         for (int i = nInterval[0]; i < nInterval[1]; i++) {
-            ConditionedCovariateDistance experiment = new ConditionedCovariateDistance(dataSets[0], dataSets[1], i);
+            ConditionedCovariateDistance experiment = new ConditionedCovariateDistance(dataSets[0], dataSets[1], i, attributeIndices);
             writeToCSV(experiment.getResultTable(),
-                    new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes", "class"},
+                    new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes", "class_values"},
                     "./data_out/martvard/" + name + "_" + i + "-attributes_ConditionedCovariate.csv");
         }
         System.out.println("Running Posterior");
         for (int i = nInterval[0]; i < nInterval[1]; i++) {
-            PosteriorDistance experiment = new PosteriorDistance(dataSets[0], dataSets[1], i);
+            PosteriorDistance experiment = new PosteriorDistance(dataSets[0], dataSets[1], i, attributeIndices);
             writeToCSV(experiment.getResultTable(),
-                    new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes"},
+                    new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes", "class_values"},
                     "./data_out/martvard/" + name + "_" + i + "-attributes_posterior.csv");
         }
         System.out.println("Running Class");
-        ClassDistance experiment = new ClassDistance(dataSets[0], dataSets[1], 0);
+        ClassDistance experiment = new ClassDistance(dataSets[0], dataSets[1], 0, attributeIndices);
         writeToCSV(experiment.getResultTable(),
-                new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes"},
+                new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes", "class_values"},
                 "./data_out/martvard/" + name + "_class.csv");
     }
 

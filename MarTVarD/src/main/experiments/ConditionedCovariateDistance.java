@@ -66,15 +66,14 @@ public class ConditionedCovariateDistance extends Experiment{
     public String[][] getResultTable(){
         int nCombinations = this.resultMap.size();
         int nClasses = this.sampleInstance.numClasses();
-        String[][] collatedResults = new String[nCombinations*nClasses][8 + 1];
+        String[][] collatedResults = new String[nCombinations*nClasses][9];
         for (int i = 0; i < nClasses; i++) {
-            String[][] tmpResult = this.getResultTable(i);
+            String[][] tmpResult = this.getResultTable(i, this.sampleInstance.classAttribute().value(i));
             for (int j = 0; j < tmpResult.length; j++) {
-                String[] line = tmpResult[j];
-                String[] finalLine = ArrayUtils.add(line, this.sampleInstance.classAttribute().value(i));
-                collatedResults[i*nCombinations + j] = finalLine;
+                collatedResults[i*nCombinations + j] = tmpResult[j];
             }
         }
         return collatedResults;
     }
+
 }

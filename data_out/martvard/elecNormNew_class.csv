@@ -1,2 +1,2 @@
-"Distance","mean","sd","max_val","max_att","min_val","min_att","attributes"
-"0.004943502824858753","0.004943502824858753","NaN","0.004943502824858753","_class=UP","0.004943502824858753","_class=UP",""
+"Distance","mean","sd","max_val","max_att","min_val","min_att","attributes","class_values"
+"0.009887005649717479","0.004943502824858739","1.962615573354719E-17","0.004943502824858753","class=UP","0.004943502824858725","class=DOWN","class","*"

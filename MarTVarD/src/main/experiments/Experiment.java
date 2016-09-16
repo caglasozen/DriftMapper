@@ -19,6 +19,8 @@ public abstract class Experiment {
     int nAttributesActive;
     Instance sampleInstance;
     Distance distanceMetric = new TotalVariation();
+    int[] attributeIndices;
+    int[] classIndices;
     abstract ArrayList<ExperimentResult> getResults(NaiveMatrix model1, NaiveMatrix model2, Instances allInstances);
 
     public Experiment(Instances instances1, Instances instances2, int nAttributesActive, int[] attributeIndices, int[] classIndices) {
@@ -47,47 +49,49 @@ public abstract class Experiment {
         }
         System.out.print("\n");
         this.resultMap = sortByValue(this.resultMap);
+        this.attributeIndices = attributeIndices;
+        this.classIndices = classIndices;
     }
 
     public String[][] getResultTable() {
-        return this.getResultTable(0);
+        return this.getResultTable(0, "*");
     }
 
-    public String[][] getResultTable(int classIndex) {
+    public String[][] getResultTable(int classIndex, String className) {
         int[][] attributeSubSets = this.resultMap.keySet().toArray(new int[this.resultMap.size()][this.nAttributesActive]);
-       String[][] results = new String[attributeSubSets.length][8];
+       String[][] results = new String[attributeSubSets.length][9];
         for (int i = 0; i < attributeSubSets.length; i++) {
             ExperimentResult currentResult = this.resultMap.get(attributeSubSets[i]).get(classIndex);
             results[i][0] = Double.toString(currentResult.actualResult);
             results[i][1] = Double.toString(currentResult.mean);
             results[i][2] = Double.toString(currentResult.sd);
-            results[i][3] = Double.toString(currentResult.minDist);
+            results[i][3] = Double.toString(currentResult.maxDist);
             results[i][4] = "";
-            results[i][5] = Double.toString(currentResult.maxDist);
+            results[i][5] = Double.toString(currentResult.minDist);
             results[i][6] = "";
             results[i][7] = "";
+            for (int j = 0; j < attributeSubSets[i].length; j++) {
+                results[i][7] += this.sampleInstance.attribute(attributeSubSets[i][j]).name() + "_";
+            }
+            results[i][7] = results[i][7].substring(0, results[i][7].length() - 1);
+            results[i][8] = className;
             if (!Double.isInfinite(currentResult.actualResult)) {
                 for (int j = 0; j < attributeSubSets[i].length; j++) {
-                    String minVal = Double.isNaN(currentResult.minValues[j]) || (int)currentResult.minValues[j] < 0 ? "*" :
-                            this.sampleInstance.attribute(attributeSubSets[i][j]).value((int)currentResult.minValues[attributeSubSets[i][j]]);
-                    String maxVal = Double.isNaN(currentResult.minValues[j]) || (int)currentResult.maxValues[j] < 0 ? "*" :
-                            this.sampleInstance.attribute(attributeSubSets[i][j]).value((int)currentResult.maxValues[attributeSubSets[i][j]]);
-                    results[i][4] += "_" + this.sampleInstance.attribute(attributeSubSets[i][j]).name() + "=" + maxVal;
-                    results[i][6] += "_" + this.sampleInstance.attribute(attributeSubSets[i][j]).name() + "=" + minVal;
-                    results[i][7] += "_" + this.sampleInstance.attribute(attributeSubSets[i][j]).name();
+                    int attributeIndex = attributeSubSets[i][j];
+                    String minVal = Double.isNaN(currentResult.minValues[attributeIndex]) || (int)currentResult.minValues[attributeIndex] < 0 ? "*" :
+                            this.sampleInstance.attribute(attributeIndex).value((int)currentResult.minValues[attributeIndex]);
+                    String maxVal = Double.isNaN(currentResult.minValues[attributeIndex]) || (int)currentResult.maxValues[attributeIndex] < 0 ? "*" :
+                            this.sampleInstance.attribute(attributeIndex).value((int)currentResult.maxValues[attributeIndex]);
+                    results[i][4] += this.sampleInstance.attribute(attributeIndex).name() + "=" + maxVal + "_";
+                    results[i][6] += this.sampleInstance.attribute(attributeIndex).name() + "=" + minVal + "_";
                 }
-                // Add class info
-                String minVal = (int)currentResult.minValues[this.sampleInstance.classIndex()] < 0 ? "*" :
-                        this.sampleInstance.attribute(this.sampleInstance.classIndex()).value((int)currentResult.minValues[this.sampleInstance.classIndex()]);
-                String maxVal = (int)currentResult.maxValues[this.sampleInstance.classIndex()] < 0 ? "*" :
-                        this.sampleInstance.attribute(this.sampleInstance.classIndex()).value((int)currentResult.maxValues[this.sampleInstance.classIndex()]);
-                results[i][4] += "_" + this.sampleInstance.attribute(this.sampleInstance.classIndex()).name() + "=" + maxVal;
-                results[i][6] += "_" + this.sampleInstance.attribute(this.sampleInstance.classIndex()).name() + "=" + minVal;
+                // Trim last underscore
+                results[i][4] = results[i][4].substring(0, results[i][4].length() - 1);
+                results[i][6] = results[i][6].substring(0, results[i][6].length() - 1);
             }
             else {
-                results[i][4] = "Does not exist";
-                results[i][6] = "Does not exist";
-                results[i][7] = "Does not exist";
+                results[i][4] = "NA";
+                results[i][6] = "NA";
             }
         }
         return results;

@@ -36,4 +36,9 @@ public class CovariateDistance extends Experiment{
         returnResults.add(finalResult);
         return returnResults;
     }
+
+    @Override
+    public String[][] getResultTable() {
+        return this.getResultTable(0, "NA");
+    }
 }

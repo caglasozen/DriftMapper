@@ -34,4 +34,9 @@ public class PosteriorDistance extends Experiment{
         returnResults.add(finalResult);
         return returnResults;
     }
+
+    @Override
+    public String[][] getResultTable() {
+        return this.getResultTable(0, "*");
+    }
 }
