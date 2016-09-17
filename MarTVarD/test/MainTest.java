@@ -24,6 +24,7 @@ public class MainTest {
         String[] standardFiles = new String[]{"elecNormNew", "sensor" };
         //String[] standardFiles = new String[]{"sensor"};
         //args = new String[]{"standardAll"};
+        //args = new String[]{"all", "20130505", "20131129"};
         args = new String[]{"all", "20130708", "20131129"};
         //args = new String[]{"prior", "20130622", "20131129"};
         //args = new String[]{"priorTest", "elecNormNew"};
@@ -99,11 +100,13 @@ public class MainTest {
                     new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes", "class_values"},
                     "./data_out/martvard/" + name + "_" + i + "-attributes_posterior.csv");
         }
+        /*
         System.out.println("Running Class");
         ClassDistance experiment = new ClassDistance(dataSets[0], dataSets[1], 0, attributeIndices);
         writeToCSV(experiment.getResultTable(),
                 new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes", "class_values"},
                 "./data_out/martvard/" + name + "_class.csv");
+                */
     }
 
     private static Instances[] loadPairData(String filename1, String filename2) {
@@ -113,7 +116,6 @@ public class MainTest {
             Instances instances2 = loadDataSet("./datasets/train_seed/"+filename2+".arff");
             Instances instances3 = new Instances(instances1);
             instances3.addAll(instances2);
-            instances3.deleteAttributeAt(0);
             instances3 = discretizeDataSet(instances3);
             instances1 = new Instances(instances3, 0, instances1.size());
             instances2 = new Instances(instances3, instances1.size(), instances2.size());
