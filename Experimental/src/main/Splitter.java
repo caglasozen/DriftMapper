@@ -26,8 +26,6 @@ public class Splitter {
         try{
             Instances data = loadDataSet("./datasets/train_seed0.arff");
             System.out.println("Parsing data...");
-            // Get id attribute
-            String idAttributeName = data.attribute(0).name();
             // Get all non-class attributes
             HashSet<String> attributeSet = new HashSet<>();
             HashSet<String> dateSet = new HashSet<>();
@@ -50,8 +48,6 @@ public class Splitter {
             Instances[] splitDataSets = new Instances[dates.length];
             for (int i = 0; i < dates.length; i++) {
                 ArrayList<Attribute> dataAttributes = new ArrayList<>();
-                // Add idAttribute
-                dataAttributes.add(new Attribute(idAttributeName));
                 // Add feature Attributes
                 for (int j = 0; j < attributes.length; j++) {
                     // Attribute is set to numerical by default
@@ -68,7 +64,7 @@ public class Splitter {
             System.out.println("Splitting data...");
             while (data.size() > 0) {
                 Instance instance = data.instance(0);
-                double[][] attributesValues = new double[dates.length][2 + attributes.length];
+                double[][] attributesValues = new double[dates.length][1 + attributes.length];
                 // Get feature attributes
                 for (int i = 1; i < instance.numAttributes() - 1; i++) {
                     String[] dates_att = instance.attribute(i).name().split("_");
@@ -78,7 +74,6 @@ public class Splitter {
                 }
                 // Get id and class attribute and add each array as an instance to separate data sets
                 for (int i = 0; i < dates.length; i++) {
-                    attributesValues[i][0] = instance.value(0);
                     attributesValues[i][attributesValues[i].length - 1] = instance.value(instance.numAttributes() - 1);
                     splitDataSets[i].add(new DenseInstance(1.0, attributesValues[i]));
                 }
