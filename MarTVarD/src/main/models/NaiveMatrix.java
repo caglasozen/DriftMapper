@@ -54,14 +54,19 @@ public class NaiveMatrix {
                 attributeSum[i][(int)inst.value(i)] += 1;
             }
             // Check if the instance hash is registered in the lookup tables
-            if (!this.vectorExists(inst)) {
+            if (!this.instanceSum.containsKey(instHash)) {
                 this.instanceSum.put(instHash, 0);
-                this.frequencyTable.put(instHash, new int[nClasses]);
             }
             // Instance Sum
             this.instanceSum.put(instHash, this.instanceSum.get(instHash) + 1);
+
+            if (!this.frequencyTable.containsKey(instHash)) {
+                this.frequencyTable.put(instHash, new int[nClasses]);
+            }
             // Frequency Matrix
-            this.frequencyTable.get(instHash)[classHash] += 1;
+            int[] row = this.frequencyTable.get(instHash);
+            row[classHash] += 1;
+            this.frequencyTable.put(instHash, row);
         }
     }
 
@@ -71,7 +76,8 @@ public class NaiveMatrix {
 
     private static int convertInstToHash(Instance instance) {
         int hash = 0;
-        for (int i = 0; i < instance.numAttributes(); i++) {
+        // TODO: Properly Ignore Class
+        for (int i = 0; i < instance.numAttributes() - 1; i++) {
             int current_hash = 1;
             // Get weight of current digit
             for (int j = 0; j < i; j++) {
@@ -107,17 +113,21 @@ public class NaiveMatrix {
         return instance.hasMissingValue();
     }
 
-    private ArrayList<Integer> convertPartialInstToHashes(Instance instance) {
+    private ArrayList<int[]> convertPartialInstToHashes(Instance instance) {
         DenseInstance copyInstance = new DenseInstance(instance);
         copyInstance.setDataset(instance.dataset());
         return(new ArrayList<>(convertPartialInstToHashes(copyInstance, 0, new HashSet<>())));
     }
 
-    private HashSet<Integer> convertPartialInstToHashes(Instance instance,
-                                                                 int currentAttributeIndex,
-                                                                 HashSet<Integer> hashesSoFar) {
+    private HashSet<int[]> convertPartialInstToHashes(Instance instance,
+                                                        int currentAttributeIndex,
+                                                        HashSet<int[]> hashesSoFar) {
         if (currentAttributeIndex >= instance.numAttributes()) {
-            hashesSoFar.add(convertInstToHash(instance));
+            int hash = convertInstToHash(instance);
+            int classHash = convertClassToHash(instance);
+            if (this.instanceSum.containsKey(hash)) {
+                hashesSoFar.add(new int[]{hash, classHash});
+            }
             return(hashesSoFar);
         }
         else if (instance.isMissing(currentAttributeIndex)) {
@@ -138,15 +148,6 @@ public class NaiveMatrix {
 
     private static int convertClassToHash(Instance instance) {
         return (int)instance.classValue();
-    }
-
-    private boolean vectorExists(Instance instance) {
-        boolean exists = this.allInstances.checkInstance(instance);
-        for (int i = 0; i < instance.numAttributes(); i++) {
-            exists = exists && instance.value(i) < this.allInstances.attribute(i).numValues();
-        }
-        Integer covariateHash = convertInstToHash(instance);
-        return exists && this.frequencyTable.containsKey(covariateHash);
     }
 
     private boolean partialVectorExists(Instance instance) {
@@ -188,31 +189,16 @@ public class NaiveMatrix {
     private int getPartialInstanceFrequency(Instance instance, boolean classSpecific) {
         if (!partialVectorExists(instance)) return 0;
         int totalFrequency = 0;
-        int nFullInstance = getNumberFullInstance(instance);
         if (!isPartialInstancePossible(instance)) return 0;
-        if (nFullInstance < this.allInstances.size()) {
-            ArrayList<Integer> instanceHashes = convertPartialInstToHashes(instance);
-            int classHash = convertClassToHash(instance);
-            for (int hash : instanceHashes) {
-                if (this.frequencyTable.containsKey(hash)) {
-                    totalFrequency += classSpecific ? this.frequencyTable.get(hash)[classHash] : this.instanceSum.get(hash);
-                }
-            }
-        }
-        else {
-            for (Instance dataInst : this.allInstances) {
-                boolean isMatch = true;
-                for (int j = 0; j < dataInst.numAttributes(); j++) {
-                    isMatch = isMatch && (instance.isMissing(j) || dataInst.value(j) == instance.value(j));
-                }
-                totalFrequency += isMatch ? 1 : 0;
-            }
+        ArrayList<int[]> instanceHashes = convertPartialInstToHashes(instance);
+        for (int[] hashInstClass : instanceHashes) {
+            totalFrequency += classSpecific ? this.frequencyTable.get(hashInstClass[0])[hashInstClass[1]] : this.instanceSum.get(hashInstClass[0]);
         }
         return totalFrequency;
     }
 
     public double findPv(Instance instance) {
-        return (double)this.getPartialInstanceFrequency(instance) / (double)this.sampleSize;
+        return (double)this.getPartialInstanceFrequency(instance, true) / (double)this.sampleSize;
     }
 
     public double findPy(Instance instance) {
@@ -221,7 +207,7 @@ public class NaiveMatrix {
     }
 
     public double findPyGv(Instance instance) {
-        int covariateFrequency = this.getPartialInstanceFrequency(instance);
+        int covariateFrequency = this.getPartialInstanceFrequency(instance, true);
         return covariateFrequency > 0 && convertClassToHash(instance) != -1 ?
                 (double)this.getPartialInstanceFrequency(instance, true) / (double)covariateFrequency : 0.0f;
     }
