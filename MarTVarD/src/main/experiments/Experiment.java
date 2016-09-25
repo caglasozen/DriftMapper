@@ -10,6 +10,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Created by LoongKuan on 31/07/2016.
@@ -45,7 +46,7 @@ public abstract class Experiment {
             // Get combination between attributes
             int[] indices = getKthCombination(i, attributeIndices, nAttributesActive);
             indices = ArrayUtils.addAll(indices, classIndices);
-            resultMap.put(indices, getResults(model1, model2, generatePartialInstances(allInstances, indices)));
+            resultMap.put(indices, getResults(model1, model2, generateAllPartialInstances(allInstances, indices)));
         }
         System.out.print("\n");
         this.resultMap = sortByValue(this.resultMap);
@@ -97,7 +98,7 @@ public abstract class Experiment {
         return results;
     }
 
-    private static Instances generatePartialInstances(Instances instances, int[] attributesIndices) {
+    private static Instances generateAllPartialInstances(Instances instances, int[] attributesIndices) {
         Instances partialInstances = new Instances(instances, instances.size());
         HashSet<Integer> existingPartialInstances = new HashSet<>();
         for (int i = 0; i < instances.size(); i++) {
@@ -125,6 +126,20 @@ public abstract class Experiment {
             }
         }
         return partialInstances;
+    }
+
+    private static Instances generateSamplePartialInstances(Instances instances, int[] attributeIndices, int sampleSize) {
+        Instances sampleInstances = new Instances(instances, sampleSize);
+        HashSet<Integer> selectedInstances = new HashSet<>();
+        Random rng = new Random();
+        while (sampleInstances.size() < sampleSize) {
+            int index = rng.nextInt(instances.size());
+            if (!selectedInstances.contains(index)) {
+                selectedInstances.add(index);
+                sampleInstances.add(instances.get(index));
+            }
+        }
+        return generateAllPartialInstances(sampleInstances, attributeIndices);
     }
 
     private static Instances separateInstanceAttributes(Instances instances, int[] attributesIndices) {
