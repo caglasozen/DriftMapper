@@ -6,7 +6,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -15,6 +14,7 @@ import java.util.HashSet;
  **/
 public class NaiveMatrix {
     private Instances allInstances;
+    private HashMap<Integer, Instance> hashCovariateTable;
     private HashMap<Integer, int[]> frequencyTable;
     private HashMap<Integer, Integer> instanceSum;
     private int[][] attributeSum;       // Maps attribute index to a list of value frequency
@@ -40,6 +40,7 @@ public class NaiveMatrix {
 
         // Populate the Frequency Matrix and Sum tables
         frequencyTable = new HashMap<>();
+        hashCovariateTable = new HashMap<>();
         instanceSum = new HashMap<>();
         // Build attributeSum ragged array
         attributeSum = new int[dataSet.numAttributes()][];
@@ -49,6 +50,7 @@ public class NaiveMatrix {
         for (Instance inst : dataSet) {
             int instHash = convertInstToHash(inst);
             int classHash = convertClassToHash(inst);
+            double[] covariateArray = ArrayUtils.subarray(inst.toDoubleArray(), 0, inst.numAttributes()-1);
             // Attribute Sum
             for (int i = 0; i < inst.numAttributes(); i++) {
                 attributeSum[i][(int)inst.value(i)] += 1;
@@ -67,6 +69,10 @@ public class NaiveMatrix {
             int[] row = this.frequencyTable.get(instHash);
             row[classHash] += 1;
             this.frequencyTable.put(instHash, row);
+
+            if (!this.hashCovariateTable.containsKey(instHash)){
+                this.hashCovariateTable.put(instHash, inst);
+            }
         }
     }
 
@@ -96,7 +102,8 @@ public class NaiveMatrix {
     private Instance convertHashToInst(int hash) {
         DenseInstance instance = new DenseInstance(allInstances.get(0));
         instance.setDataset(allInstances);
-        for (int i = instance.numAttributes() - 1; i >= 0; i--) {
+        instance.setMissing(instance.classIndex());
+        for (int i = instance.numAttributes() - 2; i >= 0; i--) {
             int current_value = 1;
             for (int j = i - 1; j >= 0; j--) {
                 current_value *= this.allInstances.attribute(j).numValues();
@@ -186,6 +193,8 @@ public class NaiveMatrix {
     private int getPartialInstanceFrequency(Instance instance) {
         return this.getPartialInstanceFrequency(instance, false);
     }
+
+    /*
     private int getPartialInstanceFrequency(Instance instance, boolean classSpecific) {
         if (!partialVectorExists(instance)) return 0;
         int totalFrequency = 0;
@@ -193,6 +202,28 @@ public class NaiveMatrix {
         ArrayList<int[]> instanceHashes = convertPartialInstToHashes(instance);
         for (int[] hashInstClass : instanceHashes) {
             totalFrequency += classSpecific ? this.frequencyTable.get(hashInstClass[0])[hashInstClass[1]] : this.instanceSum.get(hashInstClass[0]);
+        }
+        return totalFrequency;
+    }
+    */
+    private int getPartialInstanceFrequency(Instance instance, boolean classSpecific) {
+        if (!partialVectorExists(instance)) return 0;
+        if (!isPartialInstancePossible(instance)) return 0;
+        int totalFrequency = 0;
+        for (int hash: this.hashCovariateTable.keySet()) {
+            boolean match = true;
+            Instance currentInst = hashCovariateTable.get(hash);
+            for (int j = 0; j < currentInst.numAttributes() - 1; j++) {
+                match = match && (instance.isMissing(j) || instance.value(j) == currentInst.value(j));
+            }
+            if (match) {
+                if (classSpecific && !instance.isMissing(instance.classIndex())) {
+                    totalFrequency += this.frequencyTable.get(hash)[convertClassToHash(instance)];
+                }
+                else {
+                    totalFrequency += this.instanceSum.get(hash);
+                }
+            }
         }
         return totalFrequency;
     }
@@ -207,7 +238,7 @@ public class NaiveMatrix {
     }
 
     public double findPyGv(Instance instance) {
-        int covariateFrequency = this.getPartialInstanceFrequency(instance, true);
+        int covariateFrequency = this.getPartialInstanceFrequency(instance, false);
         return covariateFrequency > 0 && convertClassToHash(instance) != -1 ?
                 (double)this.getPartialInstanceFrequency(instance, true) / (double)covariateFrequency : 0.0f;
     }
