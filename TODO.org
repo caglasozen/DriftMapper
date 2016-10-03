@@ -1,0 +1,10 @@
+* Week 8
+- [X] p and q probability distributions does not sum to 1
+  - [X] Partial instanes provaided are non-unique
+  - [X] Generation of duplicate complete inst from partials
+- [X] Calculate number of complete instances that can be generated
+  - Don't iterate trhough all generated if larger than data set
+
+* Possible Uses
+- Find attributes that are indicators of concept drift
+  - Predict Concept Drfit
