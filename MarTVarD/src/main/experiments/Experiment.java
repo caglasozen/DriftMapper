@@ -96,7 +96,7 @@ public abstract class Experiment {
         Instances sampleInstances = new Instances(instances, sampleSize);
         HashSet<Integer> selectedInstances = new HashSet<>();
         Random rng = new Random();
-        if (sampleSize >= instances.size()) {
+        if (sampleSize >= instances.size() || sampleSize <= 0) {
             sampleInstances = instances;
         }
         else {
