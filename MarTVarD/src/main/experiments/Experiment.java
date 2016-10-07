@@ -51,8 +51,8 @@ public abstract class Experiment {
             // Get combination between attributes
             int[] indices = getKthCombination(i, attributeIndices, nAttributesActive);
             indices = ArrayUtils.addAll(indices, classIndices);
-            Instances sampleInstances = generatePartialInstances(allInstances, indices, sampleSize);
-            Instances instances = generateAllPartialInstances(allInstances, indices);
+            Instances instances = generatePartialInstances(allInstances, indices);
+            Instances sampleInstances = sampleInstances(instances, sampleSize);
             int scaling = sampleInstances.size() / instances.size();
             resultMap.put(indices, getResults(model1, model2, sampleInstances, scaling));
         }
@@ -62,12 +62,7 @@ public abstract class Experiment {
         this.classIndices = classIndices;
     }
 
-    private static Instances generatePartialInstances(Instances instances, int[] attributeIndices, int sampleSize) {
-        return sampleSize <= 0 ? generateAllPartialInstances(instances, attributeIndices) :
-                generateSamplePartialInstances(instances, attributeIndices, sampleSize);
-    }
-
-    private static Instances generateAllPartialInstances(Instances instances, int[] attributesIndices) {
+    private static Instances generatePartialInstances(Instances instances, int[] attributesIndices) {
         Instances partialInstances = new Instances(instances, instances.size());
         HashSet<Integer> existingPartialInstances = new HashSet<>();
         for (int i = 0; i < instances.size(); i++) {
@@ -97,7 +92,7 @@ public abstract class Experiment {
         return partialInstances;
     }
 
-    private static Instances generateSamplePartialInstances(Instances instances, int[] attributeIndices, int sampleSize) {
+    private static Instances sampleInstances(Instances instances, int sampleSize) {
         Instances sampleInstances = new Instances(instances, sampleSize);
         HashSet<Integer> selectedInstances = new HashSet<>();
         Random rng = new Random();
@@ -113,7 +108,7 @@ public abstract class Experiment {
                 }
             }
         }
-        return generateAllPartialInstances(sampleInstances, attributeIndices);
+        return sampleInstances;
     }
 
     public String[][] getResultTable() {
