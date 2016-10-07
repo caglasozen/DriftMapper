@@ -53,7 +53,7 @@ public abstract class Experiment {
             indices = ArrayUtils.addAll(indices, classIndices);
             Instances instances = generatePartialInstances(allInstances, indices);
             Instances sampleInstances = sampleInstances(instances, sampleSize);
-            int scaling = sampleInstances.size() / instances.size();
+            double scaling = (double) instances.size() / (double) sampleInstances.size();
             resultMap.put(indices, getResults(model1, model2, sampleInstances, scaling));
         }
         System.out.print("\n");
