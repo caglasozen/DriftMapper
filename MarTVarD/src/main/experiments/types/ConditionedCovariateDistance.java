@@ -1,5 +1,7 @@
-package main.experiments;
+package main.experiments.types;
 
+import main.experiments.Experiment;
+import main.experiments.ExperimentResult;
 import main.models.NaiveMatrix;
 import org.apache.commons.lang3.ArrayUtils;
 import weka.core.Instances;
@@ -9,14 +11,15 @@ import java.util.ArrayList;
 /**
  * Created by LoongKuan on 31/07/2016.
  **/
-public class ConditionedCovariateDistance extends Experiment{
+public class ConditionedCovariateDistance extends Experiment {
 
-    public ConditionedCovariateDistance(Instances instances1, Instances instances2, int nAttributesActive, int[] attributeIndices){
-        super(instances1, instances2, nAttributesActive, attributeIndices, new int[]{instances1.classIndex()});
+    public ConditionedCovariateDistance(Instances instances1, Instances instances2, int nAttributesActive, int[] attributeIndices, int sampleSize){
+        super(instances1, instances2, nAttributesActive, attributeIndices, new int[]{instances1.classIndex()}, sampleSize);
     }
 
     @Override
-    public ArrayList<ExperimentResult> getResults(NaiveMatrix model1, NaiveMatrix model2, Instances allInstances) {
+    public ArrayList<ExperimentResult> getResults(NaiveMatrix model1, NaiveMatrix model2, Instances allInstances, double sampleScale) {
+        // Get the index of instances with different classes and get probabilities
         double[] p = new double[allInstances.size()];
         double[] q = new double[allInstances.size()];
         double[] separateDistance = new double[allInstances.size()];
@@ -52,7 +55,7 @@ public class ConditionedCovariateDistance extends Experiment{
                     separateDistanceGy[j] = separateDistance[index];
                     instanceValuesGy[j] = instanceValues[index];
                 }
-                double finalDistance = this.distanceMetric.findDistance(pGy, qGy);
+                double finalDistance = this.distanceMetric.findDistance(pGy, qGy) * sampleScale;
                 results.add(i, new ExperimentResult(finalDistance, separateDistanceGy, instanceValuesGy));
             }
             else {

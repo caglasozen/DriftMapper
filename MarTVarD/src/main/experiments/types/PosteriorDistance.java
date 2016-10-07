@@ -1,5 +1,7 @@
-package main.experiments;
+package main.experiments.types;
 
+import main.experiments.Experiment;
+import main.experiments.ExperimentResult;
 import main.models.NaiveMatrix;
 import weka.core.Instances;
 
@@ -8,14 +10,14 @@ import java.util.ArrayList;
 /**
  * Created by LoongKuan on 31/07/2016.
  **/
-public class PosteriorDistance extends Experiment{
+public class PosteriorDistance extends Experiment {
 
-    public PosteriorDistance(Instances instances1, Instances instances2, int nAttributesActive, int[] attributeIndices){
-        super(instances1, instances2, nAttributesActive, attributeIndices, new int[]{instances1.classIndex()});
+    public PosteriorDistance(Instances instances1, Instances instances2, int nAttributesActive, int[] attributeIndices, int sampleSize){
+        super(instances1, instances2, nAttributesActive, attributeIndices, new int[]{instances1.classIndex()}, sampleSize);
     }
 
     @Override
-    public ArrayList<ExperimentResult> getResults(NaiveMatrix model1, NaiveMatrix model2, Instances allInstances) {
+    public ArrayList<ExperimentResult> getResults(NaiveMatrix model1, NaiveMatrix model2, Instances allInstances, double sampleScale) {
         double[] p = new double[allInstances.size()];
         double[] q = new double[allInstances.size()];
         double[] weights = new double[allInstances.size()];
@@ -28,7 +30,7 @@ public class PosteriorDistance extends Experiment{
             separateDistance[i] = this.distanceMetric.findDistance(new double[]{p[i]}, new double[]{q[i]}, new double[]{weights[i]});
             instanceValues[i] = allInstances.get(i).toDoubleArray();
         }
-        double finalDistance = this.distanceMetric.findDistance(p, q, weights);
+        double finalDistance = this.distanceMetric.findDistance(p, q, weights) * sampleScale;
         ExperimentResult finalResult = new ExperimentResult(finalDistance, separateDistance, instanceValues);
         ArrayList<ExperimentResult> returnResults = new ArrayList<>();
         returnResults.add(finalResult);
