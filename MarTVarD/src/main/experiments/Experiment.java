@@ -64,29 +64,22 @@ public abstract class Experiment {
 
     private static Instances generatePartialInstances(Instances instances, int[] attributesIndices) {
         Instances partialInstances = new Instances(instances, instances.size());
-        HashSet<Integer> existingPartialInstances = new HashSet<>();
+        HashSet<String> existingPartialInstances = new HashSet<>();
         for (int i = 0; i < instances.size(); i++) {
             Instance instance = new DenseInstance(instances.instance(i));
-            int partialHash = 0;
-            int hashBase = 1;
             // Iterate over attributes in instance
             for (int j = 0; j < instances.numAttributes(); j ++) {
                 // If not class or active attribute set missing
                 if (!ArrayUtils.contains(attributesIndices, j)) {
                     instance.setMissing(j);
                 }
-                // Else calculate hash of attribute value and add to total partial instance hash
-                else {
-                    partialHash += hashBase * instance.value(j);
-                    hashBase *= instances.attribute(j).numValues();
-                }
             }
             // Check if partial Instance already exists in data set
             // If true, delete duplicate instance from data set
             // Else add partial instance hash to set
-            if (!existingPartialInstances.contains(partialHash)) {
+            if (!existingPartialInstances.contains(instance.toString())) {
                 partialInstances.add(instance);
-                existingPartialInstances.add(partialHash);
+                existingPartialInstances.add(instance.toString());
             }
         }
         return partialInstances;

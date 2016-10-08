@@ -3,6 +3,8 @@ package main.experiments.types;
 import main.experiments.Experiment;
 import main.experiments.ExperimentResult;
 import main.models.NaiveMatrix;
+import weka.core.DenseInstance;
+import weka.core.Instance;
 import weka.core.Instances;
 
 import java.util.ArrayList;
@@ -24,7 +26,10 @@ public class PosteriorDistance extends Experiment {
         double[] separateDistance = new double[allInstances.size()];
         double[][] instanceValues = new double[allInstances.size()][allInstances.numAttributes()];
         for (int i = 0; i < allInstances.size(); i++) {
-            weights[i] = (model1.findPv(allInstances.get(i)) + model2.findPv(allInstances.get(i))) / 2;
+            Instance covariateInstance = new DenseInstance(allInstances.get(i));
+            covariateInstance.setDataset(allInstances);
+            covariateInstance.setMissing(covariateInstance.classIndex());
+            weights[i] = (model1.findPv(covariateInstance) + model2.findPv(covariateInstance)) / 2;
             p[i] = model1.findPyGv(allInstances.get(i));
             q[i] = model2.findPyGv(allInstances.get(i));
             separateDistance[i] = this.distanceMetric.findDistance(new double[]{p[i]}, new double[]{q[i]}, new double[]{weights[i]});
