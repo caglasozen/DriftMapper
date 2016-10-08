@@ -136,9 +136,6 @@ public class scratch {
                 dataStream.prepareForUse();
                 dataStream.writeDataStreamToFile(folder+filename+extension);
             }
-            else if (args[0].equals("genAllData")) {
-                generateData();
-            }
             else if (args[0].equals("compare")) {
                 Instances instances1 = loadAnyDataSet("./datasets/train_seed/"+args[1]+".arff");
                 Instances instances2 = loadAnyDataSet("./datasets/train_seed/"+args[2]+".arff");
@@ -189,52 +186,6 @@ public class scratch {
             writeToCSV(results[2], new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"}, "./data_out/nple/" + name + "_" + i + "-ple_class.csv");
             writeToCSV(results[3], new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"}, "./data_out/nple/" + name + "_" + i + "-ple_posterior.csv");
         }
-    }
-
-    private static void generateData() {
-        String filename;
-                // Set data generator to use
-                AbruptTreeDriftGenerator dataStream = new AbruptTreeDriftGenerator();
-                //AbruptDriftGenerator dataStream = new AbruptDriftGenerator();
-                configureDataSet(dataStream);
-
-                int[] burnIns = new int[]{500, 1000, 2000, 5000, 8000};
-                double[] magnitudes = new double[]{0.2, 0.5, 0.8};
-                String folder = "./datasets/";
-                String extension = ".arff";
-
-                for (int burnIn : burnIns) {
-
-                    dataStream.burnInNInstances.setValue(burnIn);
-                    dataStream.driftConditional.setValue(false);
-                    dataStream.driftPriors.setValue(false);
-                    filename = "b" + Integer.toString(burnIn) + "_none";
-                    dataStream.prepareForUse();
-                    dataStream.writeDataStreamToFile(folder+filename+extension);
-
-                    for (double magnitude : magnitudes) {
-                        dataStream.driftMagnitudeConditional.setValue(magnitude);
-                        dataStream.driftMagnitudePrior.setValue(magnitude);
-
-                        dataStream.driftConditional.setValue(false);
-                        dataStream.driftPriors.setValue(true);
-                        filename = "b" + Integer.toString(burnIn) + "_m" + Double.toString(magnitude) + "_prior";
-                        dataStream.prepareForUse();
-                        dataStream.writeDataStreamToFile(folder+filename+extension);
-
-                        dataStream.driftConditional.setValue(true);
-                        dataStream.driftPriors.setValue(false);
-                        filename = "b" + Integer.toString(burnIn) + "_m" + Double.toString(magnitude) + "_posterior";
-                        dataStream.prepareForUse();
-                        dataStream.writeDataStreamToFile(folder+filename+extension);
-
-                        dataStream.driftConditional.setValue(true);
-                        dataStream.driftPriors.setValue(true);
-                        filename = "b" + Integer.toString(burnIn) + "_m" + Double.toString(magnitude) + "_both";
-                        dataStream.prepareForUse();
-                        dataStream.writeDataStreamToFile(folder+filename+extension);
-                    }
-                }
     }
 
     private static void writeDataStream(CategoricalDriftGenerator dataStream, String filename) {
