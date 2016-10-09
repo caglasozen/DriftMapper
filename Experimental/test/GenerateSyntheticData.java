@@ -18,7 +18,7 @@ public class GenerateSyntheticData {
         dataStream.precisionDriftMagnitude.setValue(0.01);
 
         int[] burnIns = new int[]{1000000};
-        double[] magnitudes = new double[]{0.2, 0.5, 0.8};
+        double[] magnitudes = new double[]{0.3, 0.5, 0.7};
         String folder = "./datasets/synthetic_" + nAttributes + "Att_" + nValues + "Val/";
         String extension = ".arff";
 

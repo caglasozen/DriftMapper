@@ -1,0 +1,2 @@
+"Distance","mean","sd","max_val","max_att","min_val","min_att","attributes","class_values"
+"0.4505100178101575","1.1226265083731808E-4","5.295897542702079E-4","0.00859225","x1=v1_x2=v5_x3=v1_x4=v4_x5=v2_class=class1","0.0","x1=v4_x2=v5_x3=v2_x4=v3_x5=v2_class=class3","x1_x2_x3_x4_x5_class","*"
