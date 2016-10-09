@@ -21,8 +21,8 @@ public class MainTest {
     public static void main(String[] args) {
         String[] standardFiles = new String[]{"airlines"};
         //String[] standardFiles = new String[]{"sensor"};
-        args = new String[]{"standardAll"};
-        int sampleSize = -1;
+        //args = new String[]{"standardAll"};
+        int sampleSize = 1000;
         //args = new String[]{"all", "20130419", "20131129"};
         //args = new String[]{"all", "20130505", "20131129"};
         //args = new String[]{"all", "20130606", "20131129"};
@@ -88,7 +88,6 @@ public class MainTest {
         int[] attributeIndicesCov = new int[dataSets[0].numAttributes()];
         for (int i = 0; i < dataSets[0].numAttributes(); i++) attributeIndicesCov[i] = i;
 
-        /*
         System.out.println("Running Covariate");
         for (int i = nInterval[0]; i < nInterval[1]; i++) {
             CovariateDistance experiment = new CovariateDistance(dataSets[0], dataSets[1], i, attributeIndicesCov, sampleSize);
@@ -103,9 +102,9 @@ public class MainTest {
                     new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes", "class_values"},
                     "./data_out/" + folder + "/" + name + "_" + i + "-attributes_ConditionedCovariate.csv");
         }
-        */
+
         System.out.println("Running Posterior");
-        for (int i = nInterval[1] - 1; i < nInterval[1]; i++) {
+        for (int i = nInterval[0]; i < nInterval[1]; i++) {
             PosteriorDistance experiment = new PosteriorDistance(dataSets[0], dataSets[1], i, attributeIndices, sampleSize);
             writeToCSV(experiment.getResultTable(),
                     new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes", "class_values"},
