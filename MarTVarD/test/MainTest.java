@@ -95,6 +95,7 @@ public class MainTest {
                     new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes", "class_values"},
                     "./data_out/" + folder + "/" + name + "_" + i + "-attributes_prior.csv");
         }
+
         System.out.println("Running ConditionedCovariate");
         for (int i = nInterval[0]; i < nInterval[1]; i++) {
             ConditionedCovariateDistance experiment = new ConditionedCovariateDistance(dataSets[0], dataSets[1], i, attributeIndices, sampleSize);
@@ -130,7 +131,7 @@ public class MainTest {
         return new Instances[2];
     }
 
-    private static void writeToCSV(String[][] data, String[] header, String filename){
+    public static void writeToCSV(String[][] data, String[] header, String filename){
         try {
             CSVWriter writer = new CSVWriter(new FileWriter(filename), ',');
             // feed in your array (or convert your data to an array)
@@ -176,7 +177,7 @@ public class MainTest {
         return Filter.useFilter(dataSet, filter);
     }
 
-    private static Instances loadAnyDataSet(String filename) {
+    public static Instances loadAnyDataSet(String filename) {
         try {
             Instances continuousData = loadDataSet(filename);
             if (filename.equals("./datasets/gas-sensor.arff")) {
