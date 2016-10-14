@@ -35,9 +35,9 @@ public class SamplingTest {
             sampleSizes[i] = (i+1) * 100;
         }
         //MainTest.standardAll(new int[]{1,7}, allFiles, 1000, folder);
-        JointTest(jointFile, folder, sampleSizes, true);
-        JointTest(jointFile, folder, sampleSizes, false);
-        PosteriorTest(jointFile, folder, sampleSizes);
+        JointTest(jointFile, folder, sampleSizes, true, 20);
+        JointTest(jointFile, folder, sampleSizes, false, 20);
+        PosteriorTest(jointFile, folder, sampleSizes, 20);
     }
 
     private static Instances[] GetSplitData(String filename, String folder) {
@@ -49,7 +49,7 @@ public class SamplingTest {
         return dataSet;
     }
 
-    private static void JointTest(String filename, String folder, int[] sampleSizes, boolean joint) {
+    private static void JointTest(String filename, String folder, int[] sampleSizes, boolean joint, int nTests) {
         Instances[] dataSet = GetSplitData(filename, folder);
 
         int nActiveAttributes = joint ? dataSet[0].numAttributes() : dataSet[0].numAttributes() - 1;
@@ -61,19 +61,20 @@ public class SamplingTest {
             int sampleSize = sampleSizes[i];
             System.out.println("Running with sample size: " + sampleSize);
             resultTable[i][0] = Integer.toString(sampleSize);
-            CovariateDistance experiment = new CovariateDistance(dataSet[0], dataSet[1], dataSet[0].numAttributes(), attributeIndicesCov, sampleSize);
+            CovariateDistance experiment = new CovariateDistance(dataSet[0], dataSet[1], dataSet[0].numAttributes(), attributeIndicesCov, sampleSize, nTests);
             String[] row = experiment.getResultTable()[0];
             for (int j = 0; j < row.length; j++) {
                 resultTable[i][j + 1] = row[j];
             }
         }
+        filename = nTests > 0 ? filename + "_" + nTests + "averaged" : filename;
         String type = joint ? "JointTest" : "CovariateTest";
         MainTest.writeToCSV(resultTable,
                 new String[]{"SampleSize", "Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes", "class_values"},
                 "./data_out/SampleSizeTest/" + filename + "_" + type + ".csv");
     }
 
-    private static void PosteriorTest(String filename, String folder, int[] sampleSizes) {
+    private static void PosteriorTest(String filename, String folder, int[] sampleSizes, int nTests) {
         Instances[] dataSet = GetSplitData(filename, folder);
 
         int[] attributeIndicesCov = new int[dataSet[0].numAttributes() - 1];
@@ -84,12 +85,13 @@ public class SamplingTest {
             int sampleSize = sampleSizes[i];
             System.out.println("Running with sample size: " + sampleSize);
             resultTable[i][0] = Integer.toString(sampleSize);
-            PosteriorDistance experiment = new PosteriorDistance(dataSet[0], dataSet[1], dataSet[0].numAttributes(), attributeIndicesCov, sampleSize);
+            PosteriorDistance experiment = new PosteriorDistance(dataSet[0], dataSet[1], dataSet[0].numAttributes(), attributeIndicesCov, sampleSize, nTests);
             String[] row = experiment.getResultTable()[0];
             for (int j = 0; j < row.length; j++) {
                 resultTable[i][j + 1] = row[j];
             }
         }
+        filename = nTests > 0 ? filename + "_" + nTests + "averaged" : filename;
         MainTest.writeToCSV(resultTable,
                 new String[]{"SampleSize", "Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes", "class_values"},
                 "./data_out/SampleSizeTest/" + filename + "_PosteriorTest.csv");

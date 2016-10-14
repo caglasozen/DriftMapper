@@ -23,6 +23,7 @@ public class MainTest {
         //String[] standardFiles = new String[]{"sensor"};
         //args = new String[]{"standardAll"};
         int sampleSize = 1000;
+        int nTests = 10;
         //args = new String[]{"all", "20130419", "20131129"};
         //args = new String[]{"all", "20130505", "20131129"};
         //args = new String[]{"all", "20130606", "20131129"};
@@ -36,7 +37,7 @@ public class MainTest {
             for (int i = 0; i < dataSets[0].numAttributes(); i++) attributeIndices[i] = i;
 
             for (int i = 1; i < 2; i++) {
-                CovariateDistance experiment = new CovariateDistance(dataSets[0], dataSets[1], i, attributeIndices, sampleSize);
+                CovariateDistance experiment = new CovariateDistance(dataSets[0], dataSets[1], i, attributeIndices, sampleSize, nTests);
                 writeToCSV(experiment.getResultTable(),
                         new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"},
                         "./data_out/martvard/" + args[1] + "_" + args[2]+ "_" + i + "-ple_prior.csv");
@@ -50,7 +51,7 @@ public class MainTest {
 
             int[] attributeIndices = new int[dataSets[0].numAttributes()];
             for (int i = 0; i < dataSets[0].numAttributes(); i++) attributeIndices[i] = i;
-            CovariateDistance experiment = new CovariateDistance(dataSets[0], dataSets[1], 1, attributeIndices, sampleSize);
+            CovariateDistance experiment = new CovariateDistance(dataSets[0], dataSets[1], 1, attributeIndices, sampleSize, nTests);
             writeToCSV(experiment.getResultTable(),
                     new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"},
                     "./data_out/test.csv");
@@ -90,7 +91,7 @@ public class MainTest {
 
         System.out.println("Running Covariate");
         for (int i = nInterval[0]; i < nInterval[1]; i++) {
-            CovariateDistance experiment = new CovariateDistance(dataSets[0], dataSets[1], i, attributeIndicesCov, sampleSize);
+            CovariateDistance experiment = new CovariateDistance(dataSets[0], dataSets[1], i, attributeIndicesCov, sampleSize, 10);
             writeToCSV(experiment.getResultTable(),
                     new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes", "class_values"},
                     "./data_out/" + folder + "/" + name + "_" + i + "-attributes_prior.csv");
@@ -98,7 +99,7 @@ public class MainTest {
 
         System.out.println("Running ConditionedCovariate");
         for (int i = nInterval[0]; i < nInterval[1]; i++) {
-            ConditionedCovariateDistance experiment = new ConditionedCovariateDistance(dataSets[0], dataSets[1], i, attributeIndices, sampleSize);
+            ConditionedCovariateDistance experiment = new ConditionedCovariateDistance(dataSets[0], dataSets[1], i, attributeIndices, sampleSize, 10);
             writeToCSV(experiment.getResultTable(),
                     new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes", "class_values"},
                     "./data_out/" + folder + "/" + name + "_" + i + "-attributes_ConditionedCovariate.csv");
@@ -106,7 +107,7 @@ public class MainTest {
 
         System.out.println("Running Posterior");
         for (int i = nInterval[0]; i < nInterval[1]; i++) {
-            PosteriorDistance experiment = new PosteriorDistance(dataSets[0], dataSets[1], i, attributeIndices, sampleSize);
+            PosteriorDistance experiment = new PosteriorDistance(dataSets[0], dataSets[1], i, attributeIndices, sampleSize, 10);
             writeToCSV(experiment.getResultTable(),
                     new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes", "class_values"},
                     "./data_out/" + folder + "/" + name + "_" + i + "-attributes_posterior.csv");

@@ -13,8 +13,8 @@ import java.util.ArrayList;
  **/
 public class ConditionedCovariateDistance extends Experiment {
 
-    public ConditionedCovariateDistance(Instances instances1, Instances instances2, int nAttributesActive, int[] attributeIndices, int sampleSize){
-        super(instances1, instances2, nAttributesActive, attributeIndices, new int[]{instances1.classIndex()}, sampleSize);
+    public ConditionedCovariateDistance(Instances instances1, Instances instances2, int nAttributesActive, int[] attributeIndices, int sampleSize, int nTests){
+        super(instances1, instances2, nAttributesActive, attributeIndices, new int[]{instances1.classIndex()}, sampleSize, nTests);
     }
 
     @Override

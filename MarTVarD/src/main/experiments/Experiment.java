@@ -27,10 +27,10 @@ public abstract class Experiment {
     private int[] classIndices;
 
     public Experiment(Instances instances1, Instances instances2, int nAttributesActive, int[] attributeIndices, int[] classIndices) {
-        this(instances1, instances2, nAttributesActive, attributeIndices, classIndices, -1);
+        this(instances1, instances2, nAttributesActive, attributeIndices, classIndices, -1, 1);
     }
 
-    public Experiment(Instances instances1, Instances instances2, int nAttributesActive, int[] attributeIndices, int[] classIndices, int sampleSize) {
+    public Experiment(Instances instances1, Instances instances2, int nAttributesActive, int[] attributeIndices, int[] classIndices, int sampleSize, int nTests) {
         // Generate base models for each data set
         NaiveMatrix model1 = new NaiveMatrix(instances1);
         NaiveMatrix model2 = new NaiveMatrix(instances2);
@@ -52,9 +52,28 @@ public abstract class Experiment {
             int[] indices = getKthCombination(i, attributeIndices, nAttributesActive);
             indices = ArrayUtils.addAll(indices, classIndices);
             Instances instances = generatePartialInstances(allInstances, indices);
-            Instances sampleInstances = sampleInstances(instances, sampleSize);
-            double scaling = (double) instances.size() / (double) sampleInstances.size();
-            resultMap.put(indices, getResults(model1, model2, sampleInstances, scaling));
+
+            ArrayList<ArrayList<ExperimentResult>> results = new ArrayList<>();
+            for (int j = 0; j < allInstances.numClasses(); j++) {
+                results.add(new ArrayList<>());
+            }
+            for (int j = 0; j < nTests; j++) {
+                Instances sampleInstances = sampleInstances(instances, sampleSize);
+                double scaling = (double) instances.size() / (double) sampleInstances.size();
+
+                ArrayList<ExperimentResult> tmpRes = getResults(model1, model2, sampleInstances, scaling);
+                for (int k = 0; k < tmpRes.size(); k++) {
+                    results.get(k).add(tmpRes.get(k));
+                }
+            }
+            ArrayList<ExperimentResult> finalAveragedResults = new ArrayList<>();
+            for (int k = 0; k < results.size(); k++) {
+                if (!results.get(k).isEmpty()) {
+                    finalAveragedResults.add(new ExperimentResult(results.get(k)));
+                }
+            }
+
+            resultMap.put(indices, finalAveragedResults);
         }
         System.out.print("\n");
         this.resultMap = sortByValue(this.resultMap);
