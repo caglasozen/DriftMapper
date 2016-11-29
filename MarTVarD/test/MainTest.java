@@ -19,10 +19,10 @@ import java.util.ArrayList;
 
 public class MainTest {
     public static void main(String[] args) {
-        String[] standardFiles = new String[]{"airlines"};
-        //String[] standardFiles = new String[]{"sensor"};
-        //args = new String[]{"standardAll"};
-        int sampleSize = 1000;
+        //String[] standardFiles = new String[]{"airlines"};
+        String[] standardFiles = new String[]{"sensor", "airlines"};
+        args = new String[]{"standardAll"};
+        double sampleScale = 1.0;
         int nTests = 10;
         //args = new String[]{"all", "20130419", "20131129"};
         //args = new String[]{"all", "20130505", "20131129"};
@@ -37,7 +37,7 @@ public class MainTest {
             for (int i = 0; i < dataSets[0].numAttributes(); i++) attributeIndices[i] = i;
 
             for (int i = 1; i < 2; i++) {
-                CovariateDistance experiment = new CovariateDistance(dataSets[0], dataSets[1], i, attributeIndices, sampleSize, nTests);
+                CovariateDistance experiment = new CovariateDistance(dataSets[0], dataSets[1], i, attributeIndices, sampleScale, nTests);
                 writeToCSV(experiment.getResultTable(),
                         new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"},
                         "./data_out/martvard/" + args[1] + "_" + args[2]+ "_" + i + "-ple_prior.csv");
@@ -51,21 +51,21 @@ public class MainTest {
 
             int[] attributeIndices = new int[dataSets[0].numAttributes()];
             for (int i = 0; i < dataSets[0].numAttributes(); i++) attributeIndices[i] = i;
-            CovariateDistance experiment = new CovariateDistance(dataSets[0], dataSets[1], 1, attributeIndices, sampleSize, nTests);
+            CovariateDistance experiment = new CovariateDistance(dataSets[0], dataSets[1], 1, attributeIndices, sampleScale, nTests);
             writeToCSV(experiment.getResultTable(),
                     new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"},
                     "./data_out/test.csv");
         }
         else if (args[0].equals("all")) {
             Instances[] dataSets = loadPairData(args[1], args[2]);
-            testAll(new int[]{1, 5}, dataSets, args[1] + "_" + args[2], sampleSize, "martvard");
+            testAll(new int[]{1, 5}, dataSets, args[1] + "_" + args[2], sampleScale, "martvard");
         }
         else if (args[0].equals("standardAll")) {
-            standardAll(new int[]{1,5}, standardFiles, sampleSize, "");
+            standardAll(new int[]{1,4}, standardFiles, sampleScale, "");
         }
     }
 
-    public static void standardAll(int[] nInterval, String[] files, int sampleSize, String folder) {
+    public static void standardAll(int[] nInterval, String[] files, double sampleScale, String folder) {
         String folder1 = folder.equals("") ? "./datasets/" : "./datasets/" + folder + "/";
         String folder2 = folder.equals("") ? "martvard" : folder;
         for (String file : files) {
@@ -73,44 +73,41 @@ public class MainTest {
             Instances[] dataSet = new Instances[2];
             dataSet[0] = new Instances(allInstances, 0, allInstances.size()/2);
             dataSet[1] = new Instances(allInstances, allInstances.size()/2 - 1, allInstances.size()/2);
-            testAll(nInterval, dataSet, file, sampleSize, folder2);
+            testAll(nInterval, dataSet, file, sampleScale, folder2);
         }
     }
 
-    private static void testAll(int[] nInterval, Instances[] dataSets, String name, int sampleSize, String folder) {
+    private static void testAll(int[] nInterval, Instances[] dataSets, String name, double sampleScale, String folder) {
         System.out.println("Running Tests on " + name);
         System.out.println("For " + nInterval[0] + " to " + nInterval[1] + " attributes");
 
-        folder = sampleSize <= 0 ? folder : folder + "_" + sampleSize;
+        folder = sampleScale <= 1 ? folder : folder + "_" + sampleScale;
 
         int[] attributeIndices = new int[dataSets[0].numAttributes() - 1];
         for (int i = 0; i < dataSets[0].numAttributes() - 1; i++) attributeIndices[i] = i;
 
-        int[] attributeIndicesCov = new int[dataSets[0].numAttributes()];
-        for (int i = 0; i < dataSets[0].numAttributes(); i++) attributeIndicesCov[i] = i;
-
         System.out.println("Running Covariate");
         for (int i = nInterval[0]; i < nInterval[1]; i++) {
-            CovariateDistance experiment = new CovariateDistance(dataSets[0], dataSets[1], i, attributeIndicesCov, sampleSize, 10);
+            CovariateDistance experiment = new CovariateDistance(dataSets[0], dataSets[1], i, attributeIndices, sampleScale, 10);
             writeToCSV(experiment.getResultTable(),
                     new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes", "class_values"},
-                    "./data_out/" + folder + "/" + name + "_" + i + "-attributes_prior.csv");
+                    "./data_out/" + folder + "_new/" + name + "_" + i + "-attributes_prior.csv");
         }
 
         System.out.println("Running ConditionedCovariate");
         for (int i = nInterval[0]; i < nInterval[1]; i++) {
-            ConditionedCovariateDistance experiment = new ConditionedCovariateDistance(dataSets[0], dataSets[1], i, attributeIndices, sampleSize, 10);
+            ConditionedCovariateDistance experiment = new ConditionedCovariateDistance(dataSets[0], dataSets[1], i, attributeIndices, sampleScale, 10);
             writeToCSV(experiment.getResultTable(),
                     new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes", "class_values"},
-                    "./data_out/" + folder + "/" + name + "_" + i + "-attributes_ConditionedCovariate.csv");
+                    "./data_out/" + folder + "_new/" + name + "_" + i + "-attributes_ConditionedCovariate.csv");
         }
 
         System.out.println("Running Posterior");
         for (int i = nInterval[0]; i < nInterval[1]; i++) {
-            PosteriorDistance experiment = new PosteriorDistance(dataSets[0], dataSets[1], i, attributeIndices, sampleSize, 10);
+            PosteriorDistance experiment = new PosteriorDistance(dataSets[0], dataSets[1], i, attributeIndices, sampleScale, 10);
             writeToCSV(experiment.getResultTable(),
                     new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes", "class_values"},
-                    "./data_out/" + folder + "/" + name + "_" + i + "-attributes_posterior.csv");
+                    "./data_out/" + folder + "_new/" + name + "_" + i + "-attributes_posterior.csv");
         }
     }
 

@@ -2,15 +2,13 @@ package main.experiments;
 
 import main.distance.Distance;
 import main.distance.TotalVariation;
-import main.models.NaiveMatrix;
+import main.models.frequency.FrequencyTable;
 import org.apache.commons.lang3.ArrayUtils;
-import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Created by LoongKuan on 31/07/2016.
@@ -18,8 +16,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public abstract class Experiment {
     protected Map<int[], ArrayList<ExperimentResult>> resultMap;
     protected Instance sampleInstance;
-    protected Distance distanceMetric = new TotalVariation();
-    protected abstract ArrayList<ExperimentResult> getResults(NaiveMatrix model1, NaiveMatrix model2, Instances allInstances, double sampleScale);
+    protected abstract ArrayList<ExperimentResult> getResults(FrequencyTable model1, FrequencyTable model2, int[] attributeSubset, double sampleScale);
 
     private int nAttributesActive;
     // TODO: Utilise given info on active covariates and class
@@ -30,10 +27,10 @@ public abstract class Experiment {
         this(instances1, instances2, nAttributesActive, attributeIndices, classIndices, -1, 1);
     }
 
-    public Experiment(Instances instances1, Instances instances2, int nAttributesActive, int[] attributeIndices, int[] classIndices, int sampleSize, int nTests) {
+    public Experiment(Instances instances1, Instances instances2, int nAttributesActive, int[] attributeIndices, int[] classIndices, double sampleScale, int nTests) {
         // Generate base models for each data set
-        NaiveMatrix model1 = new NaiveMatrix(instances1);
-        NaiveMatrix model2 = new NaiveMatrix(instances2);
+        FrequencyTable model1 = new FrequencyTable(instances1, nAttributesActive, attributeIndices);
+        FrequencyTable model2 = new FrequencyTable(instances2, nAttributesActive, attributeIndices);
 
         // Generate union set of all instances in both data sets
         Instances allInstances = new Instances(instances1);
@@ -48,21 +45,14 @@ public abstract class Experiment {
         resultMap = new HashMap<>();
         for (int i = 0; i < nCombination; i++) {
             System.out.print("\rRunning experiment " + (i + 1) + "/" + nCombination);
-            // Get combination between attributes
-            int[] indices = getKthCombination(i, attributeIndices, nAttributesActive);
-            indices = ArrayUtils.addAll(indices, classIndices);
-            Instances instances = generatePartialInstances(allInstances, indices);
+            // Get attribute subset
+            int[] attributeSubset = getKthCombination(i, attributeIndices, nAttributesActive);
 
             ArrayList<ArrayList<ExperimentResult>> results = new ArrayList<>();
-            for (int j = 0; j < allInstances.numClasses(); j++) {
-                results.add(new ArrayList<>());
-            }
             for (int j = 0; j < nTests; j++) {
-                Instances sampleInstances = sampleInstances(instances, sampleSize);
-                double scaling = (double) instances.size() / (double) sampleInstances.size();
-
-                ArrayList<ExperimentResult> tmpRes = getResults(model1, model2, sampleInstances, scaling);
+                ArrayList<ExperimentResult> tmpRes = getResults(model1, model2, attributeSubset, sampleScale);
                 for (int k = 0; k < tmpRes.size(); k++) {
+                    if (results.size() <= k) results.add(new ArrayList<>());
                     results.get(k).add(tmpRes.get(k));
                 }
             }
@@ -72,55 +62,12 @@ public abstract class Experiment {
                     finalAveragedResults.add(new ExperimentResult(results.get(k)));
                 }
             }
-
-            resultMap.put(indices, finalAveragedResults);
+            resultMap.put(attributeSubset, finalAveragedResults);
         }
         System.out.print("\n");
         this.resultMap = sortByValue(this.resultMap);
         this.attributeIndices = attributeIndices;
         this.classIndices = classIndices;
-    }
-
-    private static Instances generatePartialInstances(Instances instances, int[] attributesIndices) {
-        Instances partialInstances = new Instances(instances, instances.size());
-        HashSet<String> existingPartialInstances = new HashSet<>();
-        for (int i = 0; i < instances.size(); i++) {
-            Instance instance = new DenseInstance(instances.instance(i));
-            // Iterate over attributes in instance
-            for (int j = 0; j < instances.numAttributes(); j ++) {
-                // If not class or active attribute set missing
-                if (!ArrayUtils.contains(attributesIndices, j)) {
-                    instance.setMissing(j);
-                }
-            }
-            // Check if partial Instance already exists in data set
-            // If true, delete duplicate instance from data set
-            // Else add partial instance hash to set
-            if (!existingPartialInstances.contains(instance.toString())) {
-                partialInstances.add(instance);
-                existingPartialInstances.add(instance.toString());
-            }
-        }
-        return partialInstances;
-    }
-
-    private static Instances sampleInstances(Instances instances, int sampleSize) {
-        Instances sampleInstances = new Instances(instances, sampleSize);
-        HashSet<Integer> selectedInstances = new HashSet<>();
-        Random rng = new Random();
-        if (sampleSize >= instances.size() || sampleSize <= 0) {
-            sampleInstances = instances;
-        }
-        else {
-            while (sampleInstances.size() < sampleSize ) {
-                int index = rng.nextInt(instances.size());
-                if (!selectedInstances.contains(index)) {
-                    selectedInstances.add(index);
-                    sampleInstances.add(instances.get(index));
-                }
-            }
-        }
-        return sampleInstances;
     }
 
     public String[][] getResultTable() {

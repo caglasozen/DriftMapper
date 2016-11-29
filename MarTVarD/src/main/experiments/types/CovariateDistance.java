@@ -1,11 +1,8 @@
 package main.experiments.types;
 
-import main.distance.Distance;
-import main.distance.TotalVariation;
 import main.experiments.Experiment;
 import main.experiments.ExperimentResult;
-import main.models.NaiveMatrix;
-import weka.core.Instance;
+import main.models.frequency.FrequencyTable;
 import weka.core.Instances;
 
 import java.util.ArrayList;
@@ -15,28 +12,14 @@ import java.util.ArrayList;
  **/
 public class CovariateDistance extends Experiment {
 
-    public CovariateDistance(Instances instances1, Instances instances2, int nAttributesActive, int[] attributeIndices, int sampleSize, int nTests){
+    public CovariateDistance(Instances instances1, Instances instances2, int nAttributesActive, int[] attributeIndices, double sampleScale, int nTests){
         // List of 0 to n where n is the number of attributes
-        super(instances1, instances2, nAttributesActive, attributeIndices, new int[]{}, sampleSize, nTests);
+        super(instances1, instances2, nAttributesActive, attributeIndices, new int[]{}, sampleScale, nTests);
     }
 
     @Override
-    public ArrayList<ExperimentResult> getResults(NaiveMatrix model1, NaiveMatrix model2, Instances allInstances, double sampleScale) {
-        double[] p = new double[allInstances.size()];
-        double[] q = new double[allInstances.size()];
-        double[] separateDistance = new double[allInstances.size()];
-        double[][] instanceValues = new double[allInstances.size()][allInstances.numAttributes()];
-        for (int i = 0; i < allInstances.size(); i++) {
-            p[i] = model1.findPv(allInstances.get(i));
-            q[i] = model2.findPv(allInstances.get(i));
-            separateDistance[i] = this.distanceMetric.findDistance(new double[]{p[i]}, new double[]{q[i]});
-            instanceValues[i] = allInstances.get(i).toDoubleArray();
-        }
-        double finalDistance = this.distanceMetric.findDistance(p, q) * sampleScale;
-        ExperimentResult finalResult = new ExperimentResult(finalDistance, separateDistance, instanceValues);
-        ArrayList<ExperimentResult> returnResults = new ArrayList<>();
-        returnResults.add(finalResult);
-        return returnResults;
+    public ArrayList<ExperimentResult> getResults(FrequencyTable model1, FrequencyTable model2, int[] attributeSubset, double sampleScale) {
+        return model1.findCovariateDistance(model2, attributeSubset, sampleScale);
     }
 
     @Override
