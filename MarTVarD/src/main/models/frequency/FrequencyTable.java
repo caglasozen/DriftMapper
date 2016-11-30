@@ -15,7 +15,7 @@ public class FrequencyTable extends BaseFrequencyModel{
     private int[][] attributeSum;       // Maps attribute index to a list of value frequency
 
     public FrequencyTable(Instances dataSet, int nAttributesActive, int[] attributesAvailable) {
-        this.nAttributesActive = nAttributesActive;
+        this.attributeSubsetLength = nAttributesActive;
         this.attributesAvailable = attributesAvailable;
 
         // Get bases for hash
@@ -48,7 +48,7 @@ public class FrequencyTable extends BaseFrequencyModel{
 
     @Override
     public void changeAttributeSubsetLength(int length) {
-        this.nAttributesActive = length;
+        this.attributeSubsetLength = length;
     }
 
     @Override

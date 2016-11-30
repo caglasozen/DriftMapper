@@ -18,7 +18,7 @@ public abstract class Model {
     protected int totalFrequency;
     // TODO: get rid of att avail
     protected int[] attributesAvailable;
-    protected int nAttributesActive;
+    protected int attributeSubsetLength;
     protected Instance exampleInst;
     protected Instances allInstances;
 
@@ -73,12 +73,12 @@ public abstract class Model {
                                                                      int nTests, DriftMeasurement driftMeasurement) {
 
         Map<int[], ArrayList<ExperimentResult>> resultMap = new HashMap<>();
-        int nCombination = nCr(this.attributesAvailable.length, this.nAttributesActive);
+        int nCombination = nCr(this.attributesAvailable.length, this.attributeSubsetLength);
 
         for (int i = 0; i < nCombination; i++) {
             System.out.print("\rRunning experiment " + (i + 1) + "/" + nCombination);
             // Get attribute subset
-            int[] attributeSubset = getKthCombination(i, this.attributesAvailable, this.nAttributesActive);
+            int[] attributeSubset = getKthCombination(i, this.attributesAvailable, this.attributeSubsetLength);
 
             ArrayList<ArrayList<ExperimentResult>> results = new ArrayList<>();
             for (int j = 0; j < nTests; j++) {
@@ -141,7 +141,7 @@ public abstract class Model {
     }
 
     private String[][] getResultTable(int classIndex, String className, Map<int[], ArrayList<ExperimentResult>> resultMap) {
-        int[][] attributeSubSets = resultMap.keySet().toArray(new int[resultMap.size()][this.nAttributesActive]);
+        int[][] attributeSubSets = resultMap.keySet().toArray(new int[resultMap.size()][this.attributeSubsetLength]);
         String[][] results = new String[attributeSubSets.length][9];
         for (int i = 0; i < attributeSubSets.length; i++) {
             ExperimentResult currentResult = resultMap.get(attributeSubSets[i]).get(classIndex);

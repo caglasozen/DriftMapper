@@ -76,7 +76,7 @@ public abstract class BaseFrequencyModel extends Model {
         for (int attributeIndex : attributeSubset) {
             valid = valid && ArrayUtils.contains(this.attributesAvailable, attributeIndex);
         }
-        return valid && attributeSubset.length == this.nAttributesActive;
+        return valid && attributeSubset.length == this.attributeSubsetLength;
     }
 
     protected static ArrayList<Integer> sampleHashes(ArrayList<Integer> hashes, double sampleScale) {

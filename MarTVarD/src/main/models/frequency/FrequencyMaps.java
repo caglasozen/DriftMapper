@@ -2,7 +2,6 @@ package main.models.frequency;
 
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.SystemInfo;
 
 import java.util.*;
 
@@ -16,9 +15,13 @@ public class FrequencyMaps extends BaseFrequencyModel {
     private int[] classFreq;
     private HashMap<int[], HashMap<Integer, Integer>> covariateFreq;
 
-    public FrequencyMaps(Instances initialInstances, int nAttributesActive, int[] attributesAvailable) {
+    public FrequencyMaps(int attributeSubsetLength, int[] attributesAvailable) {
         this.attributesAvailable = attributesAvailable;
-        this.nAttributesActive = nAttributesActive;
+    }
+
+    public FrequencyMaps(Instances initialInstances, int attributeSubsetLength, int[] attributesAvailable) {
+        this.attributesAvailable = attributesAvailable;
+        this.attributeSubsetLength = attributeSubsetLength;
         this.exampleInst = initialInstances.firstInstance();
         this.classFreq = new int[this.exampleInst.numClasses()];
         this.covariateFreq = new HashMap<>();
@@ -32,20 +35,20 @@ public class FrequencyMaps extends BaseFrequencyModel {
             base *= initialInstances.attribute(attributesAvailable[i]).numValues();
         }
 
-        this.changeAttributeSubsetLength(nAttributesActive);
+        this.changeAttributeSubsetLength(attributeSubsetLength);
     }
 
     @Override
     public void changeAttributeSubsetLength(int length) {
-        this.nAttributesActive = length;
+        this.attributeSubsetLength = length;
 
-        int nAttributeSubsets = FrequencyMaps.nCr(this.attributesAvailable.length, this.nAttributesActive);
+        int nAttributeSubsets = FrequencyMaps.nCr(this.attributesAvailable.length, this.attributeSubsetLength);
         // New frequency map
         this.frequencyMaps = new HashMap<>();
         // Add a frequencyMap for each attribute subset
         for (int i = 0; i < nAttributeSubsets; i++) {
             this.frequencyMaps.put(
-                    attributeSubsetToHash(getKthCombination(i, this.attributesAvailable, this.nAttributesActive)),
+                    attributeSubsetToHash(getKthCombination(i, this.attributesAvailable, this.attributeSubsetLength)),
                     new HashMap<>());
         }
         // Add initialInstances to frequencyMaps
@@ -102,9 +105,9 @@ public class FrequencyMaps extends BaseFrequencyModel {
     private void editInstance(Instance instance, int amount) {
         this.totalFrequency += amount;
         this.classFreq[(int)instance.classValue()] += amount;
-        int nAttributeSubsets = nCr(this.attributesAvailable.length, this.nAttributesActive);
+        int nAttributeSubsets = nCr(this.attributesAvailable.length, this.attributeSubsetLength);
         for (int j = 0; j < nAttributeSubsets; j++) {
-            int[] activeAttributes = getKthCombination(j, attributesAvailable, nAttributesActive);
+            int[] activeAttributes = getKthCombination(j, attributesAvailable, attributeSubsetLength);
             int partialHash = FrequencyMaps.instanceToPartialHash(instance, activeAttributes, hashBases);
             int subsetHash = attributeSubsetToHash(activeAttributes);
             if (!this.frequencyMaps.get(subsetHash).containsKey(partialHash)) {
