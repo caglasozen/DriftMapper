@@ -51,7 +51,6 @@ public class FrequencyMaps extends BaseFrequencyModel {
         }
 
         // Add initialInstances to frequencyMaps
-        this.totalFrequency = 0;
         int percentage = -1;
         for (int i = 0; i < this.allInstances.size(); i++) {
             if (percentage != (int)((i/(double)this.allInstances.size()) * 100)) {
@@ -105,7 +104,6 @@ public class FrequencyMaps extends BaseFrequencyModel {
     }
 
     private void editInstance(Instance instance, int amount) {
-        this.totalFrequency += amount;
         this.classFreq[(int)instance.classValue()] += amount;
         int nAttributeSubsets = nCr(this.attributesAvailable.length, this.attributeSubsetLength);
         for (int j = 0; j < nAttributeSubsets; j++) {

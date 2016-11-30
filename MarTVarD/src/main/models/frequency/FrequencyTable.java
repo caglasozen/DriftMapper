@@ -26,7 +26,6 @@ public class FrequencyTable extends BaseFrequencyModel{
     @Override
     public void reset() {
         this.allInstances = new Instances(this.allInstances, this.allInstances.size());
-        this.totalFrequency = 0;
         // Build data structures
         frequencyTable = new HashMap<>();
         // Build attributeSum ragged array
@@ -49,7 +48,7 @@ public class FrequencyTable extends BaseFrequencyModel{
 
     @Override
     public void addInstance(Instance instance) {
-        this.totalFrequency += 1;
+        this.allInstances.add(instance);
         int instHash = this.instanceToPartialHash(instance, this.attributesAvailable);
         int classHash = (int)instance.classValue();
         // Attribute Sum
@@ -69,6 +68,7 @@ public class FrequencyTable extends BaseFrequencyModel{
 
     @Override
     public void removeInstance(Instance instance) {
+        this.allInstances.remove(instance);
         int instHash = this.instanceToPartialHash(instance, this.attributesAvailable);
         int classHash = (int)instance.classValue();
         // Attribute Sum

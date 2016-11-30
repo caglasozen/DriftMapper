@@ -128,10 +128,10 @@ public abstract class BaseFrequencyModel extends Model {
             Instance instance = this.partialHashToInstance(allHashes.get(i), attributeSubset);
             totalP += this.findFv(instance, attributeSubset);
             totalQ += modelAfter.findFv(instance, attributeSubset);
-            p[i] = this.totalFrequency == 0 ?
-                    0 : (double)this.findFv(instance, attributeSubset) / (double)this.totalFrequency;
-            q[i] = modelAfter.totalFrequency == 0 ?
-                    0 : (double)modelAfter.findFv(instance, attributeSubset) / (double)modelAfter.totalFrequency;
+            p[i] = this.allInstances.size() == 0 ?
+                    0 : (double)this.findFv(instance, attributeSubset) / (double)this.allInstances.size();
+            q[i] = modelAfter.allInstances.size() == 0 ?
+                    0 : (double)modelAfter.findFv(instance, attributeSubset) / (double)modelAfter.allInstances.size();
             separateDistance[i] = this.distanceMetric.findDistance(new double[]{p[i]}, new double[]{q[i]});
             instanceValues[i] = instance.toDoubleArray();
         }
@@ -158,10 +158,10 @@ public abstract class BaseFrequencyModel extends Model {
         for (int i = 0; i < allHashes.size(); i++) {
             Instance instance = this.partialHashToInstance(allHashes.get(i), attributeSubset);
             for(int classIndex = 0; classIndex < nClass; classIndex++) {
-                p[i*nClass + classIndex] = this.totalFrequency == 0 ?
-                        0 : (double)this.findFvy(instance, attributeSubset, classIndex) / (double)this.totalFrequency;
-                q[i*nClass + classIndex] = modelAfter.totalFrequency == 0 ?
-                        0 : (double) modelAfter.findFvy(instance, attributeSubset, classIndex) / (double)modelAfter.totalFrequency;
+                p[i*nClass + classIndex] = this.allInstances.size() == 0 ?
+                        0 : (double)this.findFvy(instance, attributeSubset, classIndex) / (double)this.allInstances.size();
+                q[i*nClass + classIndex] = modelAfter.allInstances.size() == 0 ?
+                        0 : (double) modelAfter.findFvy(instance, attributeSubset, classIndex) / (double)modelAfter.allInstances.size();
                 separateDistance[i*nClass + classIndex] = this.distanceMetric.findDistance(new double[]{p[i]}, new double[]{q[i]});
                 instanceValues[i*nClass + classIndex] = instance.toDoubleArray();
             }

@@ -14,9 +14,6 @@ import java.util.*;
  **/
 
 public abstract class Model {
-    // TODO: get rif of total freq
-    protected int totalFrequency;
-    // TODO: get rid of att avail
     protected int[] attributesAvailable;
     protected int attributeSubsetLength;
     protected Instances allInstances;
