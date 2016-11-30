@@ -23,6 +23,9 @@ public abstract class Model {
 
     protected Distance distanceMetric = new TotalVariation();
 
+    public abstract Model copy();
+    public abstract void reset();
+
     public abstract ArrayList<ExperimentResult> findCovariateDistance(
             Model modelToCompare, int[] attributeSubset, double sampleScale);
     public abstract ArrayList<ExperimentResult> findJointDistance(

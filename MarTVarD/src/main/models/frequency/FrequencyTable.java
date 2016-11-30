@@ -1,5 +1,6 @@
 package main.models.frequency;
 
+import main.models.Model;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -14,35 +15,35 @@ public class FrequencyTable extends BaseFrequencyModel{
     private HashMap<Integer, int[]> frequencyTable;
     private int[][] attributeSum;       // Maps attribute index to a list of value frequency
 
-    public FrequencyTable(Instances dataSet, int nAttributesActive, int[] attributesAvailable) {
-        this.attributeSubsetLength = nAttributesActive;
+    public FrequencyTable(Instances dataset, int attributeSubsetLength, int[] attributesAvailable) {
+        this.attributeSubsetLength = attributeSubsetLength;
         this.attributesAvailable = attributesAvailable;
 
-        // Get bases for hash
-        int base = 1;
-        this.hashBases = new int[dataSet.numAttributes() - 1];
-        for (int i = 0; i < dataSet.numAttributes() - 1; i++) {
-            this.hashBases[i] = base;
-            base *= dataSet.attribute(attributesAvailable[i]).numValues();
-        }
-
-        // Get sample instance
-        this.allInstances = new Instances(dataSet);
-
-        // Save the sample size
-        this.totalFrequency = dataSet.size();
-
-        frequencyTable = new HashMap<>();
-        // Build attributeSum ragged array
-        attributeSum = new int[dataSet.numAttributes()][];
-        for (int i = 0; i < dataSet.numAttributes(); i++) {
-            attributeSum[i] = new int[dataSet.attribute(i).numValues()];
-        }
+        this.setDataset(dataset);
+        this.reset();
 
         // Populate the Frequency Matrix and Sum tables
-        for (Instance instance : dataSet) {
+        for (Instance instance : dataset) {
             this.addInstance(instance);
         }
+    }
+
+    @Override
+    public void reset() {
+        this.allInstances = new Instances(this.allInstances, this.allInstances.size());
+        // Build data structures
+        frequencyTable = new HashMap<>();
+        // Build attributeSum ragged array
+        attributeSum = new int[this.allInstances.numAttributes()][];
+        for (int i = 0; i < allInstances.numAttributes(); i++) {
+            attributeSum[i] = new int[allInstances.attribute(i).numValues()];
+        }
+    }
+
+    @Override
+    public Model copy() {
+        return new FrequencyTable(new Instances(this.allInstances, this.allInstances.size()),
+                this.attributeSubsetLength, this.attributesAvailable);
     }
 
     @Override
@@ -52,6 +53,7 @@ public class FrequencyTable extends BaseFrequencyModel{
 
     @Override
     public void addInstance(Instance instance) {
+        this.totalFrequency += 1;
         int instHash = this.instanceToPartialHash(instance, this.attributesAvailable);
         int classHash = (int)instance.classValue();
         // Attribute Sum

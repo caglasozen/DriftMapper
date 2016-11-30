@@ -1,5 +1,6 @@
 package main.models.frequency;
 
+import main.models.Model;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -13,28 +14,28 @@ public class FrequencyMaps extends BaseFrequencyModel {
     // Hash of attribute subset is key because array cannot be key
     private HashMap<Integer, HashMap<Integer, int[]>> frequencyMaps;
     private int[] classFreq;
-    private HashMap<int[], HashMap<Integer, Integer>> covariateFreq;
 
-    public FrequencyMaps(int attributeSubsetLength, int[] attributesAvailable) {
-        this.attributesAvailable = attributesAvailable;
-    }
-
-    public FrequencyMaps(Instances initialInstances, int attributeSubsetLength, int[] attributesAvailable) {
+    public FrequencyMaps(Instances dataset, int attributeSubsetLength, int[] attributesAvailable) {
         this.attributesAvailable = attributesAvailable;
         this.attributeSubsetLength = attributeSubsetLength;
         this.classFreq = new int[this.allInstances.numClasses()];
-        this.covariateFreq = new HashMap<>();
-        this.allInstances = initialInstances;
 
-        // Get bases for hash
-        int base = 1;
-        this.hashBases = new int[initialInstances.numAttributes() - 1];
-        for (int i = 0; i < initialInstances.numAttributes() - 1; i++) {
-            this.hashBases[i] = base;
-            base *= initialInstances.attribute(attributesAvailable[i]).numValues();
-        }
+        this.setDataset(dataset);
+        this.allInstances.addAll(dataset);
 
         this.changeAttributeSubsetLength(attributeSubsetLength);
+    }
+
+    @Override
+    public void reset() {
+        this.allInstances = new Instances(this.allInstances, this.allInstances.size());
+        this.changeAttributeSubsetLength(this.attributeSubsetLength);
+    }
+
+    @Override
+    public Model copy() {
+        return new FrequencyMaps(new Instances(this.allInstances, this.allInstances.size()),
+                this.attributeSubsetLength, this.attributesAvailable);
     }
 
     @Override
@@ -65,6 +66,10 @@ public class FrequencyMaps extends BaseFrequencyModel {
 
     @Override
     public void addInstance(Instance instance) {
+        if (this.allInstances == null) {
+            this.setDataset(instance.dataset());
+            this.changeAttributeSubsetLength(this.attributeSubsetLength);
+        }
         this.allInstances.add(instance);
         this.editInstance(instance, 1);
     }

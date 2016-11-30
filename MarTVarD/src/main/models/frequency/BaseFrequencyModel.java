@@ -5,6 +5,7 @@ import main.models.Model;
 import org.apache.commons.lang3.ArrayUtils;
 import weka.core.DenseInstance;
 import weka.core.Instance;
+import weka.core.Instances;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,6 +26,17 @@ public abstract class BaseFrequencyModel extends Model {
     protected abstract int findFy(int classIndex);
     protected abstract int findFvy(Instance instance, int[] attributesSubset, int classIndex);
     protected abstract Set<Integer> getAllHashes(int[] attributeSubset);
+
+    protected void setDataset(Instances dataset) {
+        this.allInstances = new Instances(dataset, dataset.size());
+        // Get bases for hash
+        int base = 1;
+        this.hashBases = new int[dataset.numAttributes() - 1];
+        for (int i = 0; i < dataset.numAttributes() - 1; i++) {
+            this.hashBases[i] = base;
+            base *= dataset.attribute(attributesAvailable[i]).numValues();
+        }
+    }
 
     protected int instanceToPartialHash(Instance instance, int[] attributeSubset) {
         int hash = 0;
