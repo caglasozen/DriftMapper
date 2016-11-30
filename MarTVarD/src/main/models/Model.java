@@ -36,8 +36,13 @@ public abstract class Model {
     public abstract void removeInstance(Instance instance);
 
     public void addAll(Instances instances) {
-        for (Instance instance : instances) {
-            this.addInstance(instance);
+        int percentage = -1;
+        for (int i = 0; i < instances.size(); i++) {
+            if (percentage != (int)((i/(double)instances.size()) * 100)) {
+                percentage = (int)((i/(double)instances.size()) * 100);
+                System.out.print("\rAdded " + percentage + "% of Instances ");
+            }
+            this.addInstance(instances.get(i));
         }
     }
 

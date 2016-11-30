@@ -52,22 +52,13 @@ public class FrequencyMaps extends BaseFrequencyModel {
         this.classFreq = new int[this.allInstances.numClasses()];
 
         // Add initialInstances to frequencyMaps
-        int percentage = -1;
         for (int i = 0; i < this.allInstances.size(); i++) {
-            if (percentage != (int)((i/(double)this.allInstances.size()) * 100)) {
-                percentage = (int)((i/(double)this.allInstances.size()) * 100);
-                System.out.print("\rAdded " + percentage + "% of Instances ");
-            }
             this.editInstance(this.allInstances.get(i), 1);
         }
     }
 
     @Override
     public void addInstance(Instance instance) {
-        if (this.allInstances == null) {
-            this.setDataset(instance.dataset());
-            this.changeAttributeSubsetLength(this.attributeSubsetLength);
-        }
         this.allInstances.add(instance);
         this.editInstance(instance, 1);
     }
