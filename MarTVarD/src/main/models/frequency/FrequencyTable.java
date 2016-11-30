@@ -21,16 +21,12 @@ public class FrequencyTable extends BaseFrequencyModel{
 
         this.setDataset(dataset);
         this.reset();
-
-        // Populate the Frequency Matrix and Sum tables
-        for (Instance instance : dataset) {
-            this.addInstance(instance);
-        }
     }
 
     @Override
     public void reset() {
         this.allInstances = new Instances(this.allInstances, this.allInstances.size());
+        this.totalFrequency = 0;
         // Build data structures
         frequencyTable = new HashMap<>();
         // Build attributeSum ragged array

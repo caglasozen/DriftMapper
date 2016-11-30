@@ -30,10 +30,14 @@ public class StaticData {
         if (model == 0) {
             model1 = new FrequencyTable(instances1, nAttributesActive, attributeIndices);
             model2 = new FrequencyTable(instances2, nAttributesActive, attributeIndices);
+            model1.addAll(instances1);
+            model2.addAll(instances2);
         }
         else {
             model1 = new FrequencyMaps(instances1, nAttributesActive, attributeIndices);
             model2 = new FrequencyMaps(instances2, nAttributesActive, attributeIndices);
+            model1.addAll(instances1);
+            model2.addAll(instances2);
         }
 
         this.resultMap = model1.analyseDifference(model2, sampleScale, nTests, driftMeasurement);

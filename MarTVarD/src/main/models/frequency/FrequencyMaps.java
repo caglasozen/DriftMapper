@@ -21,8 +21,6 @@ public class FrequencyMaps extends BaseFrequencyModel {
         this.classFreq = new int[this.allInstances.numClasses()];
 
         this.setDataset(dataset);
-        this.allInstances.addAll(dataset);
-
         this.changeAttributeSubsetLength(attributeSubsetLength);
     }
 
@@ -51,11 +49,11 @@ public class FrequencyMaps extends BaseFrequencyModel {
                     attributeSubsetToHash(getKthCombination(i, this.attributesAvailable, this.attributeSubsetLength)),
                     new HashMap<>());
         }
+
         // Add initialInstances to frequencyMaps
-        //TODO: Add fancy x out of n instances added printout
+        this.totalFrequency = 0;
         int percentage = -1;
         for (int i = 0; i < this.allInstances.size(); i++) {
-            //if (i % 10000 == 0) System.out.print("\rAdded " + i + " Instances out of " + this.allInstances.size());
             if (percentage != (int)((i/(double)this.allInstances.size()) * 100)) {
                 percentage = (int)((i/(double)this.allInstances.size()) * 100);
                 System.out.print("\rAdded " + percentage + "% of Instances ");
