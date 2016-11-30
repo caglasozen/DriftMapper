@@ -18,7 +18,6 @@ public class FrequencyMaps extends BaseFrequencyModel {
     public FrequencyMaps(Instances dataset, int attributeSubsetLength, int[] attributesAvailable) {
         this.attributesAvailable = attributesAvailable;
         this.attributeSubsetLength = attributeSubsetLength;
-        this.classFreq = new int[this.allInstances.numClasses()];
 
         this.setDataset(dataset);
         this.changeAttributeSubsetLength(attributeSubsetLength);
@@ -49,6 +48,8 @@ public class FrequencyMaps extends BaseFrequencyModel {
                     attributeSubsetToHash(getKthCombination(i, this.attributesAvailable, this.attributeSubsetLength)),
                     new HashMap<>());
         }
+        // New class frequency array
+        this.classFreq = new int[this.allInstances.numClasses()];
 
         // Add initialInstances to frequencyMaps
         int percentage = -1;
