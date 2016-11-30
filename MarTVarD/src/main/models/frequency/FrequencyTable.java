@@ -20,7 +20,6 @@ public class FrequencyTable extends BaseFrequencyModel{
         this.attributesAvailable = attributesAvailable;
 
         this.setDataset(dataset);
-        this.reset();
     }
 
     @Override

@@ -20,7 +20,6 @@ public class FrequencyMaps extends BaseFrequencyModel {
         this.attributeSubsetLength = attributeSubsetLength;
 
         this.setDataset(dataset);
-        this.changeAttributeSubsetLength(attributeSubsetLength);
     }
 
     @Override

@@ -36,6 +36,7 @@ public abstract class BaseFrequencyModel extends Model {
             this.hashBases[i] = base;
             base *= dataset.attribute(attributesAvailable[i]).numValues();
         }
+        this.reset();
     }
 
     protected int instanceToPartialHash(Instance instance, int[] attributeSubset) {
