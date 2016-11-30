@@ -26,27 +26,27 @@ public abstract class BaseFrequencyModel extends Model {
     protected abstract int findFvy(Instance instance, int[] attributesSubset, int classIndex);
     protected abstract Set<Integer> getAllHashes(int[] attributeSubset);
 
-    protected static int instanceToPartialHash(Instance instance, int[] activeAttributes, int[] hashBases) {
+    protected int instanceToPartialHash(Instance instance, int[] attributeSubset) {
         int hash = 0;
         // TODO: Don't rely on class being last attribute
         // Iterate over attributes in strippedInstance
         for (int i = 0; i < instance.numAttributes() - 1; i++) {
             // If not class or active attribute set missing
-            if (ArrayUtils.contains(activeAttributes, i)) {
-                hash += hashBases[i] * (int)instance.value(i);
+            if (ArrayUtils.contains(attributeSubset, i)) {
+                hash += this.hashBases[i] * (int)instance.value(i);
             }
         }
         return hash;
     }
 
-    protected static Instance partialHashToInstance(int partialHash, int[] activeAttributes, Instance exampleInst, int[] hashBases) {
-        Instance partialInstance = new DenseInstance(exampleInst.numAttributes());
-        partialInstance.setDataset(exampleInst.dataset());
+    protected Instance partialHashToInstance(int partialHash, int[] activeAttributes) {
+        Instance partialInstance = new DenseInstance(this.allInstances.numAttributes());
+        partialInstance.setDataset(this.allInstances);
 
         for (int i = partialInstance.numAttributes() - 2; i >= 0; i--) {
             if (ArrayUtils.contains(activeAttributes, i)) {
-                partialInstance.setValue(i, partialHash / hashBases[i]);
-                partialHash = partialHash % hashBases[i];
+                partialInstance.setValue(i, partialHash / this.hashBases[i]);
+                partialHash = partialHash % this.hashBases[i];
             }
             else {
                 partialInstance.setMissing(i);
@@ -56,16 +56,15 @@ public abstract class BaseFrequencyModel extends Model {
         return partialInstance;
     }
 
-    protected static boolean isPartialHashEqualHash(int partialHash, int hash, int[] attributeSubset,
-                                                    int[] hashBases, Instance exampleInst) {
+    protected boolean isPartialHashEqualHash(int partialHash, int hash, int[] attributeSubset) {
         int rem = hash - partialHash;
         int quo;
-        for (int i = exampleInst.numAttributes() - 2; i >= 0; i--) {
+        for (int i = this.allInstances.numAttributes() - 2; i >= 0; i--) {
             if (rem < 0) return false;
             if (!ArrayUtils.contains(attributeSubset, i)) {
-                quo = rem / hashBases[i];
-                if (quo >= exampleInst.attribute(i).numValues()) return false;
-                rem = rem % hashBases[i];
+                quo = rem / this.hashBases[i];
+                if (quo >= this.allInstances.attribute(i).numValues()) return false;
+                rem = rem % this.hashBases[i];
             }
         }
         return rem == 0;

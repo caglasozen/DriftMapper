@@ -83,7 +83,7 @@ public class FrequencyMaps extends BaseFrequencyModel {
 
     @Override
     protected int findFv(Instance instance, int[] attributesSubset) {
-        int hash = BaseFrequencyModel.instanceToPartialHash(instance, attributesSubset, hashBases);
+        int hash = this.instanceToPartialHash(instance, attributesSubset);
         return !hashSeen(hash, attributesSubset) ? 0 : this.frequencyMaps.get(attributeSubsetToHash(attributesSubset)).get(hash)[0];
     }
 
@@ -94,7 +94,7 @@ public class FrequencyMaps extends BaseFrequencyModel {
 
     @Override
     protected int findFvy(Instance instance, int[] attributesSubset, int classIndex) {
-        int hash = BaseFrequencyModel.instanceToPartialHash(instance, attributesSubset, hashBases);
+        int hash = this.instanceToPartialHash(instance, attributesSubset);
         return !hashSeen(hash, attributesSubset) ? 0 : this.frequencyMaps.get(attributeSubsetToHash(attributesSubset)).get(hash)[1 + classIndex];
     }
 
@@ -108,7 +108,7 @@ public class FrequencyMaps extends BaseFrequencyModel {
         int nAttributeSubsets = nCr(this.attributesAvailable.length, this.attributeSubsetLength);
         for (int j = 0; j < nAttributeSubsets; j++) {
             int[] activeAttributes = getKthCombination(j, attributesAvailable, attributeSubsetLength);
-            int partialHash = FrequencyMaps.instanceToPartialHash(instance, activeAttributes, hashBases);
+            int partialHash = this.instanceToPartialHash(instance, activeAttributes);
             int subsetHash = attributeSubsetToHash(activeAttributes);
             if (!this.frequencyMaps.get(subsetHash).containsKey(partialHash)) {
                 this.frequencyMaps.get(subsetHash).put(partialHash, new int[1 + this.exampleInst.numClasses()]);

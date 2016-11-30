@@ -53,7 +53,7 @@ public class FrequencyTable extends BaseFrequencyModel{
 
     @Override
     public void addInstance(Instance instance) {
-        int instHash = instanceToPartialHash(instance, this.attributesAvailable, hashBases);
+        int instHash = this.instanceToPartialHash(instance, this.attributesAvailable);
         int classHash = (int)instance.classValue();
         // Attribute Sum
         for (int i = 0; i < instance.numAttributes(); i++) {
@@ -72,7 +72,7 @@ public class FrequencyTable extends BaseFrequencyModel{
 
     @Override
     public void removeInstance(Instance instance) {
-        int instHash = instanceToPartialHash(instance, this.attributesAvailable,hashBases);
+        int instHash = this.instanceToPartialHash(instance, this.attributesAvailable);
         int classHash = (int)instance.classValue();
         // Attribute Sum
         for (int i = 0; i < instance.numAttributes(); i++) {
@@ -93,8 +93,8 @@ public class FrequencyTable extends BaseFrequencyModel{
     protected Set<Integer> getAllHashes(int[] attributeSubset) {
         HashSet<Integer> hashes = new HashSet<>();
         for (int hash : this.frequencyTable.keySet()) {
-            Instance instance = partialHashToInstance(hash, this.attributesAvailable, this.exampleInst, this.hashBases);
-            int currentHash = instanceToPartialHash(instance, attributeSubset, hashBases);
+            Instance instance = this.partialHashToInstance(hash, this.attributesAvailable);
+            int currentHash = this.instanceToPartialHash(instance, attributeSubset);
             if (!hashes.contains(currentHash)) {
                 hashes.add(currentHash);
             }
@@ -139,11 +139,11 @@ public class FrequencyTable extends BaseFrequencyModel{
         if (!partialVectorExists(instance, attributeSubset)) return 0;
         if (!isPartialInstancePossible(instance, attributeSubset)) return 0;
 
-        int instHash = instanceToPartialHash(instance, attributeSubset, hashBases);
+        int instHash = this.instanceToPartialHash(instance, attributeSubset);
 
         int totalFrequency = 0;
         for (int hash: this.frequencyTable.keySet()) {
-            if (isPartialHashEqualHash(instHash, hash, attributeSubset, this.hashBases, this.exampleInst)) {
+            if (this.isPartialHashEqualHash(instHash, hash, attributeSubset)) {
                 totalFrequency += classSpecific ?
                         this.frequencyTable.get(hash)[(int)instance.classValue() + 1] :
                         this.frequencyTable.get(hash)[0];
