@@ -1,5 +1,5 @@
-import main.experiments.types.CovariateDistance;
-import main.experiments.types.PosteriorDistance;
+import main.analyse.StaticData;
+import main.models.DriftMeasurement;
 import weka.core.Instances;
 
 /**
@@ -61,7 +61,7 @@ public class SamplingTest {
             int sampleSize = sampleSizes[i];
             System.out.println("Running with sample size: " + sampleSize);
             resultTable[i][0] = Integer.toString(sampleSize);
-            CovariateDistance experiment = new CovariateDistance(dataSet[0], dataSet[1], dataSet[0].numAttributes(), attributeIndicesCov, sampleSize, nTests);
+            StaticData experiment = new StaticData(dataSet[0], dataSet[1], dataSet[0].numAttributes(), attributeIndicesCov, sampleSize, nTests, DriftMeasurement.COVARIATE, 0);
             String[] row = experiment.getResultTable()[0];
             for (int j = 0; j < row.length; j++) {
                 resultTable[i][j + 1] = row[j];
@@ -85,7 +85,7 @@ public class SamplingTest {
             int sampleSize = sampleSizes[i];
             System.out.println("Running with sample size: " + sampleSize);
             resultTable[i][0] = Integer.toString(sampleSize);
-            PosteriorDistance experiment = new PosteriorDistance(dataSet[0], dataSet[1], dataSet[0].numAttributes(), attributeIndicesCov, sampleSize, nTests);
+            StaticData experiment = new StaticData(dataSet[0], dataSet[1], dataSet[0].numAttributes(), attributeIndicesCov, sampleSize, nTests, DriftMeasurement.POSTERIOR, 0);
             String[] row = experiment.getResultTable()[0];
             for (int j = 0; j < row.length; j++) {
                 resultTable[i][j + 1] = row[j];

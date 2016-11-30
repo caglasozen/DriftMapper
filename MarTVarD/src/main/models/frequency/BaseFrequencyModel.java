@@ -1,14 +1,14 @@
 package main.models.frequency;
 
-import main.experiments.ExperimentResult;
+import main.analyse.ExperimentResult;
 import main.models.Model;
 import org.apache.commons.lang3.ArrayUtils;
 import weka.core.DenseInstance;
 import weka.core.Instance;
-import weka.core.Instances;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -16,12 +16,7 @@ import java.util.Set;
  **/
 
 public abstract class BaseFrequencyModel extends Model {
-    protected int totalFrequency;
-    // TODO: get rid of att avail
-    protected int[] attributesAvailable;
-    protected int nAttributesActive;
-    protected Instance exampleInst;
-    protected Instances allInstances;
+
     protected int[] hashBases;
 
     public abstract void changeAttributeSubsetLength(int length);
@@ -95,7 +90,8 @@ public abstract class BaseFrequencyModel extends Model {
     }
 
     private ArrayList<Integer> mergeHashes(BaseFrequencyModel model, int[] attributeSubset) {
-        Set<Integer> hashes = this.getAllHashes(attributeSubset);
+        Set<Integer> hashes = new HashSet<>();
+        hashes.addAll(this.getAllHashes(attributeSubset));
         hashes.addAll(model.getAllHashes(attributeSubset));
         return new ArrayList<>(hashes);
     }
@@ -111,17 +107,16 @@ public abstract class BaseFrequencyModel extends Model {
         allHashes = sampleHashes(allHashes, sampleScale);
 
         ArrayList<ExperimentResult> returnResults = new ArrayList<>();
+        int totalP = 0;
+        int totalQ = 0;
         double[] p = new double[allHashes.size()];
         double[] q = new double[allHashes.size()];
         double[] separateDistance = new double[allHashes.size()];
         double[][] instanceValues = new double[allHashes.size()][this.exampleInst.numAttributes()];
-        //TODO: Remove debug flags
-        int totalpSeen = 0;
-        int totalqSeen = 0;
         for (int i = 0; i < allHashes.size(); i++) {
             Instance instance = partialHashToInstance(allHashes.get(i), attributeSubset, this.exampleInst, hashBases);
-            totalpSeen += this.findFv(instance, attributeSubset);
-            totalqSeen += modelAfter.findFv(instance, attributeSubset);
+            totalP += this.findFv(instance, attributeSubset);
+            totalQ += modelAfter.findFv(instance, attributeSubset);
             p[i] = this.totalFrequency == 0 ?
                     0 : (double)this.findFv(instance, attributeSubset) / (double)this.totalFrequency;
             q[i] = modelAfter.totalFrequency == 0 ?
@@ -211,8 +206,12 @@ public abstract class BaseFrequencyModel extends Model {
         ArrayList<ExperimentResult> returnResults = new ArrayList<>();
         for (int i = 0; i < allHashes.size(); i++) {
             Instance instance = partialHashToInstance(allHashes.get(i), attributeSubset, this.exampleInst, hashBases);
+            int Totalp = 0;
+            int Totalq = 0;
             for (int classIndex = 0; classIndex < this.exampleInst.numClasses(); classIndex++) {
                 instance.setClassValue(classIndex);
+                Totalp += this.findFvy(instance, attributeSubset, classIndex);
+                Totalq += modelAfter.findFvy(instance, attributeSubset, classIndex);
                 p[classIndex] = this.findFv(instance, attributeSubset) == 0 ?
                         0 : (double) this.findFvy(instance, attributeSubset, classIndex) / (double) this.findFv(instance, attributeSubset);
                 q[classIndex] = modelAfter.findFv(instance, attributeSubset) == 0 ?

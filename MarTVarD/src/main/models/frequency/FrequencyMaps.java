@@ -2,6 +2,7 @@ package main.models.frequency;
 
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.SystemInfo;
 
 import java.util.*;
 
@@ -10,7 +11,8 @@ import java.util.*;
  **/
 
 public class FrequencyMaps extends BaseFrequencyModel {
-    private HashMap<int[], HashMap<Integer, int[]>> frequencyMaps;
+    // Hash of attribute subset is key because array cannot be key
+    private HashMap<Integer, HashMap<Integer, int[]>> frequencyMaps;
     private int[] classFreq;
     private HashMap<int[], HashMap<Integer, Integer>> covariateFreq;
 
@@ -38,14 +40,24 @@ public class FrequencyMaps extends BaseFrequencyModel {
         this.nAttributesActive = length;
 
         int nAttributeSubsets = FrequencyMaps.nCr(this.attributesAvailable.length, this.nAttributesActive);
+        // New frequency map
         this.frequencyMaps = new HashMap<>();
         // Add a frequencyMap for each attribute subset
         for (int i = 0; i < nAttributeSubsets; i++) {
-            this.frequencyMaps.put(getKthCombination(i, this.attributesAvailable, this.nAttributesActive), new HashMap<>());
+            this.frequencyMaps.put(
+                    attributeSubsetToHash(getKthCombination(i, this.attributesAvailable, this.nAttributesActive)),
+                    new HashMap<>());
         }
         // Add initialInstances to frequencyMaps
-        for (Instance instance : this.allInstances) {
-            this.addInstance(instance);
+        //TODO: Add fancy x out of n instances added printout
+        int percentage = -1;
+        for (int i = 0; i < this.allInstances.size(); i++) {
+            //if (i % 10000 == 0) System.out.print("\rAdded " + i + " Instances out of " + this.allInstances.size());
+            if (percentage != (int)((i/(double)this.allInstances.size()) * 100)) {
+                percentage = (int)((i/(double)this.allInstances.size()) * 100);
+                System.out.print("\rAdded " + percentage + "% of Instances ");
+            }
+            this.editInstance(this.allInstances.get(i), 1);
         }
     }
 
@@ -63,13 +75,13 @@ public class FrequencyMaps extends BaseFrequencyModel {
 
     @Override
     protected Set<Integer> getAllHashes(int[] attributeSubset) {
-        return this.frequencyMaps.get(attributeSubset).keySet();
+        return this.frequencyMaps.get(attributeSubsetToHash(attributeSubset)).keySet();
     }
 
     @Override
     protected int findFv(Instance instance, int[] attributesSubset) {
         int hash = BaseFrequencyModel.instanceToPartialHash(instance, attributesSubset, hashBases);
-        return !hashSeen(hash, attributesSubset) ? 0 : this.frequencyMaps.get(attributesSubset).get(hash)[0];
+        return !hashSeen(hash, attributesSubset) ? 0 : this.frequencyMaps.get(attributeSubsetToHash(attributesSubset)).get(hash)[0];
     }
 
     @Override
@@ -80,11 +92,11 @@ public class FrequencyMaps extends BaseFrequencyModel {
     @Override
     protected int findFvy(Instance instance, int[] attributesSubset, int classIndex) {
         int hash = BaseFrequencyModel.instanceToPartialHash(instance, attributesSubset, hashBases);
-        return !hashSeen(hash, attributesSubset) ? 0 : this.frequencyMaps.get(attributesSubset).get(hash)[1 + classIndex];
+        return !hashSeen(hash, attributesSubset) ? 0 : this.frequencyMaps.get(attributeSubsetToHash(attributesSubset)).get(hash)[1 + classIndex];
     }
 
     private boolean hashSeen(int hash, int[] attributeSubset) {
-        return this.frequencyMaps.get(attributeSubset).containsKey(hash);
+        return this.frequencyMaps.get(attributeSubsetToHash(attributeSubset)).containsKey(hash);
     }
 
     private void editInstance(Instance instance, int amount) {
@@ -94,14 +106,22 @@ public class FrequencyMaps extends BaseFrequencyModel {
         for (int j = 0; j < nAttributeSubsets; j++) {
             int[] activeAttributes = getKthCombination(j, attributesAvailable, nAttributesActive);
             int partialHash = FrequencyMaps.instanceToPartialHash(instance, activeAttributes, hashBases);
-            if (!this.frequencyMaps.get(activeAttributes).containsKey(partialHash)) {
-                this.frequencyMaps.get(activeAttributes).put(partialHash, new int[1 + this.exampleInst.numClasses()]);
+            int subsetHash = attributeSubsetToHash(activeAttributes);
+            if (!this.frequencyMaps.get(subsetHash).containsKey(partialHash)) {
+                this.frequencyMaps.get(subsetHash).put(partialHash, new int[1 + this.exampleInst.numClasses()]);
             }
-            int[] prevFreq = this.frequencyMaps.get(activeAttributes).get(partialHash);
+            int[] prevFreq = this.frequencyMaps.get(subsetHash).get(partialHash);
             prevFreq[0] += amount;
-            prevFreq[(int)instance.classValue()] += amount;
-            this.frequencyMaps.get(activeAttributes).replace(partialHash, prevFreq);
+            prevFreq[1 + (int)instance.classValue()] += amount;
+            this.frequencyMaps.get(subsetHash).replace(partialHash, prevFreq);
         }
     }
 
+    private static int attributeSubsetToHash(int[] attributeSubset) {
+        int hash = 0;
+        for (int i : attributeSubset) {
+            hash += Math.pow(2, i);
+        }
+        return hash;
+    }
 }
