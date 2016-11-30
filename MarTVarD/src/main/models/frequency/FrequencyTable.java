@@ -28,7 +28,6 @@ public class FrequencyTable extends BaseFrequencyModel{
 
         // Get sample instance
         this.allInstances = new Instances(dataSet);
-        this.exampleInst = dataSet.firstInstance();
 
         // Save the sample size
         this.totalFrequency = dataSet.size();
@@ -109,7 +108,7 @@ public class FrequencyTable extends BaseFrequencyModel{
 
     @Override
     protected int findFy(int classIndex) {
-        return this.attributeSum[this.exampleInst.classIndex()][classIndex];
+        return this.attributeSum[this.allInstances.classIndex()][classIndex];
     }
 
     @Override

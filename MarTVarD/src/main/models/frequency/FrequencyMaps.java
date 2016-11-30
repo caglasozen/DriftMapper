@@ -22,8 +22,7 @@ public class FrequencyMaps extends BaseFrequencyModel {
     public FrequencyMaps(Instances initialInstances, int attributeSubsetLength, int[] attributesAvailable) {
         this.attributesAvailable = attributesAvailable;
         this.attributeSubsetLength = attributeSubsetLength;
-        this.exampleInst = initialInstances.firstInstance();
-        this.classFreq = new int[this.exampleInst.numClasses()];
+        this.classFreq = new int[this.allInstances.numClasses()];
         this.covariateFreq = new HashMap<>();
         this.allInstances = initialInstances;
 
@@ -111,7 +110,7 @@ public class FrequencyMaps extends BaseFrequencyModel {
             int partialHash = this.instanceToPartialHash(instance, activeAttributes);
             int subsetHash = attributeSubsetToHash(activeAttributes);
             if (!this.frequencyMaps.get(subsetHash).containsKey(partialHash)) {
-                this.frequencyMaps.get(subsetHash).put(partialHash, new int[1 + this.exampleInst.numClasses()]);
+                this.frequencyMaps.get(subsetHash).put(partialHash, new int[1 + this.allInstances.numClasses()]);
             }
             int[] prevFreq = this.frequencyMaps.get(subsetHash).get(partialHash);
             prevFreq[0] += amount;

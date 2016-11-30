@@ -19,7 +19,6 @@ public abstract class Model {
     // TODO: get rid of att avail
     protected int[] attributesAvailable;
     protected int attributeSubsetLength;
-    protected Instance exampleInst;
     protected Instances allInstances;
 
     protected Distance distanceMetric = new TotalVariation();
@@ -125,10 +124,10 @@ public abstract class Model {
                 return this.getResultTable(0, "NA", resultMap);
             case LIKELIHOOD:
                 int nCombinations = resultMap.size();
-                int nClasses = this.exampleInst.numClasses();
+                int nClasses = this.allInstances.numClasses();
                 String[][] collatedResults = new String[nCombinations*nClasses][9];
                 for (int i = 0; i < nClasses; i++) {
-                    String[][] tmpResult = this.getResultTable(i, this.exampleInst.classAttribute().value(i), resultMap);
+                    String[][] tmpResult = this.getResultTable(i, this.allInstances.classAttribute().value(i), resultMap);
                     for (int j = 0; j < tmpResult.length; j++) {
                         collatedResults[i*nCombinations + j] = tmpResult[j];
                     }
@@ -154,7 +153,7 @@ public abstract class Model {
             results[i][6] = "";
             results[i][7] = "";
             for (int j = 0; j < attributeSubSets[i].length; j++) {
-                results[i][7] += this.exampleInst.attribute(attributeSubSets[i][j]).name() + "_";
+                results[i][7] += this.allInstances.attribute(attributeSubSets[i][j]).name() + "_";
             }
             results[i][7] = results[i][7].substring(0, results[i][7].length() - 1);
             results[i][8] = className;
@@ -162,11 +161,11 @@ public abstract class Model {
                 for (int j = 0; j < attributeSubSets[i].length; j++) {
                     int attributeIndex = attributeSubSets[i][j];
                     String minVal = Double.isNaN(currentResult.minValues[attributeIndex]) || (int)currentResult.minValues[attributeIndex] < 0 ? "*" :
-                            this.exampleInst.attribute(attributeIndex).value((int)currentResult.minValues[attributeIndex]);
+                            this.allInstances.attribute(attributeIndex).value((int)currentResult.minValues[attributeIndex]);
                     String maxVal = Double.isNaN(currentResult.minValues[attributeIndex]) || (int)currentResult.maxValues[attributeIndex] < 0 ? "*" :
-                            this.exampleInst.attribute(attributeIndex).value((int)currentResult.maxValues[attributeIndex]);
-                    results[i][4] += this.exampleInst.attribute(attributeIndex).name() + "=" + maxVal + "_";
-                    results[i][6] += this.exampleInst.attribute(attributeIndex).name() + "=" + minVal + "_";
+                            this.allInstances.attribute(attributeIndex).value((int)currentResult.maxValues[attributeIndex]);
+                    results[i][4] += this.allInstances.attribute(attributeIndex).name() + "=" + maxVal + "_";
+                    results[i][6] += this.allInstances.attribute(attributeIndex).name() + "=" + minVal + "_";
                 }
                 // Trim last underscore
                 results[i][4] = results[i][4].substring(0, results[i][4].length() - 1);

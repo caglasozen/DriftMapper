@@ -111,9 +111,9 @@ public abstract class BaseFrequencyModel extends Model {
         double[] p = new double[allHashes.size()];
         double[] q = new double[allHashes.size()];
         double[] separateDistance = new double[allHashes.size()];
-        double[][] instanceValues = new double[allHashes.size()][this.exampleInst.numAttributes()];
+        double[][] instanceValues = new double[allHashes.size()][this.allInstances.numAttributes()];
         for (int i = 0; i < allHashes.size(); i++) {
-            Instance instance = partialHashToInstance(allHashes.get(i), attributeSubset, this.exampleInst, hashBases);
+            Instance instance = this.partialHashToInstance(allHashes.get(i), attributeSubset);
             totalP += this.findFv(instance, attributeSubset);
             totalQ += modelAfter.findFv(instance, attributeSubset);
             p[i] = this.totalFrequency == 0 ?
@@ -138,13 +138,13 @@ public abstract class BaseFrequencyModel extends Model {
         ArrayList<Integer> allHashes = mergeHashes(modelAfter, attributeSubset);
 
         ArrayList<ExperimentResult> returnResults = new ArrayList<>();
-        int nClass =  exampleInst.numClasses();
+        int nClass =  this.allInstances.numClasses();
         double[] p = new double[allHashes.size() * nClass];
         double[] q = new double[allHashes.size() * nClass];
         double[] separateDistance = new double[allHashes.size() * nClass];
-        double[][] instanceValues = new double[allHashes.size() * nClass][this.exampleInst.numAttributes()];
+        double[][] instanceValues = new double[allHashes.size() * nClass][this.allInstances.numAttributes()];
         for (int i = 0; i < allHashes.size(); i++) {
-            Instance instance = partialHashToInstance(allHashes.get(i), attributeSubset, this.exampleInst, hashBases);
+            Instance instance = this.partialHashToInstance(allHashes.get(i), attributeSubset);
             for(int classIndex = 0; classIndex < nClass; classIndex++) {
                 p[i*nClass + classIndex] = this.totalFrequency == 0 ?
                         0 : (double)this.findFvy(instance, attributeSubset, classIndex) / (double)this.totalFrequency;
@@ -171,11 +171,11 @@ public abstract class BaseFrequencyModel extends Model {
         double[] p = new double[allHashes.size()];
         double[] q = new double[allHashes.size()];
         double[] separateDistance = new double[allHashes.size()];
-        double[][] instanceValues = new double[allHashes.size()][this.exampleInst.numAttributes()];
+        double[][] instanceValues = new double[allHashes.size()][this.allInstances.numAttributes()];
         ArrayList<ExperimentResult> returnResults = new ArrayList<>();
-        for (int classIndex = 0; classIndex < this.exampleInst.numClasses(); classIndex++) {
+        for (int classIndex = 0; classIndex < this.allInstances.numClasses(); classIndex++) {
             for (int i = 0; i < allHashes.size(); i++) {
-                Instance instance = partialHashToInstance(allHashes.get(i), attributeSubset, this.exampleInst, hashBases);
+                Instance instance = this.partialHashToInstance(allHashes.get(i), attributeSubset);
                 p[i] = this.findFy(classIndex) == 0 ?
                         0 : (double) this.findFvy(instance, attributeSubset, classIndex) / (double) this.findFy(classIndex);
                 q[i] = modelAfter.findFy(classIndex) == 0 ?
@@ -198,19 +198,15 @@ public abstract class BaseFrequencyModel extends Model {
         // Get the hash of all the seen instances and get a sample from them
         ArrayList<Integer> allHashes = mergeHashes(modelAfter, attributeSubset);
 
-        double[] p = new double[this.exampleInst.numClasses()];
-        double[] q = new double[this.exampleInst.numClasses()];
-        double[] separateDistance = new double[this.exampleInst.numClasses()];
-        double[][] instanceValues = new double[this.exampleInst.numClasses()][this.exampleInst.numAttributes()];
+        double[] p = new double[this.allInstances.numClasses()];
+        double[] q = new double[this.allInstances.numClasses()];
+        double[] separateDistance = new double[this.allInstances.numClasses()];
+        double[][] instanceValues = new double[this.allInstances.numClasses()][this.allInstances.numAttributes()];
         ArrayList<ExperimentResult> returnResults = new ArrayList<>();
         for (int i = 0; i < allHashes.size(); i++) {
-            Instance instance = partialHashToInstance(allHashes.get(i), attributeSubset, this.exampleInst, hashBases);
-            int Totalp = 0;
-            int Totalq = 0;
-            for (int classIndex = 0; classIndex < this.exampleInst.numClasses(); classIndex++) {
+            Instance instance = this.partialHashToInstance(allHashes.get(i), attributeSubset);
+            for (int classIndex = 0; classIndex < this.allInstances.numClasses(); classIndex++) {
                 instance.setClassValue(classIndex);
-                Totalp += this.findFvy(instance, attributeSubset, classIndex);
-                Totalq += modelAfter.findFvy(instance, attributeSubset, classIndex);
                 p[classIndex] = this.findFv(instance, attributeSubset) == 0 ?
                         0 : (double) this.findFvy(instance, attributeSubset, classIndex) / (double) this.findFv(instance, attributeSubset);
                 q[classIndex] = modelAfter.findFv(instance, attributeSubset) == 0 ?
