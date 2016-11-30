@@ -35,6 +35,18 @@ public abstract class Model {
     public abstract void addInstance(Instance instance);
     public abstract void removeInstance(Instance instance);
 
+    public void addAll(Instances instances) {
+        for (Instance instance : instances) {
+            this.addInstance(instance);
+        }
+    }
+
+    public void removeAll(Instances instances) {
+        for (Instance instance : instances) {
+            this.removeInstance(instance);
+        }
+    }
+
     protected static Instances sampleInstances(Instances instances, double sampleScale) {
         Instances sampleInstances = new Instances(instances, (int)(instances.size() * sampleScale));
         HashSet<Integer> selectedInstances = new HashSet<>();
