@@ -63,8 +63,8 @@ public class FrequencyMaps extends BaseFrequencyModel {
     }
 
     @Override
-    public void removeInstance(Instance instance) {
-        this.allInstances.remove(instance);
+    public void removeInstance(int index) {
+        Instance instance = this.allInstances.remove(index);
         this.editInstance(instance, -1);
     }
 

@@ -33,7 +33,7 @@ public abstract class Model {
             Model modelToCompare, int[] attributeSubset, double sampleScale);
 
     public abstract void addInstance(Instance instance);
-    public abstract void removeInstance(Instance instance);
+    public abstract void removeInstance(int index);
 
     public int size() {
         return this.allInstances.size();
@@ -54,9 +54,9 @@ public abstract class Model {
         }
     }
 
-    public void removeAll(Instances instances) {
-        for (Instance instance : instances) {
-            this.removeInstance(instance);
+    public void removeAll(int[] indices) {
+        for (int index : indices) {
+            this.removeInstance(index);
         }
     }
 

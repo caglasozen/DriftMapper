@@ -66,8 +66,8 @@ public class FrequencyTable extends BaseFrequencyModel{
     }
 
     @Override
-    public void removeInstance(Instance instance) {
-        this.allInstances.remove(instance);
+    public void removeInstance(int index) {
+        Instance instance = this.allInstances.remove(index);
         int instHash = this.instanceToPartialHash(instance, this.attributesAvailable);
         int classHash = (int)instance.classValue();
         // Attribute Sum
