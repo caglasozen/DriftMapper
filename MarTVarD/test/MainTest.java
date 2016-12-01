@@ -82,19 +82,20 @@ public class MainTest {
         System.out.println("Running Tests on " + name);
         System.out.println("For " + nInterval[0] + " to " + nInterval[1] + " attributes");
         int model = 1;
-        String appendFolder = "_maps";
+        String appendFolder = model == 0 ? "_new" : "_maps";
 
         folder = sampleScale <= 1 ? folder : folder + "_" + sampleScale;
 
         int[] attributeIndices = new int[dataSets[0].numAttributes() - 1];
         for (int i = 0; i < dataSets[0].numAttributes() - 1; i++) attributeIndices[i] = i;
 
+        /*
         System.out.println("Running Covariate");
         for (int i = nInterval[0]; i < nInterval[1]; i++) {
             StaticData experiment = new StaticData(dataSets[0], dataSets[1], i, attributeIndices,
                     sampleScale, 10, DriftMeasurement.COVARIATE, model);
             writeToCSV(experiment.getResultTable(),
-                    new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes", "class_values"},
+                    new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes"},
                     "./data_out/" + folder + appendFolder + "/" + name + "_" + i + "-attributes_covariate.csv");
         }
 
@@ -103,15 +104,16 @@ public class MainTest {
             StaticData experiment = new StaticData(dataSets[0], dataSets[1], i, attributeIndices,
                     sampleScale, 10, DriftMeasurement.JOINT, model);
             writeToCSV(experiment.getResultTable(),
-                    new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes", "class_values"},
+                    new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes"},
                     "./data_out/" + folder + appendFolder + "/" + name + "_" + i + "-attributes_joint.csv");
         }
+        */
 
         System.out.println("Running ConditionedCovariate");
         for (int i = nInterval[0]; i < nInterval[1]; i++) {
             StaticData experiment = new StaticData(dataSets[0], dataSets[1], i, attributeIndices, sampleScale, 10, DriftMeasurement.LIKELIHOOD, model);
             writeToCSV(experiment.getResultTable(),
-                    new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes", "class_values"},
+                    new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes"},
                     "./data_out/" + folder + appendFolder + "/" + name + "_" + i + "-attributes_likelihood.csv");
         }
 
@@ -119,7 +121,7 @@ public class MainTest {
         for (int i = nInterval[0]; i < nInterval[1]; i++) {
             StaticData experiment = new StaticData(dataSets[0], dataSets[1], i, attributeIndices, sampleScale, 10, DriftMeasurement.POSTERIOR, model);
             writeToCSV(experiment.getResultTable(),
-                    new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes", "class_values"},
+                    new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes"},
                     "./data_out/" + folder + appendFolder + "/" + name + "_" + i + "-attributes_posterior.csv");
         }
     }

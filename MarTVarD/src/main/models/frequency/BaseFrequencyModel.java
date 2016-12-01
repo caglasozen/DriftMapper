@@ -110,7 +110,7 @@ public abstract class BaseFrequencyModel extends Model {
 
     // TODO: Try and separate these into smaller functions
     @Override
-    public ArrayList<ExperimentResult> findCovariateDistance(Model modelToCompare, int[] attributeSubset, double sampleScale) {
+    public ExperimentResult findCovariateDistance(Model modelToCompare, int[] attributeSubset, double sampleScale) {
         if (!validAttributeSubset(attributeSubset)) return null;
         BaseFrequencyModel modelAfter = (BaseFrequencyModel)modelToCompare;
 
@@ -118,17 +118,12 @@ public abstract class BaseFrequencyModel extends Model {
         ArrayList<Integer> allHashes = mergeHashes(modelAfter, attributeSubset);
         allHashes = sampleHashes(allHashes, sampleScale);
 
-        ArrayList<ExperimentResult> returnResults = new ArrayList<>();
-        int totalP = 0;
-        int totalQ = 0;
         double[] p = new double[allHashes.size()];
         double[] q = new double[allHashes.size()];
         double[] separateDistance = new double[allHashes.size()];
         double[][] instanceValues = new double[allHashes.size()][this.allInstances.numAttributes()];
         for (int i = 0; i < allHashes.size(); i++) {
             Instance instance = this.partialHashToInstance(allHashes.get(i), attributeSubset);
-            totalP += this.findFv(instance, attributeSubset);
-            totalQ += modelAfter.findFv(instance, attributeSubset);
             p[i] = this.allInstances.size() == 0 ?
                     0 : (double)this.findFv(instance, attributeSubset) / (double)this.allInstances.size();
             q[i] = modelAfter.allInstances.size() == 0 ?
@@ -138,19 +133,17 @@ public abstract class BaseFrequencyModel extends Model {
         }
         double finalDistance = this.distanceMetric.findDistance(p, q) * sampleScale;
         ExperimentResult finalResult = new ExperimentResult(finalDistance, separateDistance, instanceValues);
-        returnResults.add(finalResult);
-        return returnResults;
+        return finalResult;
     }
 
     @Override
-    public ArrayList<ExperimentResult> findJointDistance(Model modelToCompare, int[] attributeSubset, double sampleScale) {
+    public ExperimentResult findJointDistance(Model modelToCompare, int[] attributeSubset, double sampleScale) {
         if (!validAttributeSubset(attributeSubset)) return null;
         BaseFrequencyModel modelAfter = (BaseFrequencyModel)modelToCompare;
 
         // Get the hash of all the seen instances and get a sample from them
         ArrayList<Integer> allHashes = mergeHashes(modelAfter, attributeSubset);
 
-        ArrayList<ExperimentResult> returnResults = new ArrayList<>();
         int nClass =  this.allInstances.numClasses();
         double[] p = new double[allHashes.size() * nClass];
         double[] q = new double[allHashes.size() * nClass];
@@ -169,12 +162,11 @@ public abstract class BaseFrequencyModel extends Model {
         }
         double finalDistance = this.distanceMetric.findDistance(p, q) * sampleScale;
         ExperimentResult finalResult = new ExperimentResult(finalDistance, separateDistance, instanceValues);
-        returnResults.add(finalResult);
-        return returnResults;
+        return finalResult;
     }
 
     @Override
-    public ArrayList<ExperimentResult> findLikelihoodDistance(Model modelToCompare, int[] attributeSubset, double sampleScale) {
+    public ExperimentResult findLikelihoodDistance(Model modelToCompare, int[] attributeSubset, double sampleScale) {
         if (!validAttributeSubset(attributeSubset)) return null;
         BaseFrequencyModel modelAfter = (BaseFrequencyModel)modelToCompare;
 
@@ -185,10 +177,11 @@ public abstract class BaseFrequencyModel extends Model {
         double[] q = new double[allHashes.size()];
         double[] separateDistance = new double[allHashes.size()];
         double[][] instanceValues = new double[allHashes.size()][this.allInstances.numAttributes()];
-        ArrayList<ExperimentResult> returnResults = new ArrayList<>();
+        double finalDistance = 0.0f;
         for (int classIndex = 0; classIndex < this.allInstances.numClasses(); classIndex++) {
             for (int i = 0; i < allHashes.size(); i++) {
                 Instance instance = this.partialHashToInstance(allHashes.get(i), attributeSubset);
+                instance.setClassValue(classIndex);
                 p[i] = this.findFy(classIndex) == 0 ?
                         0 : (double) this.findFvy(instance, attributeSubset, classIndex) / (double) this.findFy(classIndex);
                 q[i] = modelAfter.findFy(classIndex) == 0 ?
@@ -196,15 +189,17 @@ public abstract class BaseFrequencyModel extends Model {
                 separateDistance[i] = this.distanceMetric.findDistance(new double[]{p[i]}, new double[]{q[i]});
                 instanceValues[i] = instance.toDoubleArray();
             }
-            double finalDistance = this.distanceMetric.findDistance(p, q) * sampleScale;
-            ExperimentResult finalResult = new ExperimentResult(finalDistance, separateDistance, instanceValues);
-            returnResults.add(finalResult);
+            finalDistance += this.distanceMetric.findDistance(p, q) * sampleScale * (
+                    ((double)this.findFy(classIndex) / (double)this.allInstances.size()) +
+                            ((double)modelAfter.findFy(classIndex) / (double)modelAfter.allInstances.size())
+            )/2;
         }
-        return returnResults;
+        ExperimentResult finalResult = new ExperimentResult(finalDistance, separateDistance, instanceValues);
+        return finalResult;
     }
 
     @Override
-    public ArrayList<ExperimentResult> findPosteriorDistance(Model modelToCompare, int[] attributeSubset, double sampleScale) {
+    public ExperimentResult findPosteriorDistance(Model modelToCompare, int[] attributeSubset, double sampleScale) {
         if (!validAttributeSubset(attributeSubset)) return null;
         BaseFrequencyModel modelAfter = (BaseFrequencyModel)modelToCompare;
 
@@ -215,7 +210,7 @@ public abstract class BaseFrequencyModel extends Model {
         double[] q = new double[this.allInstances.numClasses()];
         double[] separateDistance = new double[this.allInstances.numClasses()];
         double[][] instanceValues = new double[this.allInstances.numClasses()][this.allInstances.numAttributes()];
-        ArrayList<ExperimentResult> returnResults = new ArrayList<>();
+        double finalDistance = 0.0f;
         for (int i = 0; i < allHashes.size(); i++) {
             Instance instance = this.partialHashToInstance(allHashes.get(i), attributeSubset);
             for (int classIndex = 0; classIndex < this.allInstances.numClasses(); classIndex++) {
@@ -227,10 +222,13 @@ public abstract class BaseFrequencyModel extends Model {
                 separateDistance[classIndex] = this.distanceMetric.findDistance(new double[]{p[classIndex]}, new double[]{q[classIndex]});
                 instanceValues[classIndex] = instance.toDoubleArray();
             }
-            double finalDistance = this.distanceMetric.findDistance(p, q) * sampleScale;
-            ExperimentResult finalResult = new ExperimentResult(finalDistance, separateDistance, instanceValues);
-            returnResults.add(finalResult);
+            finalDistance += this.distanceMetric.findDistance(p, q) * sampleScale * (
+                    ((double)this.findFv(instance, attributeSubset)/(double)this.allInstances.size()) +
+                            ((double)modelAfter.findFv(instance, attributeSubset)/(double)modelAfter.allInstances.size())
+            ) /2;
         }
-        return returnResults;
+        ExperimentResult finalResult = new ExperimentResult(finalDistance, separateDistance, instanceValues);
+        return finalResult;
     }
+
 }

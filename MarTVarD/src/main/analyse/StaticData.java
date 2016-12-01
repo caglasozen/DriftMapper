@@ -12,7 +12,7 @@ import java.util.*;
  * Created by LoongKuan on 31/07/2016.
  **/
 public class StaticData {
-    private Map<int[], ArrayList<ExperimentResult>> resultMap;
+    private Map<int[], ExperimentResult> resultMap;
     private String[][] resultTable;
 
     public StaticData(Instances instances1, Instances instances2,
@@ -41,14 +41,14 @@ public class StaticData {
         }
 
         this.resultMap = model1.analyseDifference(model2, sampleScale, nTests, driftMeasurement);
-        this.resultTable = model1.getResultTable(driftMeasurement, this.resultMap);
+        this.resultTable = model1.getResultTable(this.resultMap);
     }
 
     public String[][] getResultTable() {
         return this.resultTable;
     }
 
-    public Map<int[], ArrayList<ExperimentResult>> getResultMap() {
+    public Map<int[], ExperimentResult> getResultMap() {
         return resultMap;
     }
 }
