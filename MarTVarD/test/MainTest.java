@@ -1,8 +1,13 @@
 import com.opencsv.CSVWriter;
 import main.analyse.StaticData;
+import main.analyse.streaming.MovingBase;
+import main.analyse.streaming.StaticBase;
 import main.models.DriftMeasurement;
+import main.models.Model;
+import main.models.frequency.FrequencyMaps;
 import weka.core.Attribute;
 import weka.core.Instances;
+import weka.core.SystemInfo;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Discretize;
 
@@ -23,46 +28,49 @@ public class MainTest {
         //args = new String[]{"standardAll"};
         double sampleScale = 1.0;
         int nTests = 10;
+        args = new String[]{"stream", "20130505", "20131129"};
         //args = new String[]{"all", "20130419", "20131129"};
-        args = new String[]{"all", "20130505", "20131129"};
+        //args = new String[]{"all", "20130505", "20131129"};
         //args = new String[]{"all", "20130606", "20131129"};
         //args = new String[]{"all", "20130708", "20131129"};
         //args = new String[]{"all", "20130910", "20131129"};
         //args = new String[]{"all", "20131113", "20131129"};
         //args = new String[]{"priorTest", "elecNormNew"};
-        if (args[0].equals("prior")) {
+        if (args[0].equals("all")) {
             Instances[] dataSets = loadPairData(args[1], args[2]);
-            int[] attributeIndices = new int[dataSets[0].numAttributes()];
-            for (int i = 0; i < dataSets[0].numAttributes(); i++) attributeIndices[i] = i;
-
-            for (int i = 1; i < 2; i++) {
-                StaticData experiment = new StaticData(dataSets[0], dataSets[1], i, attributeIndices,
-                        sampleScale, nTests, DriftMeasurement.COVARIATE, 0);
-                writeToCSV(experiment.getResultTable(),
-                        new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"},
-                        "./data_out/martvard/" + args[1] + "_" + args[2]+ "_" + i + "-ple_prior.csv");
-            }
-        }
-        else if (args[0].equals("priorTest")) {
-            Instances allInstances = loadAnyDataSet("./datasets/"+ args[1] +".arff");
-            Instances[] dataSets = new Instances[2];
-            dataSets[0] = new Instances(allInstances, 0, allInstances.size()/2);
-            dataSets[1] = new Instances(allInstances, allInstances.size()/2 - 1, allInstances.size()/2);
-
-            int[] attributeIndices = new int[dataSets[0].numAttributes()];
-            for (int i = 0; i < dataSets[0].numAttributes(); i++) attributeIndices[i] = i;
-            StaticData experiment = new StaticData(dataSets[0], dataSets[1], 1, attributeIndices,
-                    sampleScale, nTests, DriftMeasurement.COVARIATE, 0);
-            writeToCSV(experiment.getResultTable(),
-                    new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "Attributes"},
-                    "./data_out/test.csv");
-        }
-        else if (args[0].equals("all")) {
-            Instances[] dataSets = loadPairData(args[1], args[2]);
-            testAll(new int[]{1, 4}, dataSets, args[1] + "_" + args[2], sampleScale, "martvard");
+            int nAtt = dataSets[0].numAttributes();
+            testAll(new int[]{nAtt-2, nAtt}, dataSets, args[1] + "_" + args[2], sampleScale, "martvard");
         }
         else if (args[0].equals("standardAll")) {
             standardAll(new int[]{1,4}, standardFiles, sampleScale, "");
+        }
+        else if (args[0].equals("stream")) {
+            Instances[] dataSets = loadPairData(args[1], args[2]);
+            Instances allInstances = dataSets[1];
+            int[] attributeIndices = new int[allInstances.numAttributes() - 1];
+            for (int i = 0; i < allInstances.numAttributes() - 1; i++) attributeIndices[i] = i;
+            Model model = new FrequencyMaps(allInstances, allInstances.numAttributes() - 1, attributeIndices);
+            StaticBase streamingData = new StaticBase(dataSets[0], model, 2000);
+            int percentage = -1;
+            long startTime = System.currentTimeMillis();
+            System.out.println("");
+            long duration = 0;
+            for (int i = 0; i < allInstances.size(); i++) {
+                /*
+                if (percentage != (int)((i/(double)allInstances.size()) * 100)) {
+                    percentage = (int)((i/(double)allInstances.size()) * 100);
+                    System.out.print("\rAdded " + percentage + "% of Instances ");
+                }
+                */
+                streamingData.addInstance(allInstances.get(i));
+                if (duration != (System.currentTimeMillis() - startTime) / 1000) {
+                    duration = (System.currentTimeMillis() - startTime) / 1000;
+                    System.out.print("\rAdded " + i + " Instances out of " + allInstances.size() +
+                            " at " + i / duration + " instances per second");
+                }
+            }
+            System.out.println("");
+            streamingData.printDriftTimeLine();
         }
     }
 
@@ -89,7 +97,6 @@ public class MainTest {
         int[] attributeIndices = new int[dataSets[0].numAttributes() - 1];
         for (int i = 0; i < dataSets[0].numAttributes() - 1; i++) attributeIndices[i] = i;
 
-        /*
         System.out.println("Running Covariate");
         for (int i = nInterval[0]; i < nInterval[1]; i++) {
             StaticData experiment = new StaticData(dataSets[0], dataSets[1], i, attributeIndices,
@@ -107,7 +114,6 @@ public class MainTest {
                     new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes"},
                     "./data_out/" + folder + appendFolder + "/" + name + "_" + i + "-attributes_joint.csv");
         }
-        */
 
         System.out.println("Running ConditionedCovariate");
         for (int i = nInterval[0]; i < nInterval[1]; i++) {
