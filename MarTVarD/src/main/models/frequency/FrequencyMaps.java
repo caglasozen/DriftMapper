@@ -118,4 +118,25 @@ public class FrequencyMaps extends BaseFrequencyModel {
         }
         return hash;
     }
+
+    @Override
+    public double peakJointDistance(Model modelToCompare, int[] attributeSubset, double sampleScale) {
+        ArrayList<Integer> allHashes = mergeHashes((BaseFrequencyModel)modelToCompare, attributeSubset);
+        int subsetHash = attributeSubsetToHash(attributeSubset);
+        int nClasses = this.allInstances.numClasses();
+        double dist = 0.0f;
+        int pN = this.allInstances.size();
+        int qN = ((FrequencyMaps)modelToCompare).allInstances.size();
+
+        for (Integer hash : allHashes) {
+            int[] pFreqs = this.frequencyMaps.get(subsetHash).containsKey(hash) ?
+                    this.frequencyMaps.get(subsetHash).get(hash) : new int[nClasses + 1];
+            int[] qFreqs = ((FrequencyMaps)modelToCompare).frequencyMaps.get(subsetHash).containsKey(hash) ?
+                    ((FrequencyMaps)modelToCompare).frequencyMaps.get(subsetHash).get(hash) : new int[1 + nClasses];
+            for (int j = 0; j < this.allInstances.numClasses(); j++) {
+                dist += Math.abs(((double)pFreqs[1 + j] / (double)pN) - ((double)qFreqs[1 + j] / (double)qN));
+            }
+        }
+        return dist / (double)2;
+    }
 }

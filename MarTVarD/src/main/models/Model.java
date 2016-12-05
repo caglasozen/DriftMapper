@@ -32,6 +32,11 @@ public abstract class Model {
     public abstract ExperimentResult findPosteriorDistance(
             Model modelToCompare, int[] attributeSubset, double sampleScale);
 
+    public abstract double peakCovariateDistance(Model modelToCompare, int[] attributeSubset, double sampleScale);
+    public abstract double peakJointDistance(Model modelToCompare, int[] attributeSubset, double sampleScale);
+    public abstract double peakLikelihoodDistance(Model modelToCompare, int[] attributeSubset, double sampleScale);
+    public abstract double peakPosteriorDistance(Model modelToCompare, int[] attributeSubset, double sampleScale);
+
     public abstract void addInstance(Instance instance);
     public abstract void removeInstance(int index);
 

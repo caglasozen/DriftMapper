@@ -231,4 +231,23 @@ public abstract class BaseFrequencyModel extends Model {
         return finalResult;
     }
 
+    @Override
+    public double peakCovariateDistance(Model modelToCompare, int[] attributeSubset, double sampleScale) {
+        return this.findCovariateDistance(modelToCompare, attributeSubset, sampleScale).actualResult;
+    }
+
+    @Override
+    public double peakJointDistance(Model modelToCompare, int[] attributeSubset, double sampleScale) {
+        return this.findJointDistance(modelToCompare, attributeSubset, sampleScale).actualResult;
+    }
+
+    @Override
+    public double peakLikelihoodDistance(Model modelToCompare, int[] attributeSubset, double sampleScale) {
+        return this.findLikelihoodDistance(modelToCompare, attributeSubset, sampleScale).actualResult;
+    }
+
+    @Override
+    public double peakPosteriorDistance(Model modelToCompare, int[] attributeSubset, double sampleScale) {
+        return this.findPosteriorDistance(modelToCompare, attributeSubset, sampleScale).actualResult;
+    }
 }
