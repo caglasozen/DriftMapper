@@ -41,13 +41,9 @@ public abstract class BaseFrequencyModel extends Model {
 
     protected int instanceToPartialHash(Instance instance, int[] attributeSubset) {
         int hash = 0;
-        // TODO: Don't rely on class being last attribute
         // Iterate over attributes in strippedInstance
-        for (int i = 0; i < instance.numAttributes() - 1; i++) {
-            // If not class or active attribute set missing
-            if (ArrayUtils.contains(attributeSubset, i)) {
-                hash += this.hashBases[i] * (int)instance.value(i);
-            }
+        for (int i : attributeSubset) {
+            hash += this.hashBases[i] * (int)instance.value(i);
         }
         return hash;
     }
@@ -56,16 +52,10 @@ public abstract class BaseFrequencyModel extends Model {
         Instance partialInstance = new DenseInstance(this.allInstances.numAttributes());
         partialInstance.setDataset(this.allInstances);
 
-        for (int i = partialInstance.numAttributes() - 2; i >= 0; i--) {
-            if (ArrayUtils.contains(activeAttributes, i)) {
-                partialInstance.setValue(i, partialHash / this.hashBases[i]);
-                partialHash = partialHash % this.hashBases[i];
-            }
-            else {
-                partialInstance.setMissing(i);
-            }
+        for (int i = activeAttributes.length - 1; i >= 0; i--) {
+            partialInstance.setValue(activeAttributes[i], partialHash / this.hashBases[activeAttributes[i]]);
+            partialHash = partialHash % this.hashBases[activeAttributes[i]];
         }
-        partialInstance.setClassMissing();
         return partialInstance;
     }
 
@@ -101,7 +91,7 @@ public abstract class BaseFrequencyModel extends Model {
         return sampledHashes;
     }
 
-    private ArrayList<Integer> mergeHashes(BaseFrequencyModel model, int[] attributeSubset) {
+    protected ArrayList<Integer> mergeHashes(BaseFrequencyModel model, int[] attributeSubset) {
         Set<Integer> hashes = new HashSet<>();
         hashes.addAll(this.getAllHashes(attributeSubset));
         hashes.addAll(model.getAllHashes(attributeSubset));
