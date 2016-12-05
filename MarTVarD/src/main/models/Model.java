@@ -48,6 +48,10 @@ public abstract class Model {
         return attributesAvailable;
     }
 
+    public Instances getAllInstances() {
+        return this.allInstances;
+    }
+
     public void addAll(Instances instances) {
         int percentage = -1;
         for (int i = 0; i < instances.size(); i++) {
@@ -62,6 +66,17 @@ public abstract class Model {
     public void removeAll(int[] indices) {
         for (int index : indices) {
             this.removeInstance(index);
+        }
+    }
+
+    public void addSome(Instances instances, int[] indicesToAdd) {
+        int percentage = -1;
+        for (int i = 0; i < indicesToAdd.length; i++) {
+            if (percentage != (int)((i/(double)indicesToAdd.length) * 100)) {
+                percentage = (int)((i/(double)indicesToAdd.length) * 100);
+                System.out.print("\rAdded " + percentage + "% of Instances ");
+            }
+            this.addInstance(instances.get(indicesToAdd[i]));
         }
     }
 
