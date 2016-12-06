@@ -28,9 +28,9 @@ public class MainTest {
         //args = new String[]{"standardAll"};
         double sampleScale = 1.0;
         int nTests = 10;
-        args = new String[]{"stream", "20130505", "20131129"};
+        //args = new String[]{"stream", "20130505", "20131129"};
         //args = new String[]{"all", "20130419", "20131129"};
-        //args = new String[]{"all", "20130505", "20131129"};
+        args = new String[]{"all", "20130505", "20131129"};
         //args = new String[]{"all", "20130606", "20131129"};
         //args = new String[]{"all", "20130708", "20131129"};
         //args = new String[]{"all", "20130910", "20131129"};
@@ -39,7 +39,7 @@ public class MainTest {
         if (args[0].equals("all")) {
             Instances[] dataSets = loadPairData(args[1], args[2]);
             int nAtt = dataSets[0].numAttributes();
-            testAll(new int[]{nAtt-2, nAtt}, dataSets, args[1] + "_" + args[2], sampleScale, "martvard");
+            testAll(new int[]{1, 4}, dataSets, args[1] + "_" + args[2], sampleScale, "martvard");
         }
         else if (args[0].equals("standardAll")) {
             standardAll(new int[]{1,4}, standardFiles, sampleScale, "");

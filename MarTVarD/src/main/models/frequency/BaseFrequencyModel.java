@@ -122,8 +122,7 @@ public abstract class BaseFrequencyModel extends Model {
             instanceValues[i] = instance.toDoubleArray();
         }
         double finalDistance = this.distanceMetric.findDistance(p, q) * sampleScale;
-        ExperimentResult finalResult = new ExperimentResult(finalDistance, separateDistance, instanceValues);
-        return finalResult;
+        return new ExperimentResult(finalDistance, separateDistance, instanceValues);
     }
 
     @Override
@@ -142,17 +141,18 @@ public abstract class BaseFrequencyModel extends Model {
         for (int i = 0; i < allHashes.size(); i++) {
             Instance instance = this.partialHashToInstance(allHashes.get(i), attributeSubset);
             for(int classIndex = 0; classIndex < nClass; classIndex++) {
-                p[i*nClass + classIndex] = this.allInstances.size() == 0 ?
+                instance.setClassValue(classIndex);
+                int currentIndex = i * nClass + classIndex;
+                p[currentIndex] = this.allInstances.size() == 0 ?
                         0 : (double)this.findFvy(instance, attributeSubset, classIndex) / (double)this.allInstances.size();
-                q[i*nClass + classIndex] = modelAfter.allInstances.size() == 0 ?
+                q[currentIndex] = modelAfter.allInstances.size() == 0 ?
                         0 : (double) modelAfter.findFvy(instance, attributeSubset, classIndex) / (double)modelAfter.allInstances.size();
-                separateDistance[i*nClass + classIndex] = this.distanceMetric.findDistance(new double[]{p[i]}, new double[]{q[i]});
-                instanceValues[i*nClass + classIndex] = instance.toDoubleArray();
+                separateDistance[currentIndex] = this.distanceMetric.findDistance(new double[]{p[currentIndex]}, new double[]{q[currentIndex]});
+                instanceValues[currentIndex] = instance.toDoubleArray();
             }
         }
         double finalDistance = this.distanceMetric.findDistance(p, q) * sampleScale;
-        ExperimentResult finalResult = new ExperimentResult(finalDistance, separateDistance, instanceValues);
-        return finalResult;
+        return new ExperimentResult(finalDistance, separateDistance, instanceValues);
     }
 
     @Override
@@ -165,10 +165,15 @@ public abstract class BaseFrequencyModel extends Model {
 
         double[] p = new double[allHashes.size()];
         double[] q = new double[allHashes.size()];
-        double[] separateDistance = new double[allHashes.size()];
-        double[][] instanceValues = new double[allHashes.size()][this.allInstances.numAttributes()];
+        int nClass =  this.allInstances.numClasses();
+        double[] separateDistance = new double[allHashes.size() * nClass];
+        double[][] instanceValues = new double[allHashes.size() * nClass][this.allInstances.numAttributes()];
         double finalDistance = 0.0f;
         for (int classIndex = 0; classIndex < this.allInstances.numClasses(); classIndex++) {
+            double weight = (
+                    ((double)this.findFy(classIndex) / (double)this.allInstances.size()) +
+                            ((double)modelAfter.findFy(classIndex) / (double)modelAfter.allInstances.size())
+            ) / 2;
             for (int i = 0; i < allHashes.size(); i++) {
                 Instance instance = this.partialHashToInstance(allHashes.get(i), attributeSubset);
                 instance.setClassValue(classIndex);
@@ -176,16 +181,12 @@ public abstract class BaseFrequencyModel extends Model {
                         0 : (double) this.findFvy(instance, attributeSubset, classIndex) / (double) this.findFy(classIndex);
                 q[i] = modelAfter.findFy(classIndex) == 0 ?
                         0 : (double) modelAfter.findFvy(instance, attributeSubset, classIndex) / (double) modelAfter.findFy(classIndex);
-                separateDistance[i] = this.distanceMetric.findDistance(new double[]{p[i]}, new double[]{q[i]});
-                instanceValues[i] = instance.toDoubleArray();
+                separateDistance[classIndex * allHashes.size() + i] = this.distanceMetric.findDistance(new double[]{p[i]}, new double[]{q[i]});
+                instanceValues[classIndex * allHashes.size() + i] = instance.toDoubleArray();
             }
-            finalDistance += this.distanceMetric.findDistance(p, q) * sampleScale * (
-                    ((double)this.findFy(classIndex) / (double)this.allInstances.size()) +
-                            ((double)modelAfter.findFy(classIndex) / (double)modelAfter.allInstances.size())
-            )/2;
+            finalDistance += this.distanceMetric.findDistance(p, q) * sampleScale * weight;
         }
-        ExperimentResult finalResult = new ExperimentResult(finalDistance, separateDistance, instanceValues);
-        return finalResult;
+        return new ExperimentResult(finalDistance, separateDistance, instanceValues);
     }
 
     @Override
@@ -198,27 +199,27 @@ public abstract class BaseFrequencyModel extends Model {
 
         double[] p = new double[this.allInstances.numClasses()];
         double[] q = new double[this.allInstances.numClasses()];
-        double[] separateDistance = new double[this.allInstances.numClasses()];
-        double[][] instanceValues = new double[this.allInstances.numClasses()][this.allInstances.numAttributes()];
+        int nClass = this.allInstances.numClasses();
+        double[] separateDistance = new double[nClass * allHashes.size()];
+        double[][] instanceValues = new double[nClass * allHashes.size()][this.allInstances.numAttributes()];
         double finalDistance = 0.0f;
         for (int i = 0; i < allHashes.size(); i++) {
             Instance instance = this.partialHashToInstance(allHashes.get(i), attributeSubset);
-            for (int classIndex = 0; classIndex < this.allInstances.numClasses(); classIndex++) {
+            for (int classIndex = 0; classIndex < nClass; classIndex++) {
                 instance.setClassValue(classIndex);
                 p[classIndex] = this.findFv(instance, attributeSubset) == 0 ?
                         0 : (double) this.findFvy(instance, attributeSubset, classIndex) / (double) this.findFv(instance, attributeSubset);
                 q[classIndex] = modelAfter.findFv(instance, attributeSubset) == 0 ?
                         0 : (double) modelAfter.findFvy(instance, attributeSubset, classIndex) / (double) modelAfter.findFv(instance, attributeSubset);
-                separateDistance[classIndex] = this.distanceMetric.findDistance(new double[]{p[classIndex]}, new double[]{q[classIndex]});
-                instanceValues[classIndex] = instance.toDoubleArray();
+                separateDistance[i * nClass + classIndex] = this.distanceMetric.findDistance(new double[]{p[classIndex]}, new double[]{q[classIndex]});
+                instanceValues[i * nClass + classIndex] = instance.toDoubleArray();
             }
             finalDistance += this.distanceMetric.findDistance(p, q) * sampleScale * (
                     ((double)this.findFv(instance, attributeSubset)/(double)this.allInstances.size()) +
                             ((double)modelAfter.findFv(instance, attributeSubset)/(double)modelAfter.allInstances.size())
             ) /2;
         }
-        ExperimentResult finalResult = new ExperimentResult(finalDistance, separateDistance, instanceValues);
-        return finalResult;
+        return new ExperimentResult(finalDistance, separateDistance, instanceValues);
     }
 
     @Override
