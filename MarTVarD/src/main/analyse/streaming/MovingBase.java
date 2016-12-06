@@ -79,14 +79,14 @@ public class MovingBase extends StreamAnalysis {
 
     private void checkDrift() {
         if (this.tailModel.findJointDistance(this.headModel,
-                this.tailModel.getAttributesAvailable(), this.sampleScale).actualResult > this.thresholdDrift) {
+                this.tailModel.getAttributesAvailable(), this.sampleScale).getDistance() > this.thresholdDrift) {
             this.reduceDrift();
         }
     }
 
     private void reduceDrift() {
         double drift = this.tailModel.findJointDistance(this.headModel,
-                this.tailModel.getAttributesAvailable(), this.sampleScale).actualResult;
+                this.tailModel.getAttributesAvailable(), this.sampleScale).getDistance();
         double originalDrift = drift;
         System.out.println("\rDrift of " + originalDrift + " at " + this.totalInstancesPast);
         while (drift > 0.25) {
@@ -98,7 +98,7 @@ public class MovingBase extends StreamAnalysis {
             this.currentWindow.remove(0);
             this.totalInstancesPast += 1;
             drift = this.tailModel.findJointDistance(this.headModel,
-                    this.tailModel.getAttributesAvailable(), this.sampleScale).actualResult;
+                    this.tailModel.getAttributesAvailable(), this.sampleScale).getDistance();
         }
         this.driftPoints.put(this.totalInstancesPast, originalDrift);
         this.baseStable = false;

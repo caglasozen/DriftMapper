@@ -4,6 +4,7 @@ import main.models.DriftMeasurement;
 import main.models.Model;
 import main.models.frequency.FrequencyMaps;
 import main.models.frequency.FrequencyTable;
+import main.report.ExperimentResult;
 import weka.core.Instances;
 
 import java.util.*;

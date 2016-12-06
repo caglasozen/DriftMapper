@@ -2,7 +2,7 @@ package main.models;
 
 import main.distance.Distance;
 import main.distance.TotalVariation;
-import main.analyse.ExperimentResult;
+import main.report.ExperimentResult;
 import org.apache.commons.lang3.ArrayUtils;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -153,36 +153,7 @@ public abstract class Model {
         String[][] results = new String[attributeSubSets.length][8];
         for (int i = 0; i < attributeSubSets.length; i++) {
             ExperimentResult currentResult = resultMap.get(attributeSubSets[i]);
-            results[i][0] = Double.toString(currentResult.actualResult);
-            results[i][1] = Double.toString(currentResult.mean);
-            results[i][2] = Double.toString(currentResult.sd);
-            results[i][3] = Double.toString(currentResult.maxDist);
-            results[i][4] = "";
-            results[i][5] = Double.toString(currentResult.minDist);
-            results[i][6] = "";
-            results[i][7] = "";
-            for (int j = 0; j < attributeSubSets[i].length; j++) {
-                results[i][7] += this.allInstances.attribute(attributeSubSets[i][j]).name() + "_";
-            }
-            results[i][7] = results[i][7].substring(0, results[i][7].length() - 1);
-            if (!Double.isInfinite(currentResult.actualResult)) {
-                for (int j = 0; j < this.allInstances.numAttributes(); j++) {
-                    if (!Double.isNaN(currentResult.maxValues[j]) && !Double.isNaN(currentResult.minValues[j])) {
-                        String maxVal = this.allInstances.attribute(j).value((int)currentResult.maxValues[j]);
-                        results[i][4] += this.allInstances.attribute(j).name() + "=" + maxVal + "_";
-
-                        String minVal = this.allInstances.attribute(j).value((int)currentResult.minValues[j]);
-                        results[i][6] += this.allInstances.attribute(j).name() + "=" + minVal + "_";
-                    }
-                }
-                // Trim last underscore
-                results[i][4] = results[i][4].substring(0, results[i][4].length() - 1);
-                results[i][6] = results[i][6].substring(0, results[i][6].length() - 1);
-            }
-            else {
-                results[i][4] = "NA";
-                results[i][6] = "NA";
-            }
+            results[i] = currentResult.getSummaryRow();
         }
         return results;
     }
@@ -202,7 +173,7 @@ public abstract class Model {
         list.sort( new Comparator<Map.Entry<int[], ExperimentResult>>() {
             public int compare( Map.Entry<int[], ExperimentResult> o1, Map.Entry<int[], ExperimentResult> o2 )
             {
-                double value = o1.getValue().actualResult - o2.getValue().actualResult;
+                double value = o1.getValue().getDistance() - o2.getValue().getDistance();
                 if (value == 0.0f) return 0;
                 else if(value < 0.0f) return -1;
                 else return 1;
