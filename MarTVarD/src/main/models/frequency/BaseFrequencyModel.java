@@ -2,15 +2,14 @@ package main.models.frequency;
 
 import main.report.ExperimentResult;
 import main.models.Model;
+import main.report.SingleExperimentResult;
+import main.report.StructuredExperimentResult;
 import org.apache.commons.lang3.ArrayUtils;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by loongkuan on 28/11/2016.
@@ -122,7 +121,7 @@ public abstract class BaseFrequencyModel extends Model {
             instanceValues.add(instance);
         }
         double finalDistance = this.distanceMetric.findDistance(p, q) * sampleScale;
-        return new ExperimentResult(finalDistance, separateDistance, instanceValues);
+        return new SingleExperimentResult(finalDistance, separateDistance, instanceValues);
     }
 
     @Override
@@ -152,7 +151,7 @@ public abstract class BaseFrequencyModel extends Model {
             }
         }
         double finalDistance = this.distanceMetric.findDistance(p, q) * sampleScale;
-        return new ExperimentResult(finalDistance, separateDistance, instanceValues);
+        return new SingleExperimentResult(finalDistance, separateDistance, instanceValues);
     }
 
     @Override
@@ -169,6 +168,10 @@ public abstract class BaseFrequencyModel extends Model {
         double[] separateDistance = new double[allHashes.size() * nClass];
         Instances instanceValues = new Instances(this.allInstances, allHashes.size() * nClass);
         double finalDistance = 0.0f;
+
+        HashMap<Integer, ExperimentResult> separateExperiments = new HashMap<>();
+        HashMap<Integer, Double> experimentProbability = new HashMap<>();
+
         for (int classIndex = 0; classIndex < this.allInstances.numClasses(); classIndex++) {
             double weight = (
                     ((double)this.findFy(classIndex) / (double)this.allInstances.size()) +
@@ -184,9 +187,19 @@ public abstract class BaseFrequencyModel extends Model {
                 separateDistance[classIndex * allHashes.size() + i] = this.distanceMetric.findDistance(new double[]{p[i]}, new double[]{q[i]});
                 instanceValues.add(instance);
             }
-            finalDistance += this.distanceMetric.findDistance(p, q) * sampleScale * weight;
+            double currentDistance = this.distanceMetric.findDistance(p, q) * sampleScale;
+            experimentProbability.put(classIndex, weight);
+            separateExperiments.put(classIndex,
+                    new SingleExperimentResult(
+                            currentDistance,
+                            ArrayUtils.subarray(separateDistance,
+                                    classIndex * allHashes.size(),
+                                    (classIndex + 1) * allHashes.size()),
+                            new Instances(instanceValues, classIndex * allHashes.size(), allHashes.size())));
+            finalDistance += currentDistance * weight;
         }
-        return new ExperimentResult(finalDistance, separateDistance, instanceValues);
+        return new StructuredExperimentResult(finalDistance, separateDistance, instanceValues,
+                separateExperiments, experimentProbability, new int[]{this.allInstances.classIndex()});
     }
 
     @Override
@@ -203,8 +216,14 @@ public abstract class BaseFrequencyModel extends Model {
         double[] separateDistance = new double[nClass * allHashes.size()];
         Instances instanceValues = new Instances(this.allInstances, allHashes.size() * nClass);
         double finalDistance = 0.0f;
+
+        HashMap<Integer, ExperimentResult> separateExperiments = new HashMap<>();
+        HashMap<Integer, Double> experimentProbability = new HashMap<>();
+
         for (int i = 0; i < allHashes.size(); i++) {
             Instance instance = this.partialHashToInstance(allHashes.get(i), attributeSubset);
+            double weight = (((double)this.findFv(instance, attributeSubset)/(double)this.allInstances.size()) +
+                    ((double)modelAfter.findFv(instance, attributeSubset)/(double)modelAfter.allInstances.size())) / 2;
             for (int classIndex = 0; classIndex < nClass; classIndex++) {
                 instance.setClassValue(classIndex);
                 p[classIndex] = this.findFv(instance, attributeSubset) == 0 ?
@@ -214,12 +233,19 @@ public abstract class BaseFrequencyModel extends Model {
                 separateDistance[i * nClass + classIndex] = this.distanceMetric.findDistance(new double[]{p[classIndex]}, new double[]{q[classIndex]});
                 instanceValues.add(instance);
             }
-            finalDistance += this.distanceMetric.findDistance(p, q) * sampleScale * (
-                    ((double)this.findFv(instance, attributeSubset)/(double)this.allInstances.size()) +
-                            ((double)modelAfter.findFv(instance, attributeSubset)/(double)modelAfter.allInstances.size())
-            ) /2;
+            double currentDistance = this.distanceMetric.findDistance(p, q) * sampleScale;
+            experimentProbability.put(allHashes.get(i), weight);
+            separateExperiments.put(allHashes.get(i),
+                    new SingleExperimentResult(
+                            currentDistance,
+                            ArrayUtils.subarray(separateDistance,
+                                    i * nClass,
+                                    (i + 1) * nClass),
+                            new Instances(instanceValues, i * nClass, nClass)));
+            finalDistance += currentDistance * weight;
         }
-        return new ExperimentResult(finalDistance, separateDistance, instanceValues);
+        return new StructuredExperimentResult(finalDistance, separateDistance, instanceValues,
+                separateExperiments, experimentProbability, attributeSubset);
     }
 
     @Override

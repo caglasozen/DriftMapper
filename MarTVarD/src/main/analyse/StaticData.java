@@ -5,6 +5,7 @@ import main.models.Model;
 import main.models.frequency.FrequencyMaps;
 import main.models.frequency.FrequencyTable;
 import main.report.ExperimentResult;
+import main.report.SummaryReport;
 import weka.core.Instances;
 
 import java.util.*;
@@ -14,7 +15,6 @@ import java.util.*;
  **/
 public class StaticData {
     private Map<int[], ExperimentResult> resultMap;
-    private String[][] resultTable;
 
     public StaticData(Instances instances1, Instances instances2,
                       int nAttributesActive, int[] attributeIndices, DriftMeasurement driftMeasurement) {
@@ -42,11 +42,6 @@ public class StaticData {
         }
 
         this.resultMap = model1.analyseDifference(model2, sampleScale, nTests, driftMeasurement);
-        this.resultTable = model1.getResultTable(this.resultMap);
-    }
-
-    public String[][] getResultTable() {
-        return this.resultTable;
     }
 
     public Map<int[], ExperimentResult> getResultMap() {

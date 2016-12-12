@@ -3,6 +3,7 @@ package main.models;
 import main.distance.Distance;
 import main.distance.TotalVariation;
 import main.report.ExperimentResult;
+import main.report.SingleExperimentResult;
 import org.apache.commons.lang3.ArrayUtils;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -126,7 +127,7 @@ public abstract class Model {
             for (int j = 0; j < nTests; j++) {
                 results.add(getResults(modelToCompare, attributeSubset, sampleScale, driftMeasurement));
             }
-            resultMap.put(attributeSubset, new ExperimentResult(results));
+            resultMap.put(attributeSubset, ExperimentResult.mergeExperiments(results));
         }
         System.out.print("\n");
         resultMap = sortByValue(resultMap);

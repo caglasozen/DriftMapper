@@ -5,16 +5,14 @@ import main.analyse.streaming.StaticBase;
 import main.models.DriftMeasurement;
 import main.models.Model;
 import main.models.frequency.FrequencyMaps;
+import main.report.SummaryReport;
 import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.SystemInfo;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Discretize;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 
 /**
@@ -30,19 +28,24 @@ public class MainTest {
         int nTests = 10;
         //args = new String[]{"stream", "20130505", "20131129"};
         //args = new String[]{"all", "20130419", "20131129"};
-        args = new String[]{"all", "20130505", "20131129"};
+        //args = new String[]{"all", "20130505", "20131129"};
         //args = new String[]{"all", "20130606", "20131129"};
         //args = new String[]{"all", "20130708", "20131129"};
         //args = new String[]{"all", "20130910", "20131129"};
         //args = new String[]{"all", "20131113", "20131129"};
+        //args = new String[]{"all", "20131129", "20131129"};
         //args = new String[]{"priorTest", "elecNormNew"};
+        args = new String[]{"testAll"};
         if (args[0].equals("all")) {
             Instances[] dataSets = loadPairData(args[1], args[2]);
             int nAtt = dataSets[0].numAttributes();
-            testAll(new int[]{1, 4}, dataSets, args[1] + "_" + args[2], sampleScale, "martvard");
+            testAll(new int[]{1, 4}, dataSets, args[1] + "_" + args[2], sampleScale, "");
         }
         else if (args[0].equals("standardAll")) {
             standardAll(new int[]{1,4}, standardFiles, sampleScale, "");
+        }
+        else if (args[0].equals("testAll")) {
+            testAllSatellite();
         }
         else if (args[0].equals("stream")) {
             Instances[] dataSets = loadPairData(args[1], args[2]);
@@ -74,6 +77,22 @@ public class MainTest {
         }
     }
 
+    private static void testAllSatellite() {
+        String[] satelliteFiles = new String[]{"20130419", "20130505", "20130521", "20130606", "20130622",
+                "20130708", "20130724", "20130809", "20130825", "20130910",
+                "20130926", "20131012", "20131028", "20131113", "20131129"};
+
+        for (int i = 0; i < satelliteFiles.length - 1; i++) {
+            Instances instances1 = loadSingleData(satelliteFiles[i]);
+            Instances instances2 = loadSingleData(satelliteFiles[i+1]);
+            testAll(new int[]{1, 4}, new Instances[]{instances1, instances2},
+                    satelliteFiles[i] + "_" + satelliteFiles[i+1], 1.0, "");
+            int numAtt = instances1.numAttributes();
+            testAll(new int[]{numAtt - 1, numAtt}, new Instances[]{instances1, instances2},
+                    satelliteFiles[i] + "_" + satelliteFiles[i+1], 1.0, "");
+        }
+    }
+
     public static void standardAll(int[] nInterval, String[] files, double sampleScale, String folder) {
         String folder1 = folder.equals("") ? "./datasets/" : "./datasets/" + folder + "/";
         String folder2 = folder.equals("") ? "martvard" : folder;
@@ -89,46 +108,59 @@ public class MainTest {
     private static void testAll(int[] nInterval, Instances[] dataSets, String name, double sampleScale, String folder) {
         System.out.println("Running Tests on " + name);
         System.out.println("For " + nInterval[0] + " to " + nInterval[1] + " attributes");
-        int model = 1;
-        String appendFolder = model == 0 ? "_new" : "_maps";
 
-        folder = sampleScale <= 1 ? folder : folder + "_" + sampleScale;
+        String rootDir = "./data_out/";
+        new File(rootDir + folder).mkdir();
+
+        int model = 1;
+        folder += model == 0 ? "/FrequencyTable" : "/FrequencyMaps";
+        new File(rootDir + folder).mkdir();
+
+        folder = sampleScale <= 1 ? folder : folder + "/SampleSscale" + sampleScale;
+        new File(rootDir + folder).mkdir();
+
+        folder += "/" + name;
+        new File(rootDir + folder).mkdir();
 
         int[] attributeIndices = new int[dataSets[0].numAttributes() - 1];
         for (int i = 0; i < dataSets[0].numAttributes() - 1; i++) attributeIndices[i] = i;
 
-        System.out.println("Running Covariate");
+        String[] csvHeader = new String[]{"drift", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes"};
+
         for (int i = nInterval[0]; i < nInterval[1]; i++) {
+            System.out.println("Running Covariate with subset length " + i);
             StaticData experiment = new StaticData(dataSets[0], dataSets[1], i, attributeIndices,
                     sampleScale, 10, DriftMeasurement.COVARIATE, model);
-            writeToCSV(experiment.getResultTable(),
-                    new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes"},
-                    "./data_out/" + folder + appendFolder + "/" + name + "_" + i + "-attributes_covariate.csv");
-        }
+            SummaryReport summaryReport = new SummaryReport(experiment.getResultMap(), true);
+            String filepath = "./data_out/" + folder + "/" + name + "_" + i + "-attributes_covariate.csv";
+            summaryReport.writeToCsv(filepath);
 
-        System.out.println("Running Joint");
-        for (int i = nInterval[0]; i < nInterval[1]; i++) {
-            StaticData experiment = new StaticData(dataSets[0], dataSets[1], i, attributeIndices,
+            System.out.println("Running Joint with subset length " + i);
+            experiment = new StaticData(dataSets[0], dataSets[1], i, attributeIndices,
                     sampleScale, 10, DriftMeasurement.JOINT, model);
-            writeToCSV(experiment.getResultTable(),
-                    new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes"},
-                    "./data_out/" + folder + appendFolder + "/" + name + "_" + i + "-attributes_joint.csv");
-        }
+            summaryReport = new SummaryReport(experiment.getResultMap(), true);
+            filepath = "./data_out/" + folder + "/" + name + "_" + i + "-attributes_joint.csv";
+            summaryReport.writeToCsv(filepath);
 
-        System.out.println("Running ConditionedCovariate");
-        for (int i = nInterval[0]; i < nInterval[1]; i++) {
-            StaticData experiment = new StaticData(dataSets[0], dataSets[1], i, attributeIndices, sampleScale, 10, DriftMeasurement.LIKELIHOOD, model);
-            writeToCSV(experiment.getResultTable(),
-                    new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes"},
-                    "./data_out/" + folder + appendFolder + "/" + name + "_" + i + "-attributes_likelihood.csv");
-        }
+            System.out.println("Running Likelihood with subset length " + i);
+            experiment = new StaticData(dataSets[0], dataSets[1], i, attributeIndices,
+                    sampleScale, 10, DriftMeasurement.LIKELIHOOD, model);
+            summaryReport = new SummaryReport(experiment.getResultMap(), true);
+            filepath = "./data_out/" + folder + "/" + name + "_" + i + "-attributes_likelihood.csv";
+            summaryReport.writeToCsv(filepath);
+            summaryReport = new SummaryReport(experiment.getResultMap(), false);
+            filepath = "./data_out/" + folder + "/" + name + "_" + i + "-attributes_likelihood_detailed.csv";
+            summaryReport.writeToCsv(filepath);
 
-        System.out.println("Running Posterior");
-        for (int i = nInterval[0]; i < nInterval[1]; i++) {
-            StaticData experiment = new StaticData(dataSets[0], dataSets[1], i, attributeIndices, sampleScale, 10, DriftMeasurement.POSTERIOR, model);
-            writeToCSV(experiment.getResultTable(),
-                    new String[]{"Distance", "mean", "sd", "max_val", "max_att", "min_val", "min_att", "attributes"},
-                    "./data_out/" + folder + appendFolder + "/" + name + "_" + i + "-attributes_posterior.csv");
+            System.out.println("Running Posterior with subset length " + i);
+            experiment = new StaticData(dataSets[0], dataSets[1], i, attributeIndices,
+                    sampleScale, 10, DriftMeasurement.POSTERIOR, model);
+            summaryReport = new SummaryReport(experiment.getResultMap(), true);
+            filepath = "./data_out/" + folder + "/" + name + "_" + i + "-attributes_posterior.csv";
+            summaryReport.writeToCsv(filepath);
+            summaryReport = new SummaryReport(experiment.getResultMap(), false);
+            filepath = "./data_out/" + folder + "/" + name + "_" + i + "-attributes_posterior_detailed.csv";
+            summaryReport.writeToCsv(filepath);
         }
     }
 
@@ -148,6 +180,19 @@ public class MainTest {
             ex.printStackTrace();
         }
         return new Instances[2];
+    }
+
+    private static Instances loadSingleData(String filename) {
+        try {
+            // Load data sets into collated data set and discretize
+            Instances instances = loadDataSet("./datasets/train_seed/"+filename+".arff");
+            instances = discretizeDataSet(instances);
+            return instances;
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
     }
 
     public static void writeToCSV(String[][] data, String[] header, String filename){

@@ -7,26 +7,27 @@ import java.util.ArrayList;
 
 /**
  * Created by LoongKuan on 31/07/2016.
+ * One ExperimentResult represents results for 1 attribute subset
 **/
 
-public class ExperimentResult {
-    private double mean;
-    private double sd;
-    private double maxDist;
-    private Instance maxInstance;
-    private double minDist;
-    private Instance minInstance;
-    private double distance;
+public abstract class ExperimentResult {
+    protected double mean;
+    protected double sd;
+    protected double maxDist;
+    protected Instance maxInstance;
+    protected double minDist;
+    protected Instance minInstance;
+    protected double distance;
 
-    private double[] separateDistance;
-    private Instances instances;
+    protected double[] separateDistance;
+    protected Instances instances;
 
-    public ExperimentResult(double distance, double[] separateDistance, Instances instances) {
+    ExperimentResult(double distance, double[] separateDistance, Instances instances) {
         // Store actual result
         this.reset(distance, separateDistance, instances);
     }
 
-    public ExperimentResult(ArrayList<ExperimentResult> resultList) {
+    ExperimentResult(ArrayList<ExperimentResult> resultList) {
         double actualResult = Double.POSITIVE_INFINITY;
         double[] data = new double[]{};
         Instances instances = null;
@@ -54,8 +55,13 @@ public class ExperimentResult {
         this.reset(actualResult, data, instances);
    }
 
-   public ExperimentResult(double weightAverageDistance, double[] separateDistance, Instances instances,
-                           ArrayList<ExperimentResult> separateExperiments, ArrayList<Double> experimentsProbability) {
+   public static ExperimentResult mergeExperiments(ArrayList<ExperimentResult> results) {
+        if (results.get(0) instanceof StructuredExperimentResult) {
+            return new StructuredExperimentResult(results);
+        }
+        else {
+            return new SingleExperimentResult(results);
+        }
    }
 
    private double calcMean() {
@@ -145,36 +151,39 @@ public class ExperimentResult {
 
     public String[] getSummaryRow() {
         String summaryRow[] = new String[8];
-        summaryRow[0] = Double.toString(this.distance);
-        summaryRow[1] = Double.toString(this.mean);
-        summaryRow[2] = Double.toString(this.sd);
-        summaryRow[3] = Double.toString(this.maxDist);
-        summaryRow[4] = "";
-        summaryRow[5] = Double.toString(this.minDist);
-        summaryRow[6] = "";
-        summaryRow[7] = "";
+
+        summaryRow[0] = "";
         for (int i = 0; i < this.instances.get(0).numAttributes(); i++) {
             if (!this.instances.get(0).isMissing(i)) {
-                summaryRow[7] += this.instances.attribute(i).name() + "_";
+                summaryRow[0] += this.instances.attribute(i).name() + "_";
             }
         }
-        summaryRow[7] = summaryRow[7].substring(0, summaryRow[7].length() - 1);
+        summaryRow[0] = summaryRow[0].substring(0, summaryRow[0].length() - 1);
+
+        summaryRow[1] = Double.toString(this.distance);
+        summaryRow[2] = Double.toString(this.mean);
+        summaryRow[3] = Double.toString(this.sd);
+        summaryRow[4] = Double.toString(this.maxDist);
+        summaryRow[5] = "";
+        summaryRow[6] = Double.toString(this.minDist);
+        summaryRow[7] = "";
+
         if (!Double.isInfinite(this.distance)) {
             for (int j = 0; j < this.instances.numAttributes(); j++) {
                 if (!this.maxInstance.isMissing(j) && !this.minInstance.isMissing(j)) {
                     String maxVal = this.maxInstance.stringValue(j);
-                    summaryRow[4] += this.instances.attribute(j).name() + "=" + maxVal + "_";
+                    summaryRow[5] += this.instances.attribute(j).name() + "=" + maxVal + "_";
                     String minVal = this.minInstance.stringValue(j);
-                    summaryRow[6] += this.instances.attribute(j).name() + "=" + minVal + "_";
+                    summaryRow[7] += this.instances.attribute(j).name() + "=" + minVal + "_";
                 }
             }
             // Trim last underscore
-            summaryRow[4] = summaryRow[4].substring(0, summaryRow[4].length() - 1);
-            summaryRow[6] = summaryRow[6].substring(0, summaryRow[6].length() - 1);
+            summaryRow[5] = summaryRow[5].substring(0, summaryRow[5].length() - 1);
+            summaryRow[7] = summaryRow[7].substring(0, summaryRow[7].length() - 1);
         }
         else {
-            summaryRow[4] = "NA";
-            summaryRow[6] = "NA";
+            summaryRow[5] = "NA";
+            summaryRow[7] = "NA";
         }
         return summaryRow;
     }
