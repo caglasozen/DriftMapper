@@ -4,6 +4,7 @@ import main.models.Model;
 import weka.core.Instance;
 import weka.core.Instances;
 
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -12,7 +13,7 @@ import java.util.*;
 
 public class FrequencyMaps extends BaseFrequencyModel {
     // Hash of attribute subset is key because array cannot be key
-    private HashMap<Integer, HashMap<Integer, int[]>> frequencyMaps;
+    private HashMap<BigInteger, HashMap<BigInteger, int[]>> frequencyMaps;
     private int[] classFreq;
 
     public FrequencyMaps(Instances dataset, int attributeSubsetLength, int[] attributesAvailable) {
@@ -69,13 +70,13 @@ public class FrequencyMaps extends BaseFrequencyModel {
     }
 
     @Override
-    protected Set<Integer> getAllHashes(int[] attributeSubset) {
+    protected Set<BigInteger> getAllHashes(int[] attributeSubset) {
         return this.frequencyMaps.get(attributeSubsetToHash(attributeSubset)).keySet();
     }
 
     @Override
     protected int findFv(Instance instance, int[] attributesSubset) {
-        int hash = this.instanceToPartialHash(instance, attributesSubset);
+        BigInteger hash = this.instanceToPartialHash(instance, attributesSubset);
         return !hashSeen(hash, attributesSubset) ? 0 : this.frequencyMaps.get(attributeSubsetToHash(attributesSubset)).get(hash)[0];
     }
 
@@ -86,11 +87,11 @@ public class FrequencyMaps extends BaseFrequencyModel {
 
     @Override
     protected int findFvy(Instance instance, int[] attributesSubset, int classIndex) {
-        int hash = this.instanceToPartialHash(instance, attributesSubset);
+        BigInteger hash = this.instanceToPartialHash(instance, attributesSubset);
         return !hashSeen(hash, attributesSubset) ? 0 : this.frequencyMaps.get(attributeSubsetToHash(attributesSubset)).get(hash)[1 + classIndex];
     }
 
-    private boolean hashSeen(int hash, int[] attributeSubset) {
+    private boolean hashSeen(BigInteger hash, int[] attributeSubset) {
         return this.frequencyMaps.get(attributeSubsetToHash(attributeSubset)).containsKey(hash);
     }
 
@@ -99,8 +100,8 @@ public class FrequencyMaps extends BaseFrequencyModel {
         int nAttributeSubsets = nCr(this.attributesAvailable.length, this.attributeSubsetLength);
         for (int j = 0; j < nAttributeSubsets; j++) {
             int[] activeAttributes = getKthCombination(j, attributesAvailable, attributeSubsetLength);
-            int partialHash = this.instanceToPartialHash(instance, activeAttributes);
-            int subsetHash = attributeSubsetToHash(activeAttributes);
+            BigInteger partialHash = this.instanceToPartialHash(instance, activeAttributes);
+            BigInteger subsetHash = attributeSubsetToHash(activeAttributes);
             if (!this.frequencyMaps.get(subsetHash).containsKey(partialHash)) {
                 this.frequencyMaps.get(subsetHash).put(partialHash, new int[1 + this.allInstances.numClasses()]);
             }
@@ -111,24 +112,17 @@ public class FrequencyMaps extends BaseFrequencyModel {
         }
     }
 
-    private static int attributeSubsetToHash(int[] attributeSubset) {
-        int hash = 0;
-        for (int i : attributeSubset) {
-            hash += Math.pow(2, i);
-        }
-        return hash;
-    }
 
     @Override
     public double peakJointDistance(Model modelToCompare, int[] attributeSubset, double sampleScale) {
-        ArrayList<Integer> allHashes = mergeHashes((BaseFrequencyModel)modelToCompare, attributeSubset);
-        int subsetHash = attributeSubsetToHash(attributeSubset);
+        ArrayList<BigInteger> allHashes = mergeHashes((BaseFrequencyModel)modelToCompare, attributeSubset);
+        BigInteger subsetHash = attributeSubsetToHash(attributeSubset);
         int nClasses = this.allInstances.numClasses();
         double dist = 0.0f;
         int pN = this.allInstances.size();
         int qN = ((FrequencyMaps)modelToCompare).allInstances.size();
 
-        for (Integer hash : allHashes) {
+        for (BigInteger hash : allHashes) {
             int[] pFreqs = this.frequencyMaps.get(subsetHash).containsKey(hash) ?
                     this.frequencyMaps.get(subsetHash).get(hash) : new int[nClasses + 1];
             int[] qFreqs = ((FrequencyMaps)modelToCompare).frequencyMaps.get(subsetHash).containsKey(hash) ?

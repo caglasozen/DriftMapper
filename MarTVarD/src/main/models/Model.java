@@ -53,7 +53,7 @@ public abstract class Model {
         return this.allInstances;
     }
 
-    public void addAll(Instances instances) {
+    public void addInstances(Instances instances) {
         int percentage = -1;
         for (int i = 0; i < instances.size(); i++) {
             if (percentage != (int)((i/(double)instances.size()) * 100)) {
@@ -64,7 +64,7 @@ public abstract class Model {
         }
     }
 
-    public void removeAll(int[] indices) {
+    public void removeInstances(int[] indices) {
         for (int index : indices) {
             this.removeInstance(index);
         }

@@ -3,19 +3,20 @@ package main.report;
 import org.apache.commons.lang3.ArrayUtils;
 import weka.core.Instances;
 
+import java.math.BigInteger;
 import java.util.*;
 
 /**
  * Created by loongkuan on 6/12/2016.
  */
 public class StructuredExperimentResult extends ExperimentResult{
-    Map<Integer, ExperimentResult> separateExperiments;
-    Map<Integer, Double> experimentsProbability;
+    Map<BigInteger, ExperimentResult> separateExperiments;
+    Map<BigInteger, Double> experimentsProbability;
     int[] conditionedAttributes;
 
     public StructuredExperimentResult(double weightAverageDistance, double[] separateDistance, Instances instances,
-                                      Map<Integer, ExperimentResult> separateExperiments,
-                                      Map<Integer, Double> experimentsProbability, int[] conditionedAttributes) {
+                                      Map<BigInteger, ExperimentResult> separateExperiments,
+                                      Map<BigInteger, Double> experimentsProbability, int[] conditionedAttributes) {
         super(weightAverageDistance, separateDistance, instances);
         this.separateExperiments = separateExperiments;
         this.experimentsProbability = experimentsProbability;
@@ -25,13 +26,13 @@ public class StructuredExperimentResult extends ExperimentResult{
     StructuredExperimentResult(ArrayList<ExperimentResult> resultList) {
         super(resultList);
         // Initialise needed places to put data
-        Map<Integer, Double> groupedExperimentProbabilitySum = new HashMap<>();
-        Map<Integer, ArrayList<ExperimentResult>> groupedSeparateExperiments = new HashMap<>();
+        Map<BigInteger , Double> groupedExperimentProbabilitySum = new HashMap<>();
+        Map<BigInteger, ArrayList<ExperimentResult>> groupedSeparateExperiments = new HashMap<>();
         // Iterate through all the given structured experiment results to average
         for (ExperimentResult result : resultList) {
-            Map<Integer, ExperimentResult> currentSeparateExperiments = ((StructuredExperimentResult)result).separateExperiments;
-            Map<Integer, Double> currentExperimentsProbability = ((StructuredExperimentResult)result).experimentsProbability;
-            for (Integer hash : currentSeparateExperiments.keySet()) {
+            Map<BigInteger, ExperimentResult> currentSeparateExperiments = ((StructuredExperimentResult)result).separateExperiments;
+            Map<BigInteger, Double> currentExperimentsProbability = ((StructuredExperimentResult)result).experimentsProbability;
+            for (BigInteger hash : currentSeparateExperiments.keySet()) {
                 // Check if we seen this before
                 if (!groupedSeparateExperiments.containsKey(hash) || !groupedExperimentProbabilitySum.containsKey(hash)) {
                     groupedSeparateExperiments.put(hash, new ArrayList<>());
@@ -52,7 +53,7 @@ public class StructuredExperimentResult extends ExperimentResult{
         this.separateExperiments = new HashMap<>();
         this.experimentsProbability = new HashMap<>();
         // Iterate though all the "groups" seen
-        for (Integer hash : groupedSeparateExperiments.keySet()) {
+        for (BigInteger hash : groupedSeparateExperiments.keySet()) {
             ArrayList<ExperimentResult> groupResults = groupedSeparateExperiments.get(hash);
             Double groupProbSum = groupedExperimentProbabilitySum.get(hash);
             int groupLength = groupResults.size();
@@ -64,7 +65,7 @@ public class StructuredExperimentResult extends ExperimentResult{
 
     public String[][] getDetailedSubTable() {
         ArrayList<String[]> subtable = new ArrayList<>();
-        for(int hash : this.separateExperiments.keySet()) {
+        for(BigInteger hash : this.separateExperiments.keySet()) {
             ExperimentResult result = this.separateExperiments.get(hash);
             String resultRow[] = new String[10];
 

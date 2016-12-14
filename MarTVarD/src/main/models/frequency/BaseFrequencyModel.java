@@ -9,6 +9,7 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -17,59 +18,69 @@ import java.util.*;
 
 public abstract class BaseFrequencyModel extends Model {
 
-    protected int[] hashBases;
+    protected BigInteger[] hashBases;
 
     public abstract void changeAttributeSubsetLength(int length);
 
     protected abstract int findFv(Instance instance, int[] attributesSubset);
     protected abstract int findFy(int classIndex);
     protected abstract int findFvy(Instance instance, int[] attributesSubset, int classIndex);
-    protected abstract Set<Integer> getAllHashes(int[] attributeSubset);
+    protected abstract Set<BigInteger> getAllHashes(int[] attributeSubset);
 
     protected void setDataset(Instances dataset) {
         this.allInstances = new Instances(dataset, dataset.size());
         // Get bases for hash
-        int base = 1;
-        this.hashBases = new int[dataset.numAttributes() - 1];
-        for (int i = 0; i < dataset.numAttributes() - 1; i++) {
-            this.hashBases[i] = base;
-            base *= dataset.attribute(attributesAvailable[i]).numValues();
+        BigInteger base = BigInteger.ONE;
+        this.hashBases = new BigInteger[dataset.numAttributes() - 1];
+        for (int j : this.attributesAvailable) {
+            this.hashBases[j] = base;
+            base = base.multiply(BigInteger.valueOf(dataset.attribute(j).numValues()));
         }
         this.reset();
     }
 
-    protected int instanceToPartialHash(Instance instance, int[] attributeSubset) {
-        int hash = 0;
+    protected BigInteger instanceToPartialHash(Instance instance, int[] attributeSubset) {
+        BigInteger hash = BigInteger.ZERO;
         // Iterate over attributes in strippedInstance
         for (int i : attributeSubset) {
-            hash += this.hashBases[i] * (int)instance.value(i);
+            hash = hash.add(this.hashBases[i].multiply(BigInteger.valueOf((int)instance.value(i))));
         }
         return hash;
     }
 
-    protected Instance partialHashToInstance(int partialHash, int[] activeAttributes) {
+    protected Instance partialHashToInstance(BigInteger partialHash, int[] activeAttributes) {
         Instance partialInstance = new DenseInstance(this.allInstances.numAttributes());
         partialInstance.setDataset(this.allInstances);
 
         for (int i = activeAttributes.length - 1; i >= 0; i--) {
-            partialInstance.setValue(activeAttributes[i], partialHash / this.hashBases[activeAttributes[i]]);
-            partialHash = partialHash % this.hashBases[activeAttributes[i]];
+            partialInstance.setValue(activeAttributes[i], partialHash.divide(this.hashBases[activeAttributes[i]]).intValue());
+            partialHash = partialHash.mod(this.hashBases[activeAttributes[i]]);
         }
         return partialInstance;
     }
 
-    protected boolean isPartialHashEqualHash(int partialHash, int hash, int[] attributeSubset) {
-        int rem = hash - partialHash;
-        int quo;
+    protected boolean isPartialHashEqualHash(BigInteger partialHash, BigInteger hash, int[] attributeSubset) {
+        BigInteger rem = hash.add(partialHash.negate());
+        BigInteger quo;
+
         for (int i = this.allInstances.numAttributes() - 2; i >= 0; i--) {
-            if (rem < 0) return false;
+            if (rem.compareTo(BigInteger.ZERO) == -1) return false;
             if (!ArrayUtils.contains(attributeSubset, i)) {
-                quo = rem / this.hashBases[i];
-                if (quo >= this.allInstances.attribute(i).numValues()) return false;
-                rem = rem % this.hashBases[i];
+                quo = rem.divide(this.hashBases[i]);
+                BigInteger numVals = BigInteger.valueOf(this.allInstances.attribute(i).numValues());
+                if (quo.compareTo(numVals) >= 0) return false;
+                rem = rem.remainder(this.hashBases[i]);
             }
         }
-        return rem == 0;
+        return rem.compareTo(BigInteger.ZERO) == 0;
+    }
+
+    protected static BigInteger attributeSubsetToHash(int[] attributeSubset) {
+        BigInteger hash = BigInteger.ZERO;
+        for (int i : attributeSubset) {
+            hash = hash.add(BigInteger.valueOf(2).pow(i));
+        }
+        return hash;
     }
 
     protected boolean validAttributeSubset(int[] attributeSubset) {
@@ -80,9 +91,9 @@ public abstract class BaseFrequencyModel extends Model {
         return valid && attributeSubset.length == this.attributeSubsetLength;
     }
 
-    protected static ArrayList<Integer> sampleHashes(ArrayList<Integer> hashes, double sampleScale) {
-        ArrayList<Integer> sampledHashes = new ArrayList<>();
-        ArrayList<Integer> allHash = new ArrayList<>(hashes);
+    protected static ArrayList<BigInteger> sampleHashes(ArrayList<BigInteger> hashes, double sampleScale) {
+        ArrayList<BigInteger> sampledHashes = new ArrayList<>();
+        ArrayList<BigInteger> allHash = new ArrayList<>(hashes);
         Collections.shuffle(allHash);
         for (int i = 0; i < Math.min((int)(hashes.size() / sampleScale), hashes.size()); i++) {
             sampledHashes.add(allHash.get(i));
@@ -90,8 +101,8 @@ public abstract class BaseFrequencyModel extends Model {
         return sampledHashes;
     }
 
-    protected ArrayList<Integer> mergeHashes(BaseFrequencyModel model, int[] attributeSubset) {
-        Set<Integer> hashes = new HashSet<>();
+    protected ArrayList<BigInteger> mergeHashes(BaseFrequencyModel model, int[] attributeSubset) {
+        Set<BigInteger> hashes = new HashSet<>();
         hashes.addAll(this.getAllHashes(attributeSubset));
         hashes.addAll(model.getAllHashes(attributeSubset));
         return new ArrayList<>(hashes);
@@ -104,7 +115,7 @@ public abstract class BaseFrequencyModel extends Model {
         BaseFrequencyModel modelAfter = (BaseFrequencyModel)modelToCompare;
 
         // Get the hash of all the seen instances and get a sample from them
-        ArrayList<Integer> allHashes = mergeHashes(modelAfter, attributeSubset);
+        ArrayList<BigInteger> allHashes = mergeHashes(modelAfter, attributeSubset);
         allHashes = sampleHashes(allHashes, sampleScale);
 
         double[] p = new double[allHashes.size()];
@@ -130,7 +141,7 @@ public abstract class BaseFrequencyModel extends Model {
         BaseFrequencyModel modelAfter = (BaseFrequencyModel)modelToCompare;
 
         // Get the hash of all the seen instances and get a sample from them
-        ArrayList<Integer> allHashes = mergeHashes(modelAfter, attributeSubset);
+        ArrayList<BigInteger> allHashes = mergeHashes(modelAfter, attributeSubset);
 
         int nClass =  this.allInstances.numClasses();
         double[] p = new double[allHashes.size() * nClass];
@@ -160,7 +171,7 @@ public abstract class BaseFrequencyModel extends Model {
         BaseFrequencyModel modelAfter = (BaseFrequencyModel)modelToCompare;
 
         // Get the hash of all the seen instances and get a sample from them
-        ArrayList<Integer> allHashes = mergeHashes(modelAfter, attributeSubset);
+        ArrayList<BigInteger> allHashes = mergeHashes(modelAfter, attributeSubset);
 
         double[] p = new double[allHashes.size()];
         double[] q = new double[allHashes.size()];
@@ -169,8 +180,8 @@ public abstract class BaseFrequencyModel extends Model {
         Instances instanceValues = new Instances(this.allInstances, allHashes.size() * nClass);
         double finalDistance = 0.0f;
 
-        HashMap<Integer, ExperimentResult> separateExperiments = new HashMap<>();
-        HashMap<Integer, Double> experimentProbability = new HashMap<>();
+        HashMap<BigInteger, ExperimentResult> separateExperiments = new HashMap<>();
+        HashMap<BigInteger, Double> experimentProbability = new HashMap<>();
 
         for (int classIndex = 0; classIndex < this.allInstances.numClasses(); classIndex++) {
             double weight = (
@@ -188,8 +199,8 @@ public abstract class BaseFrequencyModel extends Model {
                 instanceValues.add(instance);
             }
             double currentDistance = this.distanceMetric.findDistance(p, q) * sampleScale;
-            experimentProbability.put(classIndex, weight);
-            separateExperiments.put(classIndex,
+            experimentProbability.put(BigInteger.valueOf(classIndex), weight);
+            separateExperiments.put(BigInteger.valueOf(classIndex),
                     new SingleExperimentResult(
                             currentDistance,
                             ArrayUtils.subarray(separateDistance,
@@ -208,7 +219,7 @@ public abstract class BaseFrequencyModel extends Model {
         BaseFrequencyModel modelAfter = (BaseFrequencyModel)modelToCompare;
 
         // Get the hash of all the seen instances and get a sample from them
-        ArrayList<Integer> allHashes = mergeHashes(modelAfter, attributeSubset);
+        ArrayList<BigInteger> allHashes = mergeHashes(modelAfter, attributeSubset);
 
         double[] p = new double[this.allInstances.numClasses()];
         double[] q = new double[this.allInstances.numClasses()];
@@ -217,8 +228,8 @@ public abstract class BaseFrequencyModel extends Model {
         Instances instanceValues = new Instances(this.allInstances, allHashes.size() * nClass);
         double finalDistance = 0.0f;
 
-        HashMap<Integer, ExperimentResult> separateExperiments = new HashMap<>();
-        HashMap<Integer, Double> experimentProbability = new HashMap<>();
+        HashMap<BigInteger, ExperimentResult> separateExperiments = new HashMap<>();
+        HashMap<BigInteger, Double> experimentProbability = new HashMap<>();
 
         for (int i = 0; i < allHashes.size(); i++) {
             Instance instance = this.partialHashToInstance(allHashes.get(i), attributeSubset);

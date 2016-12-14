@@ -5,7 +5,6 @@ import main.models.Model;
 import main.models.frequency.FrequencyMaps;
 import main.models.frequency.FrequencyTable;
 import main.report.ExperimentResult;
-import main.report.SummaryReport;
 import weka.core.Instances;
 
 import java.util.*;
@@ -31,14 +30,14 @@ public class StaticData {
         if (model == 0) {
             model1 = new FrequencyTable(instances1, nAttributesActive, attributeIndices);
             model2 = new FrequencyTable(instances2, nAttributesActive, attributeIndices);
-            model1.addAll(instances1);
-            model2.addAll(instances2);
+            model1.addInstances(instances1);
+            model2.addInstances(instances2);
         }
         else {
             model1 = new FrequencyMaps(instances1, nAttributesActive, attributeIndices);
             model2 = new FrequencyMaps(instances2, nAttributesActive, attributeIndices);
-            model1.addAll(instances1);
-            model2.addAll(instances2);
+            model1.addInstances(instances1);
+            model2.addInstances(instances2);
         }
 
         this.resultMap = model1.analyseDifference(model2, sampleScale, nTests, driftMeasurement);

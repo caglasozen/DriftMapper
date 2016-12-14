@@ -4,6 +4,7 @@ import main.models.Model;
 import weka.core.Instance;
 import weka.core.Instances;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -12,7 +13,7 @@ import java.util.Set;
  * Created by loongkuan on 11/05/16.
  **/
 public class FrequencyTable extends BaseFrequencyModel{
-    private HashMap<Integer, int[]> frequencyTable;
+    private HashMap<BigInteger, int[]> frequencyTable;
     private int[][] attributeSum;       // Maps attribute index to a list of value frequency
 
     public FrequencyTable(Instances dataset, int attributeSubsetLength, int[] attributesAvailable) {
@@ -48,7 +49,7 @@ public class FrequencyTable extends BaseFrequencyModel{
     @Override
     public void addInstance(Instance instance) {
         this.allInstances.add(instance);
-        int instHash = this.instanceToPartialHash(instance, this.attributesAvailable);
+        BigInteger instHash = this.instanceToPartialHash(instance, this.attributesAvailable);
         int classHash = (int)instance.classValue();
         // Attribute Sum
         for (int i = 0; i < instance.numAttributes(); i++) {
@@ -68,7 +69,7 @@ public class FrequencyTable extends BaseFrequencyModel{
     @Override
     public void removeInstance(int index) {
         Instance instance = this.allInstances.remove(index);
-        int instHash = this.instanceToPartialHash(instance, this.attributesAvailable);
+        BigInteger instHash = this.instanceToPartialHash(instance, this.attributesAvailable);
         int classHash = (int)instance.classValue();
         // Attribute Sum
         for (int i = 0; i < instance.numAttributes(); i++) {
@@ -86,11 +87,11 @@ public class FrequencyTable extends BaseFrequencyModel{
     }
 
     @Override
-    protected Set<Integer> getAllHashes(int[] attributeSubset) {
-        HashSet<Integer> hashes = new HashSet<>();
-        for (int hash : this.frequencyTable.keySet()) {
+    protected Set<BigInteger> getAllHashes(int[] attributeSubset) {
+        HashSet<BigInteger> hashes = new HashSet<>();
+        for (BigInteger hash : this.frequencyTable.keySet()) {
             Instance instance = this.partialHashToInstance(hash, this.attributesAvailable);
-            int currentHash = this.instanceToPartialHash(instance, attributeSubset);
+            BigInteger currentHash = this.instanceToPartialHash(instance, attributeSubset);
             if (!hashes.contains(currentHash)) {
                 hashes.add(currentHash);
             }
@@ -135,10 +136,10 @@ public class FrequencyTable extends BaseFrequencyModel{
         if (!partialVectorExists(instance, attributeSubset)) return 0;
         if (!isPartialInstancePossible(instance, attributeSubset)) return 0;
 
-        int instHash = this.instanceToPartialHash(instance, attributeSubset);
+        BigInteger instHash = this.instanceToPartialHash(instance, attributeSubset);
 
         int totalFrequency = 0;
-        for (int hash: this.frequencyTable.keySet()) {
+        for (BigInteger hash: this.frequencyTable.keySet()) {
             if (this.isPartialHashEqualHash(instHash, hash, attributeSubset)) {
                 totalFrequency += classSpecific ?
                         this.frequencyTable.get(hash)[(int)instance.classValue() + 1] :
