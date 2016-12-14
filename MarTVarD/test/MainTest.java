@@ -22,11 +22,10 @@ import java.util.ArrayList;
 public class MainTest {
     public static void main(String[] args) {
         //String[] standardFiles = new String[]{"airlines"};
-        String[] standardFiles = new String[]{"elecNormNew", "sensor", "airlines"};
-        //args = new String[]{"standardAll"};
+        String[] standardFiles = new String[]{"gas-sensor"};
+        args = new String[]{"standardAll"};
         double sampleScale = 1.0;
         int nTests = 10;
-        //args = new String[]{"stream", "20130505", "20131129"};
         //args = new String[]{"all", "20130419", "20131129"};
         //args = new String[]{"all", "20130505", "20131129"};
         //args = new String[]{"all", "20130606", "20131129"};
@@ -35,7 +34,7 @@ public class MainTest {
         //args = new String[]{"all", "20131113", "20131129"};
         //args = new String[]{"all", "20131129", "20131129"};
         //args = new String[]{"priorTest", "elecNormNew"};
-        args = new String[]{"testAll"};
+        //args = new String[]{"testAll"};
         if (args[0].equals("all")) {
             Instances[] dataSets = loadPairData(args[1], args[2]);
             int nAtt = dataSets[0].numAttributes();
@@ -46,34 +45,6 @@ public class MainTest {
         }
         else if (args[0].equals("testAll")) {
             testAllSatellite();
-        }
-        else if (args[0].equals("stream")) {
-            Instances[] dataSets = loadPairData(args[1], args[2]);
-            Instances allInstances = dataSets[1];
-            int[] attributeIndices = new int[allInstances.numAttributes() - 1];
-            for (int i = 0; i < allInstances.numAttributes() - 1; i++) attributeIndices[i] = i;
-            Model model = new FrequencyMaps(allInstances, allInstances.numAttributes() - 1, attributeIndices);
-            StaticBase streamingData = new StaticBase(dataSets[0], model, 2000);
-            int percentage = -1;
-            long startTime = System.currentTimeMillis();
-            System.out.println("");
-            long duration = 0;
-            for (int i = 0; i < allInstances.size(); i++) {
-                /*
-                if (percentage != (int)((i/(double)allInstances.size()) * 100)) {
-                    percentage = (int)((i/(double)allInstances.size()) * 100);
-                    System.out.print("\rAdded " + percentage + "% of Instances ");
-                }
-                */
-                streamingData.addInstance(allInstances.get(i));
-                if (duration != (System.currentTimeMillis() - startTime) / 1000) {
-                    duration = (System.currentTimeMillis() - startTime) / 1000;
-                    System.out.print("\rAdded " + i + " Instances out of " + allInstances.size() +
-                            " at " + i / duration + " instances per second");
-                }
-            }
-            System.out.println("");
-            streamingData.printDriftTimeLine();
         }
     }
 
@@ -164,7 +135,7 @@ public class MainTest {
         }
     }
 
-    private static Instances[] loadPairData(String filename1, String filename2) {
+    static Instances[] loadPairData(String filename1, String filename2) {
         try {
             // Load data sets into collated data set and discretize
             Instances instances1 = loadDataSet("./datasets/train_seed/"+filename1+".arff");
@@ -182,7 +153,7 @@ public class MainTest {
         return new Instances[2];
     }
 
-    private static Instances loadSingleData(String filename) {
+    static Instances loadSingleData(String filename) {
         try {
             // Load data sets into collated data set and discretize
             Instances instances = loadDataSet("./datasets/train_seed/"+filename+".arff");
@@ -195,7 +166,7 @@ public class MainTest {
         return null;
     }
 
-    public static void writeToCSV(String[][] data, String[] header, String filename){
+    static void writeToCSV(String[][] data, String[] header, String filename){
         try {
             CSVWriter writer = new CSVWriter(new FileWriter(filename), ',');
             // feed in your array (or convert your data to an array)
@@ -210,7 +181,7 @@ public class MainTest {
         }
     }
 
-    private static Instances loadDataSet(String filename) throws IOException {
+    static Instances loadDataSet(String filename) throws IOException {
         // Check if any attribute is numeric
         Instances result;
         BufferedReader reader;
