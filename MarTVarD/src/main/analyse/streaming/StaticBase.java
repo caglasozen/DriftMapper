@@ -18,9 +18,11 @@ public class StaticBase extends StreamAnalysis{
     public StaticBase(Instances baseInstances, Model referenceModel, int windowSize) {
         this.baseModel = referenceModel.copy();
         this.movingModel = referenceModel.copy();
-        this.baseModel.addAll(baseInstances);
+        this.baseModel.addInstances(baseInstances);
         this.windowSize = windowSize;
         driftTimeLine = new HashMap<>();
+        // TODO: make param
+        this.resolution = windowSize / 5;
     }
 
     @Override
@@ -31,19 +33,23 @@ public class StaticBase extends StreamAnalysis{
     @Override
     public void addInstance(Instance instance) {
         this.movingModel.addInstance(instance);
+        this.currentIndex += 1;
         if (this.movingModel.size() > this.windowSize) {
-            this.movingModel.removeInstance(0);
+            for (int j = 0; j < this.resolution; j++) {
+                this.movingModel.removeInstance(0);
+            }
+        }
+        if (this.movingModel.size() % this.resolution == 0) {
             driftTimeLine.put(this.currentIndex,
                     this.baseModel.peakJointDistance(
                             this.movingModel,
                             this.baseModel.getAttributesAvailable(),
                             1.0));
-            this.currentIndex += 1;
         }
     }
 
     public void printDriftTimeLine() {
-        for (int i = 0; i < this.currentIndex; i++) {
+        for (int i = 0; i < this.currentIndex; i+=this.resolution) {
             System.out.println("Drift of " + this.driftTimeLine.get(i) + " at " + i);
         }
     }
