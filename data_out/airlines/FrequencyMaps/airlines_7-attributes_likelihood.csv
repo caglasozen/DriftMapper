@@ -1,0 +1,2 @@
+"attribute_subset","drift","mean","sd","max_value","max_attribute","min_value","min_attribute"
+"Airline_Flight_AirportFrom_AirportTo_DayOfWeek_Time_Length_Delay","0.5146413448212649","3.5294717426378654E-6","3.0900180492924544E-6","4.677442758503178E-5","Airline=UA_Flight='(566.5-1306.5]'_AirportFrom=ORD_AirportTo=LGA_DayOfWeek=3_Time='(890.5-1079.5]'_Length='(130.5-174.5]'_Delay=1","0.0","Airline=WN_Flight='(1306.5-2431.5]'_AirportFrom=DAL_AirportTo=ELP_DayOfWeek=1_Time='(1079.5-inf)'_Length='(100.5-130.5]'_Delay=0"

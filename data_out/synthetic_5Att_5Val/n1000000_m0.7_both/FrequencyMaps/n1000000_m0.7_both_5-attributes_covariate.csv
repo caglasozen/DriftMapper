@@ -1,0 +1,2 @@
+"attribute_subset","drift","mean","sd","max_value","max_attribute","min_value","min_attribute"
+"x1_x2_x3_x4_x5","0.698716","2.2358912000000215E-4","5.229576107934851E-4","0.008244999999999999","x1=v2_x2=v3_x3=v1_x4=v3_x5=v1","0.0","x1=v2_x2=v2_x3=v4_x4=v5_x5=v2"
