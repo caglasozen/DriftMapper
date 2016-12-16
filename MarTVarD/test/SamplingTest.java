@@ -1,5 +1,5 @@
 import main.analyse.StaticData;
-import main.models.DriftMeasurement;
+import main.DriftMeasurement;
 import main.report.SummaryReport;
 import weka.core.Instances;
 
@@ -29,13 +29,13 @@ public class SamplingTest {
 
         String folder = "synthetic_" + nAttributes + "Att_" + nValues + "Val";
 
-        //MainTest.standardAll(new int[]{1,6}, allFiles, -1, folder);
+        //MainTest.compareHalf(new int[]{1,6}, allFiles, -1, folder);
         int nSizes = 60;
         int[] sampleSizes = new int[nSizes];
         for (int i = 0; i < nSizes; i++) {
             sampleSizes[i] = (i+1) * 100;
         }
-        //MainTest.standardAll(new int[]{1,7}, allFiles, 1000, folder);
+        //MainTest.compareHalf(new int[]{1,7}, allFiles, 1000, folder);
         JointTest(jointFile, folder, sampleSizes, true, 20);
         JointTest(jointFile, folder, sampleSizes, false, 20);
         PosteriorTest(jointFile, folder, sampleSizes, 20);

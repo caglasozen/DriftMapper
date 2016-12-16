@@ -1,6 +1,6 @@
 package main.analyse;
 
-import main.models.DriftMeasurement;
+import main.DriftMeasurement;
 import main.models.Model;
 import main.models.frequency.FrequencyMaps;
 import main.models.frequency.FrequencyTable;

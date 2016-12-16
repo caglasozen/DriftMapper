@@ -1,9 +1,9 @@
 package main.models;
 
+import main.DriftMeasurement;
 import main.distance.Distance;
 import main.distance.TotalVariation;
 import main.report.ExperimentResult;
-import main.report.SingleExperimentResult;
 import org.apache.commons.lang3.ArrayUtils;
 import weka.core.Instance;
 import weka.core.Instances;

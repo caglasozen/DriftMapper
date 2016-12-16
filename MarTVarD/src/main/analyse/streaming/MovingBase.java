@@ -63,9 +63,9 @@ public class MovingBase extends StreamAnalysis {
         */
 
         // TODO: Make params
-        this.resolution = 1000;
+        this.resolution = 10000;
         this.modelCurrent = this.referenceModel.copy();
-        this.maxDriftToIgnore = 0.01;
+        this.maxDriftToIgnore = 0.1;
         this.intervals = new ArrayList<>();
         this.drifts = new ArrayList<>();
         this.isDrifting = false;
@@ -92,8 +92,9 @@ public class MovingBase extends StreamAnalysis {
 
     private void updateDetector() {
         this.currentInterval[1] = this.currentIndex;
-        double dist = this.currentDetectorModels[0].peakJointDistance(this.modelCurrent,
+        double dist = this.currentDetectorModels[0].peakPosteriorDistance(this.modelCurrent,
                 this.modelCurrent.getAttributesAvailable(), this.sampleScale);
+        //System.out.println("\r" + dist + " at " + this.currentIndex);
         if (!this.isDrifting) {
             if (dist > this.maxDriftToIgnore) {
                 this.isDrifting = true;
@@ -101,15 +102,16 @@ public class MovingBase extends StreamAnalysis {
                 this.currentDetectorModels[1] = this.modelCurrent;
             }
             else {
+                this.currentInterval[0] = currentIndex;
                 this.currentDetectorModels[0].addInstances(this.modelCurrent.getAllInstances());
             }
         }
         else {
             // Larger drift detected, continue moving window
-            if (this.currentDrift < dist + this.maxDriftToIgnore) {
+            if (this.currentDrift < dist + 0.001) {
                 // Add all instances in current model to old one to try and maximise drift
                 this.currentDetectorModels[1].addInstances(this.modelCurrent.getAllInstances());
-                double dist2 = this.currentDetectorModels[0].peakJointDistance(this.currentDetectorModels[1],
+                double dist2 = this.currentDetectorModels[0].peakPosteriorDistance(this.currentDetectorModels[1],
                         this.currentDetectorModels[1].getAttributesAvailable(), this.sampleScale);
                 if (dist2 < dist) {
                     this.currentDrift = dist;
@@ -126,21 +128,21 @@ public class MovingBase extends StreamAnalysis {
                 this.currentDrift = 0;
                 this.currentDetectorModels[0] = this.modelCurrent;
                 this.currentDetectorModels[1] = null;
-                this.currentInterval = new int[]{this.currentIndex - this.resolution, this.currentIndex};
+                this.currentInterval = new int[]{this.currentIndex, this.currentIndex};
             }
         }
         this.modelCurrent = this.referenceModel.copy();
     }
 
     private void checkDrift() {
-        if (this.tailModel.findJointDistance(this.headModel,
+        if (this.tailModel.findCovariateDistance(this.headModel,
                 this.tailModel.getAttributesAvailable(), this.sampleScale).getDistance() > this.thresholdDrift) {
             this.reduceDrift();
         }
     }
 
     private void reduceDrift() {
-        double drift = this.tailModel.findJointDistance(this.headModel,
+        double drift = this.tailModel.findCovariateDistance(this.headModel,
                 this.tailModel.getAttributesAvailable(), this.sampleScale).getDistance();
         double originalDrift = drift;
         System.out.println("\rDrift of " + originalDrift + " at " + this.totalInstancesPast);
@@ -152,7 +154,7 @@ public class MovingBase extends StreamAnalysis {
             this.tailModel.removeInstance(0);
             this.currentWindow.remove(0);
             this.totalInstancesPast += 1;
-            drift = this.tailModel.findJointDistance(this.headModel,
+            drift = this.tailModel.findPosteriorDistance(this.headModel,
                     this.tailModel.getAttributesAvailable(), this.sampleScale).getDistance();
         }
         this.driftPoints.put(this.totalInstancesPast, originalDrift);
@@ -162,7 +164,7 @@ public class MovingBase extends StreamAnalysis {
     public void printDriftPoints() {
         for (int i = 0; i < this.intervals.size(); i++) {
             System.out.println("Drift of " + this.drifts.get(i) +
-                    " form " + this.intervals.get(i)[0] + " to " + this.intervals.get(i)[1]);
+                    " from " + this.intervals.get(i)[0] + " to " + this.intervals.get(i)[1]);
         }
     }
 }

@@ -1,4 +1,4 @@
-package main.models;
+package main;
 
 /**
  * Created by loongkuan on 29/11/2016.
