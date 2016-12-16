@@ -1,6 +1,8 @@
 import main.generator.AbruptTreeDriftGenerator;
 import main.generator.CategoricalDriftGenerator;
 
+import java.io.File;
+
 /**
  * Created by LoongKuan on 8/10/2016.
  */
@@ -20,6 +22,7 @@ public class GenerateSyntheticData {
         int[] burnIns = new int[]{1000000};
         double[] magnitudes = new double[]{0.3, 0.5, 0.7};
         String folder = "./datasets/synthetic_" + nAttributes + "Att_" + nValues + "Val/";
+        new File(folder).mkdir();
         String extension = ".arff";
 
         for (int burnIn : burnIns) {

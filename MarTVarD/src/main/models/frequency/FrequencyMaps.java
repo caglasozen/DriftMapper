@@ -114,23 +114,29 @@ public class FrequencyMaps extends BaseFrequencyModel {
 
 
     @Override
-    public double peakJointDistance(Model modelToCompare, int[] attributeSubset, double sampleScale) {
+    public double peakPosteriorDistance(Model modelToCompare, int[] attributeSubset, double sampleScale) {
         ArrayList<BigInteger> allHashes = mergeHashes((BaseFrequencyModel)modelToCompare, attributeSubset);
         BigInteger subsetHash = attributeSubsetToHash(attributeSubset);
         int nClasses = this.allInstances.numClasses();
-        double dist = 0.0f;
-        int pN = this.allInstances.size();
-        int qN = ((FrequencyMaps)modelToCompare).allInstances.size();
 
-        for (BigInteger hash : allHashes) {
-            int[] pFreqs = this.frequencyMaps.get(subsetHash).containsKey(hash) ?
-                    this.frequencyMaps.get(subsetHash).get(hash) : new int[nClasses + 1];
-            int[] qFreqs = ((FrequencyMaps)modelToCompare).frequencyMaps.get(subsetHash).containsKey(hash) ?
-                    ((FrequencyMaps)modelToCompare).frequencyMaps.get(subsetHash).get(hash) : new int[1 + nClasses];
-            for (int j = 0; j < this.allInstances.numClasses(); j++) {
-                dist += Math.abs(((double)pFreqs[1 + j] / (double)pN) - ((double)qFreqs[1 + j] / (double)qN));
-            }
+        double dist = 0.0f;
+        for (int classIndex = 0; classIndex < this.allInstances.numClasses(); classIndex++) {
+             int pN = this.findFy(classIndex);
+             int qN = ((FrequencyMaps)modelToCompare).findFy(classIndex);
+             double weight = (((double)pN / (double)this.allInstances.size()) +
+                     ((double)qN / (double)((FrequencyMaps)modelToCompare).allInstances.size())) / 2;
+             double currentDist = 0.0f;
+             for (BigInteger hash : allHashes) {
+                 int[] pFreqs = this.frequencyMaps.get(subsetHash).containsKey(hash) ?
+                         this.frequencyMaps.get(subsetHash).get(hash) : new int[nClasses + 1];
+                 int[] qFreqs = ((FrequencyMaps)modelToCompare).frequencyMaps.get(subsetHash).containsKey(hash) ?
+                         ((FrequencyMaps)modelToCompare).frequencyMaps.get(subsetHash).get(hash) : new int[1 + nClasses];
+                 double tmpDist = pN == 0 ? 0 : (double)pFreqs[1 + classIndex] / (double)pN;
+                 tmpDist -= qN == 0 ? 0 : ((double)qFreqs[1 + classIndex] / (double)qN);
+                 currentDist += Math.abs(tmpDist);
+             }
+            dist += (currentDist / (double)2) * weight;
         }
-        return dist / (double)2;
+        return dist;
     }
 }
