@@ -22,8 +22,11 @@ public class StreamingTest extends MainTest{
         //args = new String[]{"stream", "n1000000_m0.7_posterior"};
         //args = new String[]{"stream", "synthetic_5Att_5Val/n1000000_none"};
 
-        String folder = "data_uni_antwerp";
-        args = new String[]{"stream", "water_2015"};
+        //String folder = "data_uni_antwerp";
+        //args = new String[]{"stream", "water_2016"};
+
+        String folder = "";
+        args = new String[]{"stream", "elecNormNew"};
 
         //String folder = "train_seed";
         //args = new String[]{"all", "20130419", "20131129"};
@@ -37,48 +40,63 @@ public class StreamingTest extends MainTest{
 
         //TODO: Be able to measure different types of drift and name accordingly
         //testAllWindowSize(allInstances, new int[]{100, 500, 1000, 5000, 10000}, filepath);
-        testAllWindowSize(allInstances, new int[]{5000, 10000, 50000, 100000, 500000}, filepath);
+        testAllWindowSizeSubsetLength(allInstances,
+                getAllWindowSize(allInstances), getAllAttributeSubsetLength(allInstances), filepath);
     }
 
-    private static void testAllWindowSize(Instances instances, int[] windowSizes, String folder) {
-        ArrayList<int[]> attributesubsets = getAllAttributeSubsets(instances, 1);
+    private static int[] getAllWindowSize(Instances instances) {
+        int currentSize = 1000;
+        ArrayList<Integer> allSizes  = new ArrayList<>();
+        while (currentSize < instances.size()) {
+            allSizes.add(currentSize);
+            currentSize = Integer.toString(currentSize).charAt(0) == '1' ? currentSize * 5 : currentSize * 2;
+        }
+        int[] returnSizes = new int[allSizes.size()];
+        for(int i = 0; i < allSizes.size(); i++) returnSizes[i] = allSizes.get(i);
+        return returnSizes;
+    }
+
+    private static int[] getAllAttributeSubsetLength(Instances instances) {
+        int maxLength = Math.min(instances.numAttributes(), 3);
+        int[] allLength = new int[maxLength];
+        for (int i = 0; i < maxLength; i++) {
+            allLength[i] = i + 1;
+        }
+        return allLength;
+    }
+
+    private static void testAllWindowSizeSubsetLength(Instances instances,
+                                                      int[] windowSizes, int[] subsetLength, String folder) {
         for (int size : windowSizes) {
-            for (DriftMeasurement type : DriftMeasurement.values()) {
-                String file = folder + "/" + type.name() + "_" + size + ".csv";
-                testOnData(instances, attributesubsets, size, type, file);
+            for (int length : subsetLength) {
+                for (DriftMeasurement type : DriftMeasurement.values()) {
+                    String file = folder + "/" + type.name() + "_" + size + "_" + length + ".csv";
+                    testOnData(instances, length, size, type, file);
+                }
             }
         }
-    }
-
-    private static ArrayList<int[]> getAllAttributeSubsets(Instances instances, int length) {
-        ArrayList<int[]> subsets = new ArrayList<>();
-        for (int i = 0; i < instances.numAttributes() - 1; i++) {
-            subsets.add(new int[]{i});
-        }
-        return subsets;
     }
 
     // TODO: Automate testing with different windows
-    private static void testOnData(Instances instances, ArrayList<int[]> attributeSubsets, int windowSize,
+    private static void testOnData(Instances instances, int attributeSubsetLength, int windowSize,
                                    DriftMeasurement driftType, String resultFile) {
         int[] attributeIndices = new int[instances.numAttributes() - 1];
         for (int i = 0; i < instances.numAttributes() - 1; i++) attributeIndices[i] = i;
-        Model model = new FrequencyMaps(instances, attributeSubsets.get(0).length, attributeIndices);
-        NaiveWindowCompare streamingData = new NaiveWindowCompare(windowSize, model, attributeSubsets, driftType);
-        long startTime = System.currentTimeMillis();
-        System.out.println("");
-        long duration = 0;
+
+        Model referenceModel = new FrequencyMaps(instances, attributeSubsetLength, attributeIndices);
+        NaiveWindowCompare streamingData = new NaiveWindowCompare(windowSize, referenceModel, driftType);
+
+        int percentage = 0;
         for (int i = 0; i < instances.size(); i++) {
-            streamingData.addInstance(instances.get(i));
-            if (duration != (System.currentTimeMillis() - startTime) / 1000) {
-                duration = (System.currentTimeMillis() - startTime) / 1000;
-                System.out.print("\rAdded " + i + " Instances out of " + instances.size() +
-                        " at " + i / duration + " instances per second");
+            if (percentage != (i * 100) / instances.size() ) {
+                percentage = (i * 100 )/ instances.size();
+                System.out.print("\r" + percentage + "% of instance processed");
             }
+            streamingData.addInstance(instances.get(i));
         }
-        System.out.println("");
-        duration = (System.currentTimeMillis() - startTime) / 1000;
-        System.out.println("Time taken: " + duration);
+        System.out.println("\rDone test of Window Size = " + windowSize +
+                ", Subset Length = " + attributeSubsetLength +
+                ", and Drift Type = " + driftType.name());
         streamingData.writeResultsToFile(resultFile);
     }
 
@@ -92,10 +110,5 @@ public class StreamingTest extends MainTest{
         filname += "/" + experimentName;
         new File(filname).mkdir();
         return filname;
-    }
-
-    private void benchmark() {
-        ADWINChangeDetector detector = new ADWINChangeDetector();
-        detector.prepareForUse();
     }
 }

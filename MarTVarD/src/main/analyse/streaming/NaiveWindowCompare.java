@@ -26,14 +26,13 @@ public class NaiveWindowCompare extends StreamAnalysis {
     private ArrayList<Integer> driftPoints;
     private ArrayList<double[]> driftValues;
 
-    public NaiveWindowCompare(int windowSize, Model referenceModel,
-                              ArrayList<int[]> attributeSubsets, DriftMeasurement driftMeasurementType) {
+    public NaiveWindowCompare(int windowSize, Model referenceModel, DriftMeasurement driftMeasurementType) {
         this.windowSize = windowSize;
         this.driftMeasurementType = driftMeasurementType;
         this.currentModel = referenceModel.copy();
         this.currentAllModel = referenceModel.copy();
         ((FrequencyMaps)currentAllModel).changeAttributeSubsetLength(this.currentModel.getAllInstances().numAttributes() - 1);
-        this.attributeSubsets = attributeSubsets;
+        this.attributeSubsets = referenceModel.getAllAttributeSubsets();
 
         this.currentIndex = -1;
         this.driftPoints = new ArrayList<>();
