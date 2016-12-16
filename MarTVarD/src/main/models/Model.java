@@ -103,17 +103,6 @@ public abstract class Model {
         return sampleInstances;
     }
 
-    protected static int[] getKthCombination(int k, int[] elements, int choices) {
-        if (choices == 0) return new int[]{};
-        else if (elements.length == choices) return  elements;
-        else {
-            int nCombinations = nCr(elements.length - 1, choices - 1);
-            if (k < nCombinations) return ArrayUtils.addAll(ArrayUtils.subarray(elements, 0, 1),
-                    getKthCombination(k, ArrayUtils.subarray(elements, 1, elements.length), choices - 1));
-            else return getKthCombination(k - nCombinations, ArrayUtils.subarray(elements, 1, elements.length), choices);
-        }
-    }
-
     public Map<int[], ExperimentResult> analyseDifference(Model modelToCompare, double sampleScale,
                                                           int nTests, DriftMeasurement driftMeasurement) {
         Map<int[], ExperimentResult> resultMap = new HashMap<>();
@@ -167,6 +156,33 @@ public abstract class Model {
             ans /= i;
         }
         return ans;
+    }
+
+    public int getNAttributeSubsets() {
+        return Model.nCr(this.attributesAvailable.length, this.attributeSubsetLength);
+    }
+
+    protected static int[] getKthCombination(int k, int[] elements, int choices) {
+        if (choices == 0) return new int[]{};
+        else if (elements.length == choices) return  elements;
+        else {
+            int nCombinations = nCr(elements.length - 1, choices - 1);
+            if (k < nCombinations) return ArrayUtils.addAll(ArrayUtils.subarray(elements, 0, 1),
+                    getKthCombination(k, ArrayUtils.subarray(elements, 1, elements.length), choices - 1));
+            else return getKthCombination(k - nCombinations, ArrayUtils.subarray(elements, 1, elements.length), choices);
+        }
+    }
+
+    public int[] getKthCombination(int k) {
+        return Model.getKthCombination(k, this.attributesAvailable, this.attributeSubsetLength);
+    }
+
+    public ArrayList<int[]> getAllAttributeSubsets() {
+        ArrayList<int[]> allAttributeSubsets = new ArrayList<>();
+        for (int i = 0; i < this.getNAttributeSubsets(); i++) {
+            allAttributeSubsets.add(this.getKthCombination(i));
+        }
+        return allAttributeSubsets;
     }
 
     private static Map<int[], ExperimentResult> sortByValue( Map<int[], ExperimentResult> map ) {
