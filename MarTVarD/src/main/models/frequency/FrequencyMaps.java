@@ -120,21 +120,25 @@ public class FrequencyMaps extends BaseFrequencyModel {
         int nClasses = this.allInstances.numClasses();
 
         double dist = 0.0f;
-        for (int classIndex = 0; classIndex < this.allInstances.numClasses(); classIndex++) {
-             int pN = this.findFy(classIndex);
-             int qN = ((FrequencyMaps)modelToCompare).findFy(classIndex);
-             double weight = (((double)pN / (double)this.allInstances.size()) +
-                     ((double)qN / (double)((FrequencyMaps)modelToCompare).allInstances.size())) / 2;
-             double currentDist = 0.0f;
-             for (BigInteger hash : allHashes) {
-                 int[] pFreqs = this.frequencyMaps.get(subsetHash).containsKey(hash) ?
-                         this.frequencyMaps.get(subsetHash).get(hash) : new int[nClasses + 1];
-                 int[] qFreqs = ((FrequencyMaps)modelToCompare).frequencyMaps.get(subsetHash).containsKey(hash) ?
-                         ((FrequencyMaps)modelToCompare).frequencyMaps.get(subsetHash).get(hash) : new int[1 + nClasses];
-                 double tmpDist = pN == 0 ? 0 : (double)pFreqs[1 + classIndex] / (double)pN;
-                 tmpDist -= qN == 0 ? 0 : ((double)qFreqs[1 + classIndex] / (double)qN);
-                 currentDist += Math.abs(tmpDist);
-             }
+        for (BigInteger hash : allHashes) {
+            int pN = this.frequencyMaps.get(subsetHash).containsKey(hash) ?
+                    this.frequencyMaps.get(subsetHash).get(hash)[0] : 0;
+            int qN = ((FrequencyMaps)modelToCompare).frequencyMaps.get(subsetHash).containsKey(hash) ?
+                    ((FrequencyMaps)modelToCompare).frequencyMaps.get(subsetHash).get(hash)[0] : 0;
+            double weight = (((double)pN / (double)this.allInstances.size()) +
+                    ((double)qN / (double)((FrequencyMaps)modelToCompare).allInstances.size())) / 2;
+            double currentDist = 0.0f;
+
+            int[] pFreqs = this.frequencyMaps.get(subsetHash).containsKey(hash) ?
+                    this.frequencyMaps.get(subsetHash).get(hash) : new int[nClasses + 1];
+            int[] qFreqs = ((FrequencyMaps)modelToCompare).frequencyMaps.get(subsetHash).containsKey(hash) ?
+                    ((FrequencyMaps)modelToCompare).frequencyMaps.get(subsetHash).get(hash) : new int[1 + nClasses];
+
+            for (int classIndex = 0; classIndex < this.allInstances.numClasses(); classIndex++) {
+                double tmpDist = pN == 0 ? 0 : (double)pFreqs[1 + classIndex] / (double)pN;
+                tmpDist -= qN == 0 ? 0 : ((double)qFreqs[1 + classIndex] / (double)qN);
+                currentDist += Math.abs(tmpDist);
+            }
             dist += (currentDist / (double)2) * weight;
         }
         return dist;
