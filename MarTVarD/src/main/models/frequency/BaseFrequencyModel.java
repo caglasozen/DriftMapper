@@ -108,6 +108,16 @@ public abstract class BaseFrequencyModel extends Model {
         return new ArrayList<>(hashes);
     }
 
+    protected ArrayList<BigInteger> intersectHashes(BaseFrequencyModel model, int[] attributeSubset) {
+        Set<BigInteger> intersection = new HashSet<>();
+        Set<BigInteger> modelHashes = model.getAllHashes(attributeSubset);
+
+        for (BigInteger hash : this.getAllHashes(attributeSubset))  {
+            if (modelHashes.contains(hash)) intersection.add(hash);
+        }
+        return new ArrayList<>(intersection);
+    }
+
     // TODO: Try and separate these into smaller functions
     @Override
     public ExperimentResult findCovariateDistance(Model modelToCompare, int[] attributeSubset, double sampleScale) {
