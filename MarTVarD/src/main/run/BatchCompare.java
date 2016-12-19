@@ -13,14 +13,14 @@ import java.io.File;
  */
 public class BatchCompare extends main{
 
-    public static void BatchComapare(String resutFolder, Instances instances, int splitIndex, int[] subsetLengths) {
+    public static void BatchComapare(String resultFolder, Instances instances, int splitIndex, int[] subsetLengths) {
         //int[] subsetLengths = getAllAttributeSubsetLength(instances);
         subsetLengths = ArrayUtils.add(subsetLengths, instances.numAttributes() - 1);
 
         Instances[] instancesPair = new Instances[2];
         instancesPair[0] = new Instances(instances, 0, splitIndex - 1);
         instancesPair[1] = new Instances(instances, splitIndex, instances.size() - splitIndex);
-        testAll(subsetLengths, instancesPair, resutFolder, 1.0);
+        testAll(subsetLengths, instancesPair, resultFolder, 1.0);
     }
 
     public static void compareSelf(int[] attributeSubsetLengths, String[] files, String folder, double sampleScale) {
