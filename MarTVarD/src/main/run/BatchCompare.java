@@ -6,21 +6,19 @@ import org.apache.commons.lang3.ArrayUtils;
 import weka.core.Instances;
 import main.DriftMeasurement;
 
-import java.io.File;
-
 /**
  * Created by loongkuan on 16/12/2016.
  */
 public class BatchCompare extends main{
 
-    public static void BatchComapare(String resultFolder, Instances instances, int splitIndex, int[] subsetLengths) {
+    public static void BatchCompare(String resultFolder, Instances instances, int splitIndex, int[] subsetLengths) {
         //int[] subsetLengths = getAllAttributeSubsetLength(instances);
         subsetLengths = ArrayUtils.add(subsetLengths, instances.numAttributes() - 1);
 
         Instances[] instancesPair = new Instances[2];
         instancesPair[0] = new Instances(instances, 0, splitIndex - 1);
         instancesPair[1] = new Instances(instances, splitIndex, instances.size() - splitIndex);
-        testAll(subsetLengths, instancesPair, resultFolder, 1.0);
+        runExperiment(subsetLengths, instancesPair, resultFolder, 1.0);
     }
 
     public static void compareSelf(int[] attributeSubsetLengths, String[] files, String folder, double sampleScale) {
@@ -32,7 +30,7 @@ public class BatchCompare extends main{
             dataSet[0] = new Instances(allInstances, 0, allInstances.size()/2);
             dataSet[1] = new Instances(allInstances, allInstances.size()/2 - 1, allInstances.size()/2);
             String resultFolder = main.getFilePath("./data_out", "folder", file, "FrequencyMap");
-            testAll(attributeSubsetLengths, dataSet, resultFolder, sampleScale);
+            runExperiment(attributeSubsetLengths, dataSet, resultFolder, sampleScale);
         }
     }
 
@@ -43,7 +41,7 @@ public class BatchCompare extends main{
         Instances instances2 = loadAnyDataSet(dataFolder + file2 + ".arff");
         attributeSubsetLengths = getMaxSubsetLength(attributeSubsetLengths, instances1);
         String resultFolder = main.getFilePath("./data_out", "folder", file1 + "_" + file2, "FrequencyMap");
-        testAll(attributeSubsetLengths, new Instances[]{instances1, instances2}, resultFolder, sampleScale);
+        runExperiment(attributeSubsetLengths, new Instances[]{instances1, instances2}, resultFolder, sampleScale);
     }
 
     private static int[] getMaxSubsetLength(int[] attributeSubsetLengths, Instances dataset) {
@@ -55,7 +53,7 @@ public class BatchCompare extends main{
         return attributeSubsetLengths;
     }
 
-    private static void testAll(int[] attributeSubsetLengths, Instances[] dataSets, String resultFolder, double sampleScale) {
+    private static void runExperiment(int[] attributeSubsetLengths, Instances[] dataSets, String resultFolder, double sampleScale) {
         String[] folders = resultFolder.split("/");
         System.out.println("Running Tests on " + folders[folders.length - 2]);
         System.out.println("For " + attributeSubsetLengths[0] + " to " + attributeSubsetLengths[1] + " attributes");
