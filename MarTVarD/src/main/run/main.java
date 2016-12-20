@@ -14,70 +14,70 @@ import java.util.ArrayList;
  */
 public class main {
     /**
-     * single subsetLength1,subsetLength2,... splitProportion folder file1 file2 ...
-     * single subsetLength1,subsetLength2,... splitIndex folder file1 file2 ...
-     * multi subsetLength1,subsetLength2,... folder file1 file2 ...
-     * stream subsetLength1,subsetLength2,... windowSize1,windowSize2,... folder file1 file2 file3 ...
+     * analyse      subsetLength1,subsetLength2,... splitProportion                             folder file1 file2 ...
+     * analyse      subsetLength1,subsetLength2,... splitIndex                                  folder file1 file2 ...
+     * stream       subsetLength1,subsetLength2,... windowSize1,windowSize2,...                 folder file1 file2 ...
+     * stream_chunk subsetLength1,subsetLength2,... groupAttIndex,groupSize1,groupsSize2,...    folder file1 file2 ...
      * @param argv experimentType folder file1 file2 file3 ...
      */
     public static void main(String[] argv) {
-        //argv = new String[]{"single", "1,2,3", "0.5", "train_seed", "20130505", "20131129"};
-        //argv = new String[]{"single", "1,2,3",  "0.5", "", "elecNormNew"};
-        argv = new String[]{"stream", "1,2,3,4",  "48,336,1461,17520", "", "elecNormNew"};
-        //argv = new String[]{"stream", "1,2,3",  "6171,43197,187845", "data_uni_antwerp", "water_2015"};
-        //argv = new String[]{"multi", "1,2,3", "train_seed", "20130419", "20130505", "20130521", "20130606", "20130622"};
+        //argv = new String[]{"analyse", "1,2,3", "0.5", "train_seed", "20130505", "20131129"};
+        //argv = new String[]{"analyse", "1,2,3",  "0.5", "", "elecNormNew"};
+        //argv = new String[]{"stream", "1,2,3,4",  "48,336,1461,17520", "", "elecNormNew"};
+        //argv = new String[]{"stream", "1,2,3",  "6048,42336,183859", "data_uni_antwerp", "water_2015"};
+        //argv = new String[]{"stream", "1,2,3,4",  "10000,50000,100000,500000", "", "sensor"};
+        //argv = new String[]{"stream_chunk", "1,2,3",  "-1", "train_seed", "20130419", "20130505", "20130521", "20130606", "20130622"};
+        argv = new String[]{"stream_chunk", "1,2,3,4",  "4,1,7", "", "airlines"};
 
+        // Obtain Subset Length
         String[] subsetLengthsString = argv[1].split(",");
         int[] subsetLengths = new int[subsetLengthsString.length];
         for (int i = 0; i < subsetLengthsString.length; i++) {
             subsetLengths[i] = Integer.parseInt(subsetLengthsString[i]);
         }
 
-        String folder = "";
-        String filename_comb = "";
-        Instances allInstances;
-        if (!argv[0].equals("multi")) {
-            folder = argv[3];
-            String[] files = ArrayUtils.subarray(argv, 4, argv.length);
-            allInstances = loadAnyDataSet("./datasets/" + folder + "/" + files[0] + ".arff");
-            filename_comb = files[0];
-            for (int i = 1; i < files.length; i++) {
-                allInstances.addAll(loadAnyDataSet("./datasets/" + folder + "/" + files[i] + ".arff"));
-                filename_comb += "_" + files[i];
-            }
+        // Obtain information regarding location of data and result output directory
+        String folder = argv[3];
+        String[] files = ArrayUtils.subarray(argv, 4, argv.length);
+        Instances[] allInstances = new Instances[files.length];
+        String filename_comb = files[0];
+        for (int i = 0; i < files.length; i++) {
+            allInstances[i] = loadAnyDataSet("./datasets/" + folder + "/" + files[i] + ".arff");
+            filename_comb += i > 0 ? "_" + files[i] : "";
         }
-        else {
-            folder = argv[2];
-            String[] files = ArrayUtils.subarray(argv, 3, argv.length);
-            allInstances = loadAnyDataSet("./datasets/" + folder + "/" + files[0] + ".arff");
-            filename_comb = files[0];
-            int windowSize = allInstances.size();
-            for (int i = 1; i < files.length; i++) {
-                System.out.println("Reading " + files[i]);
-                allInstances.addAll(loadAnyDataSet("./datasets/" + folder + "/" + files[i] + ".arff"));
-                filename_comb += "_" + files[i];
-            }
-            String filepath = getFilePath("./data_out", folder, "", "stream");
-            DriftTimeline.DriftTimeline(filepath, allInstances, new int[]{windowSize}, subsetLengths);
-        }
+        String filepath = getFilePath("./data_out", folder, filename_comb, argv[0]);
 
-        String filepath;
         switch (argv[0]){
-            case "single":
-                filepath = getFilePath("./data_out", folder, filename_comb, "FrequencyMaps");
+            case "analyse":
                 double splitArg = Double.parseDouble(argv[2]);
-                int splitIndex = splitArg < 1 && splitArg > 0 ? (int)(allInstances.size() * splitArg) : (int) splitArg;
-                BatchCompare.BatchComapare(filepath, allInstances, splitIndex, subsetLengths);
+                Instances instances = mergeInstances(allInstances);
+                int splitIndex = splitArg < 1 && splitArg > 0 ? (int)(instances.size() * splitArg) : (int) splitArg;
+                BatchCompare.BatchCompare(filepath, instances, splitIndex, subsetLengths);
                 break;
             case "stream":
-                filepath = getFilePath("./data_out", folder, filename_comb, "stream");
                 String[] windowSizesString = argv[2].split(",");
                 int[] windowSizes = new int[windowSizesString.length];
                 for (int i = 0; i < windowSizesString.length; i++) {
                     windowSizes[i] = Integer.parseInt(windowSizesString[i]);
                 }
-                DriftTimeline.DriftTimeline(filepath, allInstances, windowSizes, subsetLengths);
+                DriftTimeline.DriftTimeline(filepath, mergeInstances(allInstances), windowSizes, subsetLengths);
+                break;
+            case "stream_chunk":
+                String[] arg2 = argv[2].split(",");
+                int groupAttribute = Integer.parseInt(arg2[0]);
+                int[] groupsSizes = new int[arg2.length - 1];
+                for (int i = 1; i < arg2.length; i++) groupsSizes[i - 1] = Integer.parseInt(arg2[i]);
+                DriftTimelineChunks.DriftTimelineChunks(filepath, allInstances, groupAttribute, groupsSizes, subsetLengths);
+                break;
         }
+    }
+
+    static Instances mergeInstances(Instances[] allInstances) {
+        Instances instances = new Instances(allInstances[0]);
+        for (int i = 1; i < allInstances.length; i++) {
+            instances.addAll(allInstances[i]);
+        }
+        return instances;
     }
 
     static int[] getAllAttributeSubsetLength(Instances instances) {

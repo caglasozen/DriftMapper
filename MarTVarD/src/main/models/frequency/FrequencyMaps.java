@@ -113,6 +113,7 @@ public class FrequencyMaps extends BaseFrequencyModel {
     }
 
 
+    /*
     @Override
     public double peakPosteriorDistance(Model modelToCompare, int[] attributeSubset, double sampleScale) {
         ArrayList<BigInteger> allHashes = mergeHashes((BaseFrequencyModel)modelToCompare, attributeSubset);
@@ -143,4 +144,5 @@ public class FrequencyMaps extends BaseFrequencyModel {
         }
         return dist;
     }
+    */
 }
