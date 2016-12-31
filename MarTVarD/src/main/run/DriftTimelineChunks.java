@@ -14,6 +14,7 @@ import java.util.ArrayList;
  */
 public class DriftTimelineChunks {
 
+    //TODO: Bug due to discretizing date attributes
     public static void DriftTimelineChunks(String resultFolder, Instances[] allInstances,
                                            int groupAttribute, int[] groupSizes, int[] subsetLengths) {
         if (groupAttribute >= 0) {
