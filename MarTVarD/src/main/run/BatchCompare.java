@@ -6,6 +6,8 @@ import org.apache.commons.lang3.ArrayUtils;
 import weka.core.Instances;
 import main.DriftMeasurement;
 
+import java.util.ArrayList;
+
 /**
  * Created by loongkuan on 16/12/2016.
  */
@@ -60,8 +62,7 @@ public class BatchCompare extends main{
 
         int model = 1;
 
-        int[] attributeIndices = new int[dataSets[0].numAttributes() - 1];
-        for (int i = 0; i < dataSets[0].numAttributes() - 1; i++) attributeIndices[i] = i;
+        int[] attributeIndices = getAttributeIndicies(dataSets[0]);
 
         for (int i : attributeSubsetLengths) {
             System.out.println("Running Covariate, Joint, Likelihood, and Posterior (in order) with subset length " + i);

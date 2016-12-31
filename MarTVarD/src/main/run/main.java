@@ -13,6 +13,7 @@ import java.util.ArrayList;
  * Created by loongkuan on 16/12/2016.
  */
 public class main {
+    //TODO: analyse subsetLength1,subsetLength2,... startIndex,MiddleIndex,EndIndex folder file1 file2 ...
     /**
      * analyse      subsetLength1,subsetLength2,... splitProportion                             folder file1 file2 ...
      * analyse      subsetLength1,subsetLength2,... splitIndex                                  folder file1 file2 ...
@@ -23,12 +24,13 @@ public class main {
     public static void main(String[] argv) {
         //argv = new String[]{"analyse", "1,2,3", "0.5", "train_seed", "20130505", "20131129"};
         //argv = new String[]{"analyse", "1,2,3",  "0.5", "", "elecNormNew"};
-        //argv = new String[]{"stream", "1,2,3,4",  "48,336,1461,17520", "", "elecNormNew"};
+        argv = new String[]{"analyse", "1,2",  "17532", "", "elecNormNew"};
+        //argv = new String[]{"stream", "1,2",  "48,336,1461,17520", "", "elecNormNew"};
         //argv = new String[]{"stream", "1,2,3",  "6048,42336,183859", "data_uni_antwerp", "water_2015"};
         //argv = new String[]{"stream", "1,2,3,4",  "10000,50000,100000,500000", "", "sensor"};
         //argv = new String[]{"stream_chunk", "1,2,3",  "-1", "train_seed", "20130419", "20130505", "20130521", "20130606", "20130622"};
         //argv = new String[]{"stream_chunk", "1,2,3,4",  "4,1,7", "", "airlines"};
-        argv = new String[]{"stream_chunk", "1,2,3",  "2,1,7,30", "data_uni_antwerp", "water_2015"};
+        //argv = new String[]{"stream_chunk", "1,2",  "2,1,7,30", "data_uni_antwerp", "water_2015"};
 
         // Obtain Subset Length
         String[] subsetLengthsString = argv[1].split(",");
@@ -82,7 +84,13 @@ public class main {
     }
 
     static int[] getAllAttributeSubsetLength(Instances instances) {
-        int maxLength = Math.min(instances.numAttributes(), 3);
+        int maxNumAtt = instances.numAttributes() - 1;
+        for (int i = 0; i < instances.numAttributes(); i++) {
+            if (instances.attribute(i).isDate() || instances.attribute(i).name().equals("date")) {
+                maxNumAtt -= 1;
+            }
+        }
+        int maxLength = Math.min(maxNumAtt, 3);
         int[] allLength = new int[maxLength];
         for (int i = 0; i < maxLength; i++) {
             allLength[i] = i + 1;
@@ -116,7 +124,11 @@ public class main {
     private static Instances discretizeDataSet(Instances dataSet) throws Exception{
         ArrayList<Integer> continuousIndex = new ArrayList<>();
         for (int i = 0; i < dataSet.numAttributes(); i++) {
-            if (dataSet.attribute(i).isNumeric()) continuousIndex.add(i);
+            if (dataSet.attribute(i).isNumeric() &&
+                    !dataSet.attribute(i).isDate() &&
+                    !dataSet.attribute(i).name().equals("date")) {
+                continuousIndex.add(i);
+            }
         }
         int[] attIndex = new int[continuousIndex.size()];
         for (int i = 0; i < continuousIndex.size(); i++) attIndex[i] = continuousIndex.get(i);
@@ -150,5 +162,17 @@ public class main {
             ex.printStackTrace();
             return new Instances("E", new ArrayList<Attribute>(), 0);
         }
+    }
+
+    public static int[] getAttributeIndicies(Instances instances) {
+        ArrayList<Integer> indicesList = new ArrayList<>();
+        for (int i = 0; i < instances.numAttributes() - 1; i++) {
+            if (!instances.attribute(i).isDate() && !instances.attribute(i).name().equals("date")) {
+                indicesList.add(i);
+            }
+        }
+        int[] attributeIndices = new int[indicesList.size()];
+        for (int i = 0; i < indicesList.size(); i++) attributeIndices[i] = indicesList.get(i);
+        return attributeIndices;
     }
 }

@@ -20,7 +20,7 @@ public class NaiveWindow extends TimelineAnalysis{
         this.driftMeasurementTypes = driftMeasurementType;
         this.currentModel = referenceModel.copy();
         this.currentAllModel = referenceModel.copy();
-        ((FrequencyMaps)currentAllModel).changeAttributeSubsetLength(this.currentModel.getAllInstances().numAttributes() - 1);
+        ((FrequencyMaps)currentAllModel).changeAttributeSubsetLength(referenceModel.getAttributesAvailable().length);
         this.attributeSubsets = referenceModel.getAllAttributeSubsets();
 
         this.currentIndex = -1;

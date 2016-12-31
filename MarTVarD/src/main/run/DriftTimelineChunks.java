@@ -12,7 +12,7 @@ import java.util.ArrayList;
 /**
  * Created by loongkuan on 20/12/2016.
  */
-public class DriftTimelineChunks {
+public class DriftTimelineChunks extends main{
 
     //TODO: Bug due to discretizing date attributes
     public static void DriftTimelineChunks(String resultFolder, Instances[] allInstances,
@@ -50,8 +50,7 @@ public class DriftTimelineChunks {
                 newAllInstances[i / groupSize].addAll(allInstances[i]);
             }
         }
-        int[] attributeIndices = new int[newAllInstances[0].numAttributes() - 1];
-        for (int i = 0; i < newAllInstances[0].numAttributes() - 1; i++) attributeIndices[i] = i;
+        int[] attributeIndices = getAttributeIndicies(newAllInstances[0]);
 
         Model referenceModel = new FrequencyMaps(newAllInstances[0], subsetLength, attributeIndices);
         NaiveChunks naiveChunks = new NaiveChunks(newAllInstances, DriftMeasurement.values(), referenceModel);

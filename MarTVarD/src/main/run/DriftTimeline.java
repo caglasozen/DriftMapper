@@ -76,8 +76,7 @@ public class DriftTimeline extends main{
 
     // TODO: Automate testing with different windows
     private static void runExperiment(Instances instances, int attributeSubsetLength, int windowSize, String resultFolder) {
-        int[] attributeIndices = new int[instances.numAttributes() - 1];
-        for (int i = 0; i < instances.numAttributes() - 1; i++) attributeIndices[i] = i;
+        int[] attributeIndices = getAttributeIndicies(instances);
 
         Model referenceModel = new FrequencyMaps(instances, attributeSubsetLength, attributeIndices);
         NaiveWindow streamingData = new NaiveWindow(windowSize, referenceModel, DriftMeasurement.values());
