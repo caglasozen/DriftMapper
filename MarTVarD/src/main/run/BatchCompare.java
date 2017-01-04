@@ -13,13 +13,14 @@ import java.util.ArrayList;
  */
 public class BatchCompare extends main{
 
-    public static void BatchCompare(String resultFolder, Instances instances, int splitIndex, int[] subsetLengths) {
+    public static void BatchCompare(String resultFolder, Instances instances, int[] splitIndices, int[] subsetLengths) {
         //int[] subsetLengths = getAllAttributeSubsetLength(instances);
         subsetLengths = ArrayUtils.add(subsetLengths, instances.numAttributes() - 1);
 
         Instances[] instancesPair = new Instances[2];
-        instancesPair[0] = new Instances(instances, 0, splitIndex - 1);
-        instancesPair[1] = new Instances(instances, splitIndex, instances.size() - splitIndex);
+        //TODO: Check math of making window size from indices
+        instancesPair[0] = new Instances(instances, splitIndices[0], splitIndices[1] - splitIndices[0]);
+        instancesPair[1] = new Instances(instances, splitIndices[1], splitIndices[2] - splitIndices[1]);
         runExperiment(subsetLengths, instancesPair, resultFolder, 1.0);
     }
 

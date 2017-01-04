@@ -15,8 +15,8 @@ import java.util.ArrayList;
 public class main {
     //TODO: analyse subsetLength1,subsetLength2,... startIndex,MiddleIndex,EndIndex folder file1 file2 ...
     /**
-     * analyse      subsetLength1,subsetLength2,... splitProportion                             folder file1 file2 ...
-     * analyse      subsetLength1,subsetLength2,... splitIndex                                  folder file1 file2 ...
+     * analyse      subsetLength1,subsetLength2,... splitStart,splitMiddle,splitEnd             folder file1 file2 ...
+     * analyse      subsetLength1,subsetLength2,... startPropostion,Middle,End                  folder file1 file2 ...
      * stream       subsetLength1,subsetLength2,... windowSize1,windowSize2,...                 folder file1 file2 ...
      * stream_chunk subsetLength1,subsetLength2,... groupAttIndex,groupSize1,groupsSize2,...    folder file1 file2 ...
      * @param argv experimentType folder file1 file2 file3 ...
@@ -52,10 +52,19 @@ public class main {
 
         switch (argv[0]){
             case "analyse":
-                double splitArg = Double.parseDouble(argv[2]);
+                String[] splitArgs = argv[2].split(",");
                 Instances instances = mergeInstances(allInstances);
-                int splitIndex = splitArg < 1 && splitArg > 0 ? (int)(instances.size() * splitArg) : (int) splitArg;
-                BatchCompare.BatchCompare(filepath, instances, splitIndex, subsetLengths);
+                int[] splitIndices = new int[3];
+                for (int i = 0; i < splitIndices.length; i++) {
+                    double arg = Double.parseDouble(splitArgs[i]);
+                    if (arg / (int)Math.floor(arg) == 1) {
+                        splitIndices[i] = (int)arg;
+                    }
+                    else {
+                        splitIndices[i] = (int) (instances.size() * arg);
+                    }
+                }
+                BatchCompare.BatchCompare(filepath, instances, splitIndices, subsetLengths);
                 break;
             case "stream":
                 String[] windowSizesString = argv[2].split(",");
