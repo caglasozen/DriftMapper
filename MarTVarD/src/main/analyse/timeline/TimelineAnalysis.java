@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import main.DriftMeasurement;
+import weka.core.Instances;
 
 /**
  * Created by loongkuan on 2/12/2016.
@@ -26,6 +27,8 @@ public abstract class TimelineAnalysis {
     protected Map<DriftMeasurement, ArrayList<Integer>> driftPoints;
     protected Map<DriftMeasurement, ArrayList<double[]>> driftValues;
     protected ArrayList<int[]> attributeSubsets;
+
+    public abstract void addInstance(Instance instance);
 
     protected void addDistance(int driftPoint) {
         for (DriftMeasurement type : this.driftMeasurementTypes) {

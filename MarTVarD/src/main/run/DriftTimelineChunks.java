@@ -21,10 +21,13 @@ public class DriftTimelineChunks extends main{
             ArrayList<Instances> groupedInstances = new ArrayList<>();
             double prevAttributeValue = -1;
             for (Instances instances : allInstances) {
-                for (Instance instance : instances) {
-                    if (instance.value(groupAttribute) != prevAttributeValue) {
+                double[] groupedAttVals = instances.attributeToDoubleArray(groupAttribute);
+                instances.deleteAttributeAt(groupAttribute);
+                for (int j = 0; j < instances.size(); j++) {
+                    Instance instance = instances.get(j);
+                    if (groupedAttVals[j] != prevAttributeValue) {
                         groupedInstances.add(new Instances(allInstances[0], 0));
-                        prevAttributeValue = instance.value(groupAttribute);
+                        prevAttributeValue = groupedAttVals[j];
                     }
                     groupedInstances.get(groupedInstances.size() - 1).add(instance);
                 }

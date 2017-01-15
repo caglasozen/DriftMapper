@@ -1,7 +1,9 @@
 package main.run;
 
 import main.DriftMeasurement;
+import main.analyse.timeline.NaiveMovingWindow;
 import main.analyse.timeline.NaiveWindow;
+import main.analyse.timeline.TimelineAnalysis;
 import main.models.Model;
 import main.models.frequency.FrequencyMaps;
 import weka.core.Instances;
@@ -14,8 +16,8 @@ import java.util.ArrayList;
 public class DriftTimeline extends main{
 
     // TODO : Allow different window size and drift type and name result file accordingly
-    public static void DriftTimeline(String resultFolder, Instances instances, int[] windowSizes, int[] subsetLengths) {
-        testAllWindowSizeSubsetLength(instances, windowSizes, subsetLengths, resultFolder);
+    public static void DriftTimeline(String resultFolder, Instances instances, int[] windowSizes, int[] subsetLengths, boolean interval) {
+        testAllWindowSizeSubsetLength(instances, windowSizes, subsetLengths, resultFolder, interval);
     }
 
 
@@ -50,7 +52,7 @@ public class DriftTimeline extends main{
         //TODO: Be able to measure different types of drift and name accordingly
         //testAllWindowSize(allInstances, new int[]{100, 500, 1000, 5000, 10000}, filepath);
         testAllWindowSizeSubsetLength(allInstances,
-                getAllWindowSize(allInstances), getAllAttributeSubsetLength(allInstances), filepath);
+                getAllWindowSize(allInstances), getAllAttributeSubsetLength(allInstances), filepath, true);
     }
 
     private static int[] getAllWindowSize(Instances instances) {
@@ -66,20 +68,26 @@ public class DriftTimeline extends main{
     }
 
     private static void testAllWindowSizeSubsetLength(Instances instances,
-                                                      int[] windowSizes, int[] subsetLength, String folder) {
+                                                      int[] windowSizes, int[] subsetLength, String folder, boolean interval) {
         for (int size : windowSizes) {
             for (int length : subsetLength) {
-                runExperiment(instances, length, size, folder);
+                runExperiment(instances, length, size, folder, interval);
             }
         }
     }
 
     // TODO: Automate testing with different windows
-    private static void runExperiment(Instances instances, int attributeSubsetLength, int windowSize, String resultFolder) {
+    private static void runExperiment(Instances instances, int attributeSubsetLength, int windowSize, String resultFolder, boolean interval) {
         int[] attributeIndices = getAttributeIndicies(instances);
 
         Model referenceModel = new FrequencyMaps(instances, attributeSubsetLength, attributeIndices);
-        NaiveWindow streamingData = new NaiveWindow(windowSize, referenceModel, DriftMeasurement.values());
+        TimelineAnalysis streamingData;
+        if (interval) {
+            streamingData = new NaiveWindow(windowSize, referenceModel, DriftMeasurement.values());
+        }
+        else {
+            streamingData = new NaiveMovingWindow(windowSize, referenceModel, DriftMeasurement.values());
+        }
 
         int percentage = 0;
         for (int i = 0; i < instances.size(); i++) {
@@ -87,6 +95,9 @@ public class DriftTimeline extends main{
                 percentage = (i * 100 )/ instances.size();
                 System.out.print("\r" + percentage + "% of instance processed");
             }
+            /*
+            System.out.print("\r" + i + " out of " + instances.size() + " instance processed");
+            */
             streamingData.addInstance(instances.get(i));
         }
 

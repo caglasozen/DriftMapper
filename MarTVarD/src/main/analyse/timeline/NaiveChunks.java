@@ -3,6 +3,7 @@ package main.analyse.timeline;
 import main.DriftMeasurement;
 import main.models.Model;
 import main.models.frequency.FrequencyMaps;
+import weka.core.Instance;
 import weka.core.Instances;
 
 import java.util.ArrayList;
@@ -46,4 +47,8 @@ public class NaiveChunks extends TimelineAnalysis{
             this.previousModel = this.currentModel;
         }
     }
+
+     @Override
+     public void addInstance(Instance instance) {
+     }
 }
