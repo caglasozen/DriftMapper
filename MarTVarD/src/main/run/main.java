@@ -18,19 +18,25 @@ public class main {
      * analyse      subsetLength1,subsetLength2,... splitStart,splitMiddle,splitEnd             folder file1 file2 ...
      * analyse      subsetLength1,subsetLength2,... startPropostion,Middle,End                  folder file1 file2 ...
      * stream       subsetLength1,subsetLength2,... windowSize1,windowSize2,...                 folder file1 file2 ...
+     * stream_cont  subsetLength1,subsetLength2,... windowSize1,windowSize2,...                 folder file1 file2 ...
      * stream_chunk subsetLength1,subsetLength2,... groupAttIndex,groupSize1,groupsSize2,...    folder file1 file2 ...
      * @param argv experimentType folder file1 file2 file3 ...
      */
     public static void main(String[] argv) {
         //argv = new String[]{"analyse", "1,2,3", "0.5", "train_seed", "20130505", "20131129"};
         //argv = new String[]{"analyse", "1,2,3",  "0.5", "", "elecNormNew"};
-        argv = new String[]{"analyse", "1,2",  "17532", "", "elecNormNew"};
+        //argv = new String[]{"analyse", "1,2",  "17532", "", "elecNormNew"};
+        argv = new String[]{"analyse", "1,2",  "240796", "", "airlines"};
         //argv = new String[]{"stream", "1,2",  "48,336,1461,17520", "", "elecNormNew"};
         //argv = new String[]{"stream", "1,2,3",  "6048,42336,183859", "data_uni_antwerp", "water_2015"};
         //argv = new String[]{"stream", "1,2,3,4",  "10000,50000,100000,500000", "", "sensor"};
         //argv = new String[]{"stream_chunk", "1,2,3",  "-1", "train_seed", "20130419", "20130505", "20130521", "20130606", "20130622"};
         //argv = new String[]{"stream_chunk", "1,2,3,4",  "4,1,7", "", "airlines"};
         //argv = new String[]{"stream_chunk", "1,2",  "2,1,7,30", "data_uni_antwerp", "water_2015"};
+        //argv = new String[]{"stream", "1,2,3",  "10000,50000,100000,500000", "synthetic_5Att_5Val", "n1000000_m0.7_both"};
+        //argv = new String[]{"stream", "1,2,3",  "133332,222221,399999,666666", "synthetic_5Att_5Val", "n1000000_m0.7_both"};
+        //argv = new String[]{"stream_cont", "1,2,3",  "10000,50000,100000,500000", "synthetic_5Att_5Val", "n1000000_m0.7_both"};
+        //argv = new String[]{"stream", "1",  "500,1000,5000", "", "gas-sensor"};
 
         // Obtain Subset Length
         String[] subsetLengthsString = argv[1].split(",");
@@ -54,15 +60,18 @@ public class main {
             case "analyse":
                 String[] splitArgs = argv[2].split(",");
                 Instances instances = mergeInstances(allInstances);
-                int[] splitIndices = new int[3];
+                int[] splitIndices = new int[splitArgs.length];
                 for (int i = 0; i < splitIndices.length; i++) {
                     double arg = Double.parseDouble(splitArgs[i]);
                     if (arg / (int)Math.floor(arg) == 1) {
                         splitIndices[i] = (int)arg;
                     }
                     else {
-                        splitIndices[i] = (int) (instances.size() * arg);
+                        splitIndices[i] = (int) (instances.size() * arg) - 1;
                     }
+                }
+                if (splitIndices.length == 1) {
+                    splitIndices = new int[]{0,splitIndices[0],instances.size() - 1};
                 }
                 BatchCompare.BatchCompare(filepath, instances, splitIndices, subsetLengths);
                 break;
@@ -72,7 +81,7 @@ public class main {
                 for (int i = 0; i < windowSizesString.length; i++) {
                     windowSizes[i] = Integer.parseInt(windowSizesString[i]);
                 }
-                DriftTimeline.DriftTimeline(filepath, mergeInstances(allInstances), windowSizes, subsetLengths);
+                DriftTimeline.DriftTimeline(filepath, mergeInstances(allInstances), windowSizes, subsetLengths, true);
                 break;
             case "stream_chunk":
                 String[] arg2 = argv[2].split(",");
@@ -80,6 +89,14 @@ public class main {
                 int[] groupsSizes = new int[arg2.length - 1];
                 for (int i = 1; i < arg2.length; i++) groupsSizes[i - 1] = Integer.parseInt(arg2[i]);
                 DriftTimelineChunks.DriftTimelineChunks(filepath, allInstances, groupAttribute, groupsSizes, subsetLengths);
+                break;
+            case "stream_cont":
+                String[] windowSizeString = argv[2].split(",");
+                int[] windowSize = new int[windowSizeString.length];
+                for (int i = 0; i < windowSizeString.length; i++) {
+                    windowSize[i] = Integer.parseInt(windowSizeString[i]);
+                }
+                DriftTimeline.DriftTimeline(filepath, mergeInstances(allInstances), windowSize, subsetLengths, false);
                 break;
         }
     }
