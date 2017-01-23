@@ -16,7 +16,7 @@ public class NaiveChunks extends TimelineAnalysis{
 
     public NaiveChunks(Instances[] allInstances, DriftMeasurement[] driftTypes, Model referenceModel) {
         this.previousAllModel = referenceModel.copy();
-        ((FrequencyMaps)previousAllModel).changeAttributeSubsetLength(referenceModel.getAttributesAvailable().length);
+        previousAllModel.changeAttributeSubsetLength(referenceModel.getAttributesAvailable().length);
         this.previousAllModel.addInstances(allInstances[0]);
         this.previousModel = referenceModel.copy();
         this.previousModel.addInstances(allInstances[0]);

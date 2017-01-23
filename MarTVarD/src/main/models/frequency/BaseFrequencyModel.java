@@ -20,8 +20,6 @@ public abstract class BaseFrequencyModel extends Model {
 
     protected BigInteger[] hashBases;
 
-    public abstract void changeAttributeSubsetLength(int length);
-
     protected abstract int findFv(Instance instance, int[] attributesSubset);
     protected abstract int findFy(int classIndex);
     protected abstract int findFvy(Instance instance, int[] attributesSubset, int classIndex);

@@ -24,8 +24,8 @@ public class NaiveMovingWindow extends TimelineAnalysis{
         this.previousAllModel= referenceModel.copy();
         this.currentModel = referenceModel.copy();
         this.currentAllModel = referenceModel.copy();
-        ((FrequencyMaps)currentAllModel).changeAttributeSubsetLength(referenceModel.getAttributesAvailable().length);
-        ((FrequencyMaps)previousAllModel).changeAttributeSubsetLength(referenceModel.getAttributesAvailable().length);
+        currentAllModel.changeAttributeSubsetLength(referenceModel.getAttributesAvailable().length);
+        previousAllModel.changeAttributeSubsetLength(referenceModel.getAttributesAvailable().length);
         this.attributeSubsets = referenceModel.getAllAttributeSubsets();
 
         this.currentIndex = -1;

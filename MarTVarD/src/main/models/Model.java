@@ -53,6 +53,8 @@ public abstract class Model {
         return this.allInstances;
     }
 
+    public abstract void changeAttributeSubsetLength(int length);
+
     public void addInstances(Instances instances) {
         for (int i = 0; i < instances.size(); i++) {
             this.addInstance(instances.get(i));
