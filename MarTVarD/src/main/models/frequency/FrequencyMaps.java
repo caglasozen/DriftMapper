@@ -75,18 +75,18 @@ public class FrequencyMaps extends BaseFrequencyModel {
     }
 
     @Override
-    protected int findFv(Instance instance, int[] attributesSubset) {
+    public int findFv(Instance instance, int[] attributesSubset) {
         BigInteger hash = this.instanceToPartialHash(instance, attributesSubset);
         return !hashSeen(hash, attributesSubset) ? 0 : this.frequencyMaps.get(attributeSubsetToHash(attributesSubset)).get(hash)[0];
     }
 
     @Override
-    protected int findFy(int classIndex) {
+    public int findFy(int classIndex) {
         return this.classFreq[classIndex];
     }
 
     @Override
-    protected int findFvy(Instance instance, int[] attributesSubset, int classIndex) {
+    public int findFvy(Instance instance, int[] attributesSubset, int classIndex) {
         BigInteger hash = this.instanceToPartialHash(instance, attributesSubset);
         return !hashSeen(hash, attributesSubset) ? 0 : this.frequencyMaps.get(attributeSubsetToHash(attributesSubset)).get(hash)[1 + classIndex];
     }

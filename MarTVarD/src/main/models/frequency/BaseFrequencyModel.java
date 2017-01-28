@@ -20,9 +20,9 @@ public abstract class BaseFrequencyModel extends Model {
 
     protected BigInteger[] hashBases;
 
-    protected abstract int findFv(Instance instance, int[] attributesSubset);
-    protected abstract int findFy(int classIndex);
-    protected abstract int findFvy(Instance instance, int[] attributesSubset, int classIndex);
+    public abstract int findFv(Instance instance, int[] attributesSubset);
+    public abstract int findFy(int classIndex);
+    public abstract int findFvy(Instance instance, int[] attributesSubset, int classIndex);
     protected abstract Set<BigInteger> getAllHashes(int[] attributeSubset);
 
     protected void setDataset(Instances dataset) {
@@ -74,6 +74,7 @@ public abstract class BaseFrequencyModel extends Model {
     }
 
     protected static BigInteger attributeSubsetToHash(int[] attributeSubset) {
+        // TODO: this method skips over a lot of values since attribute subset is fixed length
         BigInteger hash = BigInteger.ZERO;
         for (int i : attributeSubset) {
             hash = hash.add(BigInteger.valueOf(2).pow(i));

@@ -100,17 +100,17 @@ public class FrequencyTable extends BaseFrequencyModel{
     }
 
     @Override
-    protected int findFv(Instance instance, int[] attributesSubset) {
+    public int findFv(Instance instance, int[] attributesSubset) {
         return this.getPartialInstanceFrequency(instance, attributesSubset, false);
     }
 
     @Override
-    protected int findFy(int classIndex) {
+    public int findFy(int classIndex) {
         return this.attributeSum[this.allInstances.classIndex()][classIndex];
     }
 
     @Override
-    protected int findFvy(Instance instance, int[] attributesSubset, int classIndex) {
+    public int findFvy(Instance instance, int[] attributesSubset, int classIndex) {
         instance.setClassValue(classIndex);
         return this.getPartialInstanceFrequency(instance, attributesSubset, true);
     }
