@@ -24,6 +24,12 @@ public abstract class Model {
     public abstract Model copy();
     public abstract void reset();
 
+    public abstract double findPv(Instance instance, int[] attributesSubset);
+    public abstract double findPy(int classIndex);
+    public abstract double findPvy(Instance instance, int[] attributesSubset, int classIndex);
+    public abstract double findPvgy(Instance instance, int[] attributesSubset, int classIndex);
+    public abstract double findPygv(Instance instance, int[] attributesSubset, int classIndex);
+
     public abstract ExperimentResult findCovariateDistance(
             Model modelToCompare, int[] attributeSubset, double sampleScale);
     public abstract ExperimentResult findJointDistance(

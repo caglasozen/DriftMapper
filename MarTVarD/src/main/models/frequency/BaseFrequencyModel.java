@@ -117,6 +117,31 @@ public abstract class BaseFrequencyModel extends Model {
         return new ArrayList<>(intersection);
     }
 
+    @Override
+    public double findPv(Instance instance, int[] attributesSubset) {
+        return (double)findFv(instance, attributesSubset) / (double)this.size();
+    }
+
+    @Override
+    public double findPy(int classIndex) {
+        return (double)findFy(classIndex) / (double)this.size();
+    }
+
+    @Override
+    public double findPvy(Instance instance, int[] attributesSubset, int classIndex) {
+        return (double)findFvy(instance, attributesSubset, classIndex) / (double)this.size();
+    }
+
+    @Override
+    public double findPvgy(Instance instance, int[] attributesSubset, int classIndex) {
+        return (double)findFvy(instance, attributesSubset, classIndex) / (double)findFy(classIndex);
+    }
+
+    @Override
+    public double findPygv(Instance instance, int[] attributesSubset, int classIndex) {
+        return (double)findFvy(instance, attributesSubset, classIndex) / (double)findFv(instance, attributesSubset);
+    }
+
     // TODO: Try and separate these into smaller functions
     @Override
     public ExperimentResult findCovariateDistance(Model modelToCompare, int[] attributeSubset, double sampleScale) {
