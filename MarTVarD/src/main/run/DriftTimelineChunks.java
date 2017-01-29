@@ -1,7 +1,7 @@
 package main.run;
 
 import main.DriftMeasurement;
-import main.analyse.timeline.NaiveChunks;
+import main.analyse.timeline.NaiveChunk;
 import main.models.Model;
 import main.models.frequency.FrequencyMaps;
 import weka.core.Instance;
@@ -56,13 +56,13 @@ public class DriftTimelineChunks extends main{
         int[] attributeIndices = getAttributeIndicies(newAllInstances[0]);
 
         Model referenceModel = new FrequencyMaps(newAllInstances[0], subsetLength, attributeIndices);
-        NaiveChunks naiveChunks = new NaiveChunks(newAllInstances, DriftMeasurement.values(), referenceModel);
+        NaiveChunk naiveChunk = new NaiveChunk(newAllInstances, DriftMeasurement.values(), referenceModel);
 
         System.out.println("\rDone test of Subset Length = " + subsetLength + " and chunk size of " + groupSize);
 
         for (DriftMeasurement driftMeasurement : DriftMeasurement.values()) {
             String file = resultFolder + "/" + driftMeasurement.name() + "_" + groupSize + "_" + subsetLength + ".csv";
-            naiveChunks.writeResultsToFile(file, driftMeasurement);
+            naiveChunk.writeResultsToFile(file, driftMeasurement);
         }
     }
 }

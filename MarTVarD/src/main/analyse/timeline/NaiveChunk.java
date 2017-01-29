@@ -12,12 +12,9 @@ import java.util.HashMap;
 /**
  * Created by loongkuan on 20/12/2016.
  */
-public class NaiveChunks extends TimelineAnalysis{
+public class NaiveChunk extends TimelineAnalysis{
 
-    public NaiveChunks(Instances[] allInstances, DriftMeasurement[] driftTypes, Model referenceModel) {
-        this.previousAllModel = referenceModel.copy();
-        previousAllModel.changeAttributeSubsetLength(referenceModel.getAttributesAvailable().length);
-        this.previousAllModel.addInstances(allInstances[0]);
+    public NaiveChunk(Instances[] allInstances, DriftMeasurement[] driftTypes, Model referenceModel) {
         this.previousModel = referenceModel.copy();
         this.previousModel.addInstances(allInstances[0]);
 
@@ -35,15 +32,12 @@ public class NaiveChunks extends TimelineAnalysis{
 
         for (int i = 1; i < allInstances.length; i++) {
             System.out.print("\rProcessing chunk: " + (i + 1) + "/" + allInstances.length);
-            this.currentAllModel = previousAllModel.copy();
-            this.currentAllModel.addInstances(allInstances[i]);
             this.currentModel = previousModel.copy();
             this.currentModel.addInstances(allInstances[i]);
 
             this.addDistance(this.currentIndex);
 
             this.currentIndex += allInstances[i].size();
-            this.previousAllModel = this.currentAllModel;
             this.previousModel = this.currentModel;
         }
     }

@@ -19,8 +19,6 @@ public class NaiveWindow extends TimelineAnalysis{
         this.windowSize = windowSize;
         this.driftMeasurementTypes = driftMeasurementType;
         this.currentModel = referenceModel.copy();
-        this.currentAllModel = referenceModel.copy();
-        currentAllModel.changeAttributeSubsetLength(referenceModel.getAttributesAvailable().length);
         this.attributeSubsets = referenceModel.getAllAttributeSubsets();
 
         this.currentIndex = -1;
@@ -37,7 +35,6 @@ public class NaiveWindow extends TimelineAnalysis{
         this.currentIndex += 1;
         if (currentModel.size() < this.windowSize) {
             this.currentModel.addInstance(instance);
-            this.currentAllModel.addInstance(instance);
         }
         else {
             if (this.previousModel != null) {
@@ -46,10 +43,6 @@ public class NaiveWindow extends TimelineAnalysis{
             this.previousModel = this.currentModel;
             this.currentModel = this.currentModel.copy();
             this.currentModel.addInstance(instance);
-
-            this.previousAllModel = this.currentAllModel;
-            this.currentAllModel= this.currentAllModel.copy();
-            this.currentAllModel.addInstance(instance);
         }
     }
 }

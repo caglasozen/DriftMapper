@@ -15,9 +15,6 @@ import weka.core.Instances;
  * Created by loongkuan on 2/12/2016.
  */
 public abstract class TimelineAnalysis {
-    protected Model previousAllModel;
-    protected Model currentAllModel;
-
     protected Model previousModel;
     protected Model currentModel;
 
@@ -32,11 +29,10 @@ public abstract class TimelineAnalysis {
 
     protected void addDistance(int driftPoint) {
         for (DriftMeasurement type : this.driftMeasurementTypes) {
-            double[] allDist = new double[this.attributeSubsets.size() + 1];
-            allDist[0] = this.getFullDistance(type);
+            double[] allDist = new double[this.attributeSubsets.size()];
             for (int i = 0; i < this.attributeSubsets.size(); i++) {
                 double dist = this.getDistance(this.attributeSubsets.get(i), type);
-                allDist[1 + i] = dist;
+                allDist[i] = dist;
             }
             ArrayList<Integer> currentDriftPoints = this.driftPoints.get(type);
             currentDriftPoints.add(driftPoint);
@@ -58,24 +54,6 @@ public abstract class TimelineAnalysis {
                 return this.previousModel.peakLikelihoodDistance(this.currentModel, attributeSubset, 1.0);
             case POSTERIOR:
                 return this.previousModel.peakPosteriorDistance(this.currentModel, attributeSubset, 1.0);
-        }
-        return Double.NaN;
-    }
-
-   protected double getFullDistance(DriftMeasurement driftMeasurementType) {
-        switch (driftMeasurementType) {
-            case COVARIATE:
-                return this.previousAllModel.peakCovariateDistance(this.currentAllModel,
-                        this.previousAllModel.getAttributesAvailable(), 1.0);
-            case JOINT:
-                return this.previousAllModel.peakJointDistance(this.currentAllModel,
-                        this.previousAllModel.getAttributesAvailable(), 1.0);
-            case LIKELIHOOD:
-                return this.previousAllModel.peakLikelihoodDistance(this.currentAllModel,
-                        this.previousAllModel.getAttributesAvailable(), 1.0);
-            case POSTERIOR:
-                return this.previousAllModel.peakPosteriorDistance(this.currentAllModel,
-                        this.previousAllModel.getAttributesAvailable(), 1.0);
         }
         return Double.NaN;
     }

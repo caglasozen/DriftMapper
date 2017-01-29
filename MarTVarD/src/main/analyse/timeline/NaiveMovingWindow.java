@@ -26,11 +26,7 @@ public class NaiveMovingWindow extends TimelineAnalysis{
         this.windowSize = windowSize;
         this.driftMeasurementTypes = driftMeasurementType;
         this.previousModel= referenceModel.copy();
-        this.previousAllModel= referenceModel.copy();
         this.currentModel = referenceModel.copy();
-        this.currentAllModel = referenceModel.copy();
-        currentAllModel.changeAttributeSubsetLength(referenceModel.getAttributesAvailable().length);
-        previousAllModel.changeAttributeSubsetLength(referenceModel.getAttributesAvailable().length);
 
         this.attributeSubsets = referenceModel.getAllAttributeSubsets();
         this.distanceMap = new double[this.currentModel.getAllInstances().numAttributes()^(this.attributeSubsets.get(0).length + 1) - 1][DriftMeasurement.values().length];
@@ -60,11 +56,9 @@ public class NaiveMovingWindow extends TimelineAnalysis{
         this.currentIndex += 1;
         if (previousModel.size() < this.windowSize) {
             this.previousModel.addInstance(instance);
-            this.previousAllModel.addInstance(instance);
         }
         else if (currentModel.size() < this.windowSize) {
             this.currentModel.addInstance(instance);
-            this.currentAllModel.addInstance(instance);
         }
         else if (this.growing) {
             this.growing = false;
@@ -73,9 +67,6 @@ public class NaiveMovingWindow extends TimelineAnalysis{
                 for (DriftMeasurement driftMeasurement : DriftMeasurement.values()) {
                     this.distanceMap[hash][driftMeasurement.ordinal()] = super.getDistance(attributeSubset, driftMeasurement);
                 }
-            }
-            for (DriftMeasurement driftMeasurement : DriftMeasurement.values()) {
-                this.allAttributeDistanceMap[driftMeasurement.ordinal()] = super.getFullDistance(driftMeasurement);
             }
         }
         else {
@@ -91,23 +82,12 @@ public class NaiveMovingWindow extends TimelineAnalysis{
                             instanceMid, attributeSubset, driftMeasurement);
                     this.distanceMap[hash][driftMeasurement.ordinal()] -= this.getSingleDistance(
                             instanceTail, attributeSubset, driftMeasurement);
-                    this.allAttributeDistanceMap[driftMeasurement.ordinal()] -= this.getFullSingleDistance(
-                            instance, driftMeasurement);
-                    this.allAttributeDistanceMap[driftMeasurement.ordinal()] -= this.getFullSingleDistance(
-                            instanceMid, driftMeasurement);
-                    this.allAttributeDistanceMap[driftMeasurement.ordinal()] -= this.getFullSingleDistance(
-                            instanceTail, driftMeasurement);
                 }
             }
             this.previousModel.removeInstance(0);
             this.previousModel.addInstance(this.currentModel.getAllInstances().get(0));
             this.currentModel.removeInstance(0);
             this.currentModel.addInstance(instance);
-
-            this.previousAllModel.removeInstance(0);
-            this.previousAllModel.addInstance(this.currentModel.getAllInstances().get(0));
-            this.currentAllModel.removeInstance(0);
-            this.currentAllModel.addInstance(instance);
 
             for (int[] attributeSubset : this.attributeSubsets) {
                 int hash = hashAttributeSubset(attributeSubset);
@@ -118,12 +98,6 @@ public class NaiveMovingWindow extends TimelineAnalysis{
                             instanceMid, attributeSubset, driftMeasurement);
                     this.distanceMap[hash][driftMeasurement.ordinal()] += this.getSingleDistance(
                             instanceTail, attributeSubset, driftMeasurement);
-                    this.allAttributeDistanceMap[driftMeasurement.ordinal()] += this.getFullSingleDistance(
-                            instance, driftMeasurement);
-                    this.allAttributeDistanceMap[driftMeasurement.ordinal()] += this.getFullSingleDistance(
-                            instanceMid, driftMeasurement);
-                    this.allAttributeDistanceMap[driftMeasurement.ordinal()] += this.getFullSingleDistance(
-                            instanceTail, driftMeasurement);
                 }
             }
         }
@@ -136,11 +110,6 @@ public class NaiveMovingWindow extends TimelineAnalysis{
     protected double getDistance(int[] attributeSubset, DriftMeasurement driftMeasurementType) {
         int hash = this.hashAttributeSubset(attributeSubset);
         return this.distanceMap[hash][driftMeasurementType.ordinal()];
-    }
-
-    @Override
-    protected double getFullDistance(DriftMeasurement driftMeasurementType) {
-        return this.allAttributeDistanceMap[driftMeasurementType.ordinal()];
     }
 
     private double getSingleDistance(Instance instance, int[] attributeSubset, DriftMeasurement driftMeasurement) {
@@ -161,32 +130,6 @@ public class NaiveMovingWindow extends TimelineAnalysis{
             case POSTERIOR:
                 result = this.previousModel.findPygv(instance, attributeSubset, (int)instance.classValue()) -
                         this.currentModel.findPygv(instance, attributeSubset, (int)instance.classValue());
-                break;
-
-        }
-        result = (1/2) * Math.abs(result);
-        return result;
-    }
-
-    private double getFullSingleDistance(Instance instance, DriftMeasurement driftMeasurement) {
-        double result = -1.0f;
-        int[] attributeSubset = this.previousAllModel.getAttributesAvailable();
-        switch (driftMeasurement) {
-            case COVARIATE:
-                result = this.previousAllModel.findPv(instance, attributeSubset) -
-                        this.currentAllModel.findPv(instance, attributeSubset);
-                break;
-            case JOINT:
-                result = this.previousAllModel.findPvy(instance, attributeSubset, (int)instance.classValue()) -
-                        this.currentAllModel.findPvy(instance, attributeSubset, (int)instance.classValue());
-                break;
-            case LIKELIHOOD:
-                result = this.previousAllModel.findPvgy(instance, attributeSubset, (int)instance.classValue()) -
-                        this.currentAllModel.findPvgy(instance, attributeSubset, (int)instance.classValue());
-                break;
-            case POSTERIOR:
-                result = this.previousAllModel.findPygv(instance, attributeSubset, (int)instance.classValue()) -
-                        this.currentAllModel.findPygv(instance, attributeSubset, (int)instance.classValue());
                 break;
 
         }
