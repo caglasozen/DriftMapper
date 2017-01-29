@@ -26,7 +26,7 @@ public class main {
         //argv = new String[]{"analyse", "1,2,3", "0.5", "train_seed", "20130505", "20131129"};
         //argv = new String[]{"analyse", "1,2,3",  "0.5", "", "elecNormNew"};
         //argv = new String[]{"analyse", "1,2",  "17532", "", "elecNormNew"};
-        argv = new String[]{"analyse", "1,2",  "240796", "", "airlines"};
+        //argv = new String[]{"analyse", "1,2",  "240796", "", "airlines"};
         //argv = new String[]{"stream", "1,2",  "48,336,1461,17520", "", "elecNormNew"};
         //argv = new String[]{"stream", "1,2,3",  "6048,42336,183859", "data_uni_antwerp", "water_2015"};
         //argv = new String[]{"stream", "1,2,3,4",  "10000,50000,100000,500000", "", "sensor"};
@@ -35,7 +35,7 @@ public class main {
         //argv = new String[]{"stream_chunk", "1,2",  "2,1,7,30", "data_uni_antwerp", "water_2015"};
         //argv = new String[]{"stream", "1,2,3",  "10000,50000,100000,500000", "synthetic_5Att_5Val", "n1000000_m0.7_both"};
         //argv = new String[]{"stream", "1,2,3",  "133332,222221,399999,666666", "synthetic_5Att_5Val", "n1000000_m0.7_both"};
-        //argv = new String[]{"stream_cont", "1,2,3",  "10000,50000,100000,500000", "synthetic_5Att_5Val", "n1000000_m0.7_both"};
+        argv = new String[]{"stream_cont", "1,2,3",  "10000,50000,100000,500000", "synthetic_5Att_5Val", "n1000000_m0.7_both"};
         //argv = new String[]{"stream", "1",  "500,1000,5000", "", "gas-sensor"};
 
         // Obtain Subset Length
