@@ -29,7 +29,7 @@ public class NaiveMovingWindow extends TimelineAnalysis{
         this.currentModel = referenceModel.copy();
 
         this.attributeSubsets = referenceModel.getAllAttributeSubsets();
-        this.distanceMap = new double[this.currentModel.getAllInstances().numAttributes()^(this.attributeSubsets.get(0).length + 1) - 1][DriftMeasurement.values().length];
+        this.distanceMap = new double[(int)Math.pow(this.currentModel.getAllInstances().numAttributes(),this.attributeSubsets.get(0).length + 1)][DriftMeasurement.values().length];
         this.allAttributeDistanceMap = new double[DriftMeasurement.values().length];
         this.growing = true;
 
