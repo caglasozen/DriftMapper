@@ -6,5 +6,6 @@ out/
 datasets/
 .Rproj.user
 .RData
-data_out/martvard/gas-sensor_3-attributes_prior.csv
+data_out/
+datasets/
 *.jar
