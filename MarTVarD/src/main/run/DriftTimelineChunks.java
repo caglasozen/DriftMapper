@@ -15,29 +15,32 @@ import java.util.ArrayList;
 public class DriftTimelineChunks extends main{
 
     //TODO: Bug due to discretizing date attributes
-    public static void DriftTimelineChunks(String resultFolder, Instances[] allInstances,
+    public static void DriftTimelineChunks(String resultFolder, Instances allInstances,
                                            int groupAttribute, int[] groupSizes, int[] subsetLengths) {
+        Instances[] allGroupedInstances;
         if (groupAttribute >= 0) {
             ArrayList<Instances> groupedInstances = new ArrayList<>();
             double prevAttributeValue = -1;
-            for (Instances instances : allInstances) {
-                double[] groupedAttVals = instances.attributeToDoubleArray(groupAttribute);
-                instances.deleteAttributeAt(groupAttribute);
-                for (int j = 0; j < instances.size(); j++) {
-                    Instance instance = instances.get(j);
-                    if (groupedAttVals[j] != prevAttributeValue) {
-                        groupedInstances.add(new Instances(allInstances[0], 0));
-                        prevAttributeValue = groupedAttVals[j];
-                    }
-                    groupedInstances.get(groupedInstances.size() - 1).add(instance);
+            double[] groupedAttVals = allInstances.attributeToDoubleArray(groupAttribute);
+            allInstances = discretizeDataSet(allInstances);
+            allInstances.deleteAttributeAt(groupAttribute);
+            for (int j = 0; j < allInstances.size(); j++) {
+                Instance instance = allInstances.get(j);
+                if (groupedAttVals[j] != prevAttributeValue) {
+                    groupedInstances.add(new Instances(allInstances, 0));
+                    prevAttributeValue = groupedAttVals[j];
                 }
+                groupedInstances.get(groupedInstances.size() - 1).add(instance);
             }
-            allInstances = groupedInstances.toArray(new Instances[groupedInstances.size()]);
+            allGroupedInstances = groupedInstances.toArray(new Instances[groupedInstances.size()]);
+        }
+        else {
+            allGroupedInstances = new Instances[]{discretizeDataSet(allInstances)};
         }
 
         for (int subsetLength : subsetLengths) {
             for (int groupSize : groupSizes) {
-                runExperiment(allInstances, subsetLength, groupSize, resultFolder);
+                runExperiment(allGroupedInstances, subsetLength, groupSize, resultFolder);
             }
         }
     }

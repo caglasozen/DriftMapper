@@ -31,11 +31,12 @@ public class main {
         //argv = new String[]{"stream", "1,2,3",  "6048,42336,183859", "data_uni_antwerp", "water_2015"};
         //argv = new String[]{"stream", "1,2,3,4",  "10000,50000,100000,500000", "", "sensor"};
         //argv = new String[]{"stream_chunk", "1,2,3",  "-1", "train_seed", "20130419", "20130505", "20130521", "20130606", "20130622"};
+        argv = new String[]{"stream_chunk", "1,2",  "0,7,30", "", "elecNormNew"};
         //argv = new String[]{"stream_chunk", "1,2,3,4",  "4,1,7", "", "airlines"};
         //argv = new String[]{"stream_chunk", "1,2",  "2,1,7,30", "data_uni_antwerp", "water_2015"};
         //argv = new String[]{"stream", "1,2,3",  "10000,50000,100000,500000", "synthetic_5Att_5Val", "n1000000_m0.7_both"};
         //argv = new String[]{"stream", "1,2,3",  "133332,222221,399999,666666", "synthetic_5Att_5Val", "n1000000_m0.7_both"};
-        argv = new String[]{"stream_cont", "1,2,3",  "10000,50000,100000,500000", "synthetic_5Att_5Val", "n1000000_m0.7_both"};
+        //argv = new String[]{"stream_cont", "1,2,3",  "10000,50000,100000,500000", "synthetic_5Att_5Val", "n1000000_m0.7_both"};
         //argv = new String[]{"stream", "1",  "500,1000,5000", "", "gas-sensor"};
 
         // Obtain Subset Length
@@ -51,15 +52,17 @@ public class main {
         Instances[] allInstances = new Instances[files.length];
         String filename_comb = files[0];
         for (int i = 0; i < files.length; i++) {
-            allInstances[i] = loadAnyDataSet("./datasets/" + folder + "/" + files[i] + ".arff");
+            allInstances[i] = loadDataSet("./datasets/" + folder + "/" + files[i] + ".arff");
             filename_comb += i > 0 ? "_" + files[i] : "";
         }
         String filepath = getFilePath("./data_out", folder, filename_comb, argv[0]);
 
+        Instances instances;
         switch (argv[0]){
             case "analyse":
                 String[] splitArgs = argv[2].split(",");
-                Instances instances = mergeInstances(allInstances);
+                instances = mergeInstances(allInstances);
+                instances = discretizeDataSet(instances);
                 int[] splitIndices = new int[splitArgs.length];
                 for (int i = 0; i < splitIndices.length; i++) {
                     double arg = Double.parseDouble(splitArgs[i]);
@@ -81,14 +84,17 @@ public class main {
                 for (int i = 0; i < windowSizesString.length; i++) {
                     windowSizes[i] = Integer.parseInt(windowSizesString[i]);
                 }
-                DriftTimeline.DriftTimeline(filepath, mergeInstances(allInstances), windowSizes, subsetLengths, true);
+                instances = mergeInstances(allInstances);
+                instances = discretizeDataSet(instances);
+                DriftTimeline.DriftTimeline(filepath, instances, windowSizes, subsetLengths, true);
                 break;
             case "stream_chunk":
                 String[] arg2 = argv[2].split(",");
                 int groupAttribute = Integer.parseInt(arg2[0]);
                 int[] groupsSizes = new int[arg2.length - 1];
                 for (int i = 1; i < arg2.length; i++) groupsSizes[i - 1] = Integer.parseInt(arg2[i]);
-                DriftTimelineChunks.DriftTimelineChunks(filepath, allInstances, groupAttribute, groupsSizes, subsetLengths);
+                instances = mergeInstances(allInstances);
+                DriftTimelineChunks.DriftTimelineChunks(filepath, instances, groupAttribute, groupsSizes, subsetLengths);
                 break;
             case "stream_cont":
                 String[] windowSizeString = argv[2].split(",");
@@ -96,7 +102,9 @@ public class main {
                 for (int i = 0; i < windowSizeString.length; i++) {
                     windowSize[i] = Integer.parseInt(windowSizeString[i]);
                 }
-                DriftTimeline.DriftTimeline(filepath, mergeInstances(allInstances), windowSize, subsetLengths, false);
+                instances = mergeInstances(allInstances);
+                instances = discretizeDataSet(instances);
+                DriftTimeline.DriftTimeline(filepath, instances, windowSize, subsetLengths, false);
                 break;
         }
     }
@@ -136,51 +144,43 @@ public class main {
         return filname;
     }
 
-    static Instances loadDataSet(String filename) throws IOException {
-        // Check if any attribute is numeric
-        Instances result;
-        BufferedReader reader;
+    static Instances loadDataSet(String filename) {
+        try{
+            // Check if any attribute is numeric
+            Instances result;
+            BufferedReader reader;
 
-        reader = new BufferedReader(new FileReader(filename));
-        result = new Instances(reader);
-        reader.close();
-        return result;
-    }
-
-    private static Instances discretizeDataSet(Instances dataSet) throws Exception{
-        ArrayList<Integer> continuousIndex = new ArrayList<>();
-        for (int i = 0; i < dataSet.numAttributes(); i++) {
-            if (dataSet.attribute(i).isNumeric() &&
-                    !dataSet.attribute(i).isDate() &&
-                    !dataSet.attribute(i).name().equals("date")) {
-                continuousIndex.add(i);
-            }
+            reader = new BufferedReader(new FileReader(filename));
+            result = new Instances(reader);
+            reader.close();
+            return result;
         }
-        int[] attIndex = new int[continuousIndex.size()];
-        for (int i = 0; i < continuousIndex.size(); i++) attIndex[i] = continuousIndex.get(i);
-
-        Discretize filter = new Discretize();
-        filter.setUseEqualFrequency(true);
-        filter.setBins(5);
-        filter.setAttributeIndicesArray(attIndex);
-        filter.setInputFormat(dataSet);
-
-        return Filter.useFilter(dataSet, filter);
+        catch (Exception ex) {
+            ex.printStackTrace();
+            return new Instances("E", new ArrayList<Attribute>(), 0);
+        }
     }
 
-    public static Instances loadAnyDataSet(String filename) {
+    static Instances discretizeDataSet(Instances dataSet) {
         try {
-            Instances continuousData = loadDataSet(filename);
-            if (filename.equals("./datasets/gas-sensor.arff")) {
-                double[] classAttVals = continuousData.attributeToDoubleArray(0);
-                Attribute classAtt = continuousData.attribute(0);
-                continuousData.deleteAttributeAt(0);
-                continuousData.insertAttributeAt(classAtt, continuousData.numAttributes());
-                for (int i = 0; i < classAttVals.length; i++) {
-                    continuousData.get(i).setValue(continuousData.classIndex(), classAttVals[i]);
+            ArrayList<Integer> continuousIndex = new ArrayList<>();
+            for (int i = 0; i < dataSet.numAttributes(); i++) {
+                if (dataSet.attribute(i).isNumeric() &&
+                        !dataSet.attribute(i).isDate() &&
+                        !dataSet.attribute(i).name().equals("date")) {
+                    continuousIndex.add(i);
                 }
             }
-            Instances instances = discretizeDataSet(continuousData);
+            int[] attIndex = new int[continuousIndex.size()];
+            for (int i = 0; i < continuousIndex.size(); i++) attIndex[i] = continuousIndex.get(i);
+
+            Discretize filter = new Discretize();
+            filter.setUseEqualFrequency(true);
+            filter.setBins(5);
+            filter.setAttributeIndicesArray(attIndex);
+            filter.setInputFormat(dataSet);
+
+            Instances instances = Filter.useFilter(dataSet, filter);
             instances.setClassIndex(instances.numAttributes() - 1);
             return instances;
         }
@@ -188,6 +188,22 @@ public class main {
             ex.printStackTrace();
             return new Instances("E", new ArrayList<Attribute>(), 0);
         }
+    }
+
+    public static Instances loadAnyDataSet(String filename) {
+        Instances continuousData = loadDataSet(filename);
+        if (filename.equals("./datasets/gas-sensor.arff")) {
+            double[] classAttVals = continuousData.attributeToDoubleArray(0);
+            Attribute classAtt = continuousData.attribute(0);
+            continuousData.deleteAttributeAt(0);
+            continuousData.insertAttributeAt(classAtt, continuousData.numAttributes());
+            for (int i = 0; i < classAttVals.length; i++) {
+                continuousData.get(i).setValue(continuousData.classIndex(), classAttVals[i]);
+            }
+        }
+        Instances instances = discretizeDataSet(continuousData);
+        instances.setClassIndex(instances.numAttributes() - 1);
+        return instances;
     }
 
     public static int[] getAttributeIndicies(Instances instances) {
