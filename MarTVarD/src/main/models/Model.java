@@ -68,8 +68,10 @@ public abstract class Model {
     }
 
     public void removeInstances(int[] indices) {
+        int offset = 0;
         for (int index : indices) {
-            this.removeInstance(index);
+            this.removeInstance(index - offset);
+            offset += 1;
         }
     }
 
