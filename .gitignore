@@ -9,3 +9,4 @@ datasets/
 data_out/
 datasets/
 *.jar
+DataAnalysisR/dist/R-Portable/App/R-Portable/library/
