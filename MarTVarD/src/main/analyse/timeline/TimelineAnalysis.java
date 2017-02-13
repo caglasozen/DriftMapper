@@ -64,7 +64,6 @@ public abstract class TimelineAnalysis {
 
         ArrayList<String> headerList = new ArrayList<>();
         headerList.add("points");
-        headerList.add("all_attributes");
         for (int i = 0; i < this.attributeSubsets.size(); i++) {
             String tmp = "";
             for (int attributeIndex : this.attributeSubsets.get(i)) {
