@@ -2,6 +2,7 @@ package main.run;
 
 import main.DriftMeasurement;
 import main.analyse.timeline.NaiveChunk;
+import main.analyse.timeline.NaiveMovingChunk;
 import main.models.Model;
 import main.models.frequency.FrequencyMaps;
 import weka.core.Instance;
@@ -12,10 +13,10 @@ import java.util.ArrayList;
 /**
  * Created by loongkuan on 20/12/2016.
  */
-public class DriftTimelineChunks extends main{
+public class DriftTimelineMovingChunks extends DriftTimelineChunks{
 
     //TODO: Bug due to discretizing date attributes
-    public static void DriftTimelineChunks(String resultFolder, Instances allInstances,
+    public static void DriftTimelineMovingChunks(String resultFolder, Instances allInstances,
                                            int groupAttribute, int[] groupSizes, int[] subsetLengths) {
         Instances[] allGroupedInstances;
         if (groupAttribute >= 0) {
@@ -46,20 +47,10 @@ public class DriftTimelineChunks extends main{
     }
 
     private static void runExperiment(Instances[] allInstances, int subsetLength, int groupSize, String resultFolder) {
-        // Create new chunks of groupSize
-        Instances[] newAllInstances = new Instances[(allInstances.length) / groupSize];
-        for (int i = 0; i < (allInstances.length - (allInstances.length % groupSize)); i++) {
-            if (i % groupSize == 0) {
-                newAllInstances[i / groupSize] = new Instances(allInstances[i]);
-            }
-            else {
-                newAllInstances[i / groupSize].addAll(allInstances[i]);
-            }
-        }
-        int[] attributeIndices = getAttributeIndicies(newAllInstances[0]);
+        int[] attributeIndices = getAttributeIndicies(allInstances[0]);
 
-        Model referenceModel = new FrequencyMaps(newAllInstances[0], subsetLength, attributeIndices);
-        NaiveChunk naiveChunk = new NaiveChunk(newAllInstances, DriftMeasurement.values(), referenceModel);
+        Model referenceModel = new FrequencyMaps(allInstances[0], subsetLength, attributeIndices);
+        NaiveMovingChunk naiveChunk = new NaiveMovingChunk(allInstances, groupSize, DriftMeasurement.values(), referenceModel);
 
         System.out.println("\rDone test of Subset Length = " + subsetLength + " and chunk size of " + groupSize);
 

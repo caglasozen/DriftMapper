@@ -20,6 +20,7 @@ public class main {
      * stream       subsetLength1,subsetLength2,... windowSize1,windowSize2,...                 folder file1 file2 ...
      * stream_cont  subsetLength1,subsetLength2,... windowSize1,windowSize2,...                 folder file1 file2 ...
      * stream_chunk subsetLength1,subsetLength2,... groupAttIndex,groupSize1,groupsSize2,...    folder file1 file2 ...
+     * moving_chunk subsetLength1,subsetLength2,... groupAttIndex,groupSize1,groupsSize2,...    folder file1 file2 ...
      * @param argv experimentType folder file1 file2 file3 ...
      */
     public static void main(String[] argv) {
@@ -27,24 +28,21 @@ public class main {
         //argv = new String[]{"analyse", "1,2,3",  "0.5", "", "elecNormNew"};
         //argv = new String[]{"analyse", "1,2",  "17532", "", "elecNormNew"};
         //argv = new String[]{"analyse", "1,2",  "240796", "", "airlines"};
-        //argv = new String[]{"stream", "1,2",  "48,336,1461,17520", "", "elecNormNew"};
+        //argv = new String[]{"stream", "1,2,7",  "336,1461", "", "elecNormNew"};
         //argv = new String[]{"stream", "1,2,3",  "6048,42336,183859", "data_uni_antwerp", "water_2015"};
         //argv = new String[]{"stream", "1,2,3,4",  "10000,50000,100000,500000", "", "sensor"};
         //argv = new String[]{"stream_chunk", "1,2,3",  "-1", "train_seed", "20130419", "20130505", "20130521", "20130606", "20130622"};
-        argv = new String[]{"stream_chunk", "1,2",  "0,7,30", "", "elecNormNew"};
+        //argv = new String[]{"stream_chunk", "1,2",  "0,7,30", "", "elecNormNew"};
+        //argv = new String[]{"moving_chunk", "1,2",  "0,7,30", "", "elecNormNew"};
+        argv = new String[]{"analyse", "1",  "700000,1100000,1800000", "SITS_2006_NDVI_C", "SITS1M_fold1_TEST"};
+        //argv = new String[]{"moving_chunk", "1",  "0,1", "SITS_2006_NDVI_C", "SITS1M_fold1_TEST"};
+        //argv = new String[]{"moving_chunk", "1,2",  "4,1,7", "", "airlines"};
         //argv = new String[]{"stream_chunk", "1,2,3,4",  "4,1,7", "", "airlines"};
         //argv = new String[]{"stream_chunk", "1,2",  "2,1,7,30", "data_uni_antwerp", "water_2015"};
         //argv = new String[]{"stream", "1,2,3",  "10000,50000,100000,500000", "synthetic_5Att_5Val", "n1000000_m0.7_both"};
         //argv = new String[]{"stream", "1,2,3",  "133332,222221,399999,666666", "synthetic_5Att_5Val", "n1000000_m0.7_both"};
         //argv = new String[]{"stream_cont", "1,2,3",  "10000,50000,100000,500000", "synthetic_5Att_5Val", "n1000000_m0.7_both"};
         //argv = new String[]{"stream", "1",  "500,1000,5000", "", "gas-sensor"};
-
-        // Obtain Subset Length
-        String[] subsetLengthsString = argv[1].split(",");
-        int[] subsetLengths = new int[subsetLengthsString.length];
-        for (int i = 0; i < subsetLengthsString.length; i++) {
-            subsetLengths[i] = Integer.parseInt(subsetLengthsString[i]);
-        }
 
         // Obtain information regarding location of data and result output directory
         String folder = argv[3];
@@ -57,8 +55,17 @@ public class main {
         }
         String filepath = getFilePath("./data_out", folder, filename_comb, argv[0]);
 
+        // Obtain Subset Length
+        String[] subsetLengthsString = argv[1].split(",");
+        int[] subsetLengths = new int[subsetLengthsString.length + 1];
+        for (int i = 0; i < subsetLengthsString.length; i++) {
+            subsetLengths[i] = Integer.parseInt(subsetLengthsString[i]);
+        }
+        subsetLengths[subsetLengthsString.length] = allInstances[0].numAttributes() - 2;
+
         Instances instances;
         switch (argv[0]){
+            //TODO: Different names for different windows
             case "analyse":
                 String[] splitArgs = argv[2].split(",");
                 instances = mergeInstances(allInstances);
@@ -96,6 +103,14 @@ public class main {
                 instances = mergeInstances(allInstances);
                 DriftTimelineChunks.DriftTimelineChunks(filepath, instances, groupAttribute, groupsSizes, subsetLengths);
                 break;
+            case "moving_chunk":
+                String[] arg2_m = argv[2].split(",");
+                int groupAttribute_m = Integer.parseInt(arg2_m[0]);
+                int[] groupsSizes_m = new int[arg2_m.length - 1];
+                for (int i = 1; i < arg2_m.length; i++) groupsSizes_m[i - 1] = Integer.parseInt(arg2_m[i]);
+                instances = mergeInstances(allInstances);
+                DriftTimelineMovingChunks.DriftTimelineMovingChunks(filepath, instances, groupAttribute_m, groupsSizes_m, subsetLengths);
+                break;
             case "stream_cont":
                 String[] windowSizeString = argv[2].split(",");
                 int[] windowSize = new int[windowSizeString.length];
@@ -117,6 +132,7 @@ public class main {
         return instances;
     }
 
+    //TODO: Fix bug caused by deleting date attribute and model not accounting for it
     static int[] getAllAttributeSubsetLength(Instances instances) {
         int maxNumAtt = instances.numAttributes() - 1;
         for (int i = 0; i < instances.numAttributes(); i++) {
