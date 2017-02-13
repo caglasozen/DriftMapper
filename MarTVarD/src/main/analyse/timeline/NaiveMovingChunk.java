@@ -19,6 +19,7 @@ public class NaiveMovingChunk extends TimelineAnalysis{
 
     public NaiveMovingChunk(Instances[] allInstances, int chunkSize, DriftMeasurement[] driftTypes, Model referenceModel) {
         this.previousModel = referenceModel.copy();
+        this.currentModel = referenceModel.copy();
 
         this.currentIndex = 0;
         this.driftMeasurementTypes = driftTypes;
@@ -35,7 +36,7 @@ public class NaiveMovingChunk extends TimelineAnalysis{
         this.chunkIndex1 = new LinkedList<>();
         this.chunkIndex2 = new LinkedList<>();
 
-        for (int i = 1; i < allInstances.length; i++) {
+        for (int i = 0; i < allInstances.length; i++) {
             System.out.print("\rProcessing chunk: " + (i + 1) + "/" + allInstances.length);
             if (chunkIndex1.size() < chunkSize) {
                 this.previousModel.addInstances(allInstances[i]);
