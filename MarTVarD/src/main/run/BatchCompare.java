@@ -32,7 +32,7 @@ public class BatchCompare extends main{
             Instances[] dataSet = new Instances[2];
             dataSet[0] = new Instances(allInstances, 0, allInstances.size()/2);
             dataSet[1] = new Instances(allInstances, allInstances.size()/2 - 1, allInstances.size()/2);
-            String resultFolder = main.getFilePath("./data_out", "folder", file, "FrequencyMap");
+            String resultFolder = main.createFilePath(new String[]{"./data_out", "folder", file, "FrequencyMap"});
             runExperiment(attributeSubsetLengths, dataSet, resultFolder, sampleScale);
         }
     }
@@ -43,7 +43,7 @@ public class BatchCompare extends main{
         Instances instances1 = loadAnyDataSet(dataFolder + file1 + ".arff");
         Instances instances2 = loadAnyDataSet(dataFolder + file2 + ".arff");
         attributeSubsetLengths = getMaxSubsetLength(attributeSubsetLengths, instances1);
-        String resultFolder = main.getFilePath("./data_out", "folder", file1 + "_" + file2, "FrequencyMap");
+        String resultFolder = main.createFilePath(new String[]{"./data_out", "folder", file1 + "_" + file2, "FrequencyMap"});
         runExperiment(attributeSubsetLengths, new Instances[]{instances1, instances2}, resultFolder, sampleScale);
     }
 

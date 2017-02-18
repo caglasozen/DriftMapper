@@ -47,7 +47,7 @@ public class DriftTimeline extends main{
             allInstances.addAll(loadAnyDataSet("./datasets/" + folder + "/" + files[i] + ".arff"));
             filename_comb += "_" + files[i];
         }
-        String filepath = getFilePath("./data_out", folder, filename_comb, "stream");
+        String filepath = createFilePath(new String[]{"./data_out", folder, filename_comb, "stream"});
 
         //TODO: Be able to measure different types of drift and name accordingly
         //testAllWindowSize(allInstances, new int[]{100, 500, 1000, 5000, 10000}, filepath);

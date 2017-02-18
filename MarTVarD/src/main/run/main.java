@@ -23,6 +23,7 @@ public class main {
      * moving_chunk subsetLength1,subsetLength2,... groupAttIndex,groupSize1,groupsSize2,...    folder file1 file2 ...
      * @param argv experimentType folder file1 file2 file3 ...
      */
+    //TODO: First arg is source second should be destination folder or vice versa
     public static void main(String[] argv) {
         //argv = new String[]{"analyse", "1,2,3", "0.5", "train_seed", "20130505", "20131129"};
         //argv = new String[]{"analyse", "1,2,3",  "0.5", "", "elecNormNew"};
@@ -34,7 +35,8 @@ public class main {
         //argv = new String[]{"stream_chunk", "1,2,3",  "-1", "train_seed", "20130419", "20130505", "20130521", "20130606", "20130622"};
         //argv = new String[]{"stream_chunk", "1,2",  "0,7,30", "", "elecNormNew"};
         //argv = new String[]{"moving_chunk", "1,2",  "0,7,30", "", "elecNormNew"};
-        argv = new String[]{"analyse", "1",  "700000,1100000,1800000", "SITS_2006_NDVI_C", "SITS1M_fold1_TEST"};
+        argv = new String[]{"moving_chunk", "7",  "0,7,30", "./data_out/elecNormNew", "./datasets/elecNormNew.arff"};
+        //argv = new String[]{"analyse", "1",  "700000,1100000,1800000", "SITS_2006_NDVI_C", "SITS1M_fold1_TEST"};
         //argv = new String[]{"moving_chunk", "1",  "0,1", "SITS_2006_NDVI_C", "SITS1M_fold1_TEST"};
         //argv = new String[]{"moving_chunk", "1,2",  "4,1,7", "", "airlines"};
         //argv = new String[]{"stream_chunk", "1,2,3,4",  "4,1,7", "", "airlines"};
@@ -44,16 +46,16 @@ public class main {
         //argv = new String[]{"stream_cont", "1,2,3",  "10000,50000,100000,500000", "synthetic_5Att_5Val", "n1000000_m0.7_both"};
         //argv = new String[]{"stream", "1",  "500,1000,5000", "", "gas-sensor"};
 
-        // Obtain information regarding location of data and result output directory
-        String folder = argv[3];
-        String[] files = ArrayUtils.subarray(argv, 4, argv.length);
-        Instances[] allInstances = new Instances[files.length];
-        String filename_comb = files[0];
-        for (int i = 0; i < files.length; i++) {
-            allInstances[i] = loadDataSet("./datasets/" + folder + "/" + files[i] + ".arff");
-            filename_comb += i > 0 ? "_" + files[i] : "";
+        // Obtain folder too put outputs
+        String[] folders = argv[3].split("/");
+        String outputFolder = createFilePath(ArrayUtils.add(folders, argv[0]));
+
+        // Get data from given .arff files
+        String[] dataFiles = ArrayUtils.subarray(argv, 4, argv.length);
+        Instances[] allInstances = new Instances[dataFiles.length];
+        for (int i = 0; i < dataFiles.length; i++) {
+            allInstances[i] = loadDataSet(dataFiles[i]);
         }
-        String filepath = getFilePath("./data_out", folder, filename_comb, argv[0]);
 
         // Obtain Subset Length
         String[] subsetLengthsString = argv[1].split(",");
@@ -82,7 +84,7 @@ public class main {
                 if (splitIndices.length == 1) {
                     splitIndices = new int[]{0,splitIndices[0],instances.size() - 1};
                 }
-                BatchCompare.BatchCompare(filepath, instances, splitIndices, subsetLengths);
+                BatchCompare.BatchCompare(outputFolder, instances, splitIndices, subsetLengths);
                 break;
             case "stream":
                 String[] windowSizesString = argv[2].split(",");
@@ -92,7 +94,7 @@ public class main {
                 }
                 instances = mergeInstances(allInstances);
                 instances = discretizeDataSet(instances);
-                DriftTimeline.DriftTimeline(filepath, instances, windowSizes, subsetLengths, true);
+                DriftTimeline.DriftTimeline(outputFolder, instances, windowSizes, subsetLengths, true);
                 break;
             case "stream_chunk":
                 String[] arg2 = argv[2].split(",");
@@ -100,7 +102,7 @@ public class main {
                 int[] groupsSizes = new int[arg2.length - 1];
                 for (int i = 1; i < arg2.length; i++) groupsSizes[i - 1] = Integer.parseInt(arg2[i]);
                 instances = mergeInstances(allInstances);
-                DriftTimelineChunks.DriftTimelineChunks(filepath, instances, groupAttribute, groupsSizes, subsetLengths);
+                DriftTimelineChunks.DriftTimelineChunks(outputFolder, instances, groupAttribute, groupsSizes, subsetLengths);
                 break;
             case "moving_chunk":
                 String[] arg2_m = argv[2].split(",");
@@ -108,7 +110,7 @@ public class main {
                 int[] groupsSizes_m = new int[arg2_m.length - 1];
                 for (int i = 1; i < arg2_m.length; i++) groupsSizes_m[i - 1] = Integer.parseInt(arg2_m[i]);
                 instances = mergeInstances(allInstances);
-                DriftTimelineMovingChunks.DriftTimelineMovingChunks(filepath, instances, groupAttribute_m, groupsSizes_m, subsetLengths);
+                DriftTimelineMovingChunks.DriftTimelineMovingChunks(outputFolder, instances, groupAttribute_m, groupsSizes_m, subsetLengths);
                 break;
             case "stream_cont":
                 String[] windowSizeString = argv[2].split(",");
@@ -118,7 +120,7 @@ public class main {
                 }
                 instances = mergeInstances(allInstances);
                 instances = discretizeDataSet(instances);
-                DriftTimeline.DriftTimeline(filepath, instances, windowSize, subsetLengths, false);
+                DriftTimeline.DriftTimeline(outputFolder, instances, windowSize, subsetLengths, false);
                 break;
         }
     }
@@ -147,16 +149,14 @@ public class main {
         return allLength;
     }
 
-    static String getFilePath(String resultDir, String dataDir, String dataFileName, String experimentName) {
-        String filname = resultDir;
-        new File(filname).mkdir();
-        filname += dataDir.equals("") ? "" : "/"  + dataDir;
-        new File(filname).mkdir();
-        filname += "/" + dataFileName;
-        new File(filname).mkdir();
-        filname += "/" + experimentName;
-        new File(filname).mkdir();
-        return filname;
+    static String createFilePath(String[] folders) {
+        String filename = folders[0];
+        new File(filename).mkdir();
+        for (int i = 1; i < folders.length; i++) {
+            filename += "/" + folders[i];
+            new File(filename).mkdir();
+        }
+        return filename;
     }
 
     static Instances loadDataSet(String filename) {
