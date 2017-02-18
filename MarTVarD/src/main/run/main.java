@@ -57,11 +57,10 @@ public class main {
 
         // Obtain Subset Length
         String[] subsetLengthsString = argv[1].split(",");
-        int[] subsetLengths = new int[subsetLengthsString.length + 1];
+        int[] subsetLengths = new int[subsetLengthsString.length];
         for (int i = 0; i < subsetLengthsString.length; i++) {
             subsetLengths[i] = Integer.parseInt(subsetLengthsString[i]);
         }
-        subsetLengths[subsetLengthsString.length] = allInstances[0].numAttributes() - 2;
 
         Instances instances;
         switch (argv[0]){
@@ -181,11 +180,7 @@ public class main {
         try {
             ArrayList<Integer> continuousIndex = new ArrayList<>();
             for (int i = 0; i < dataSet.numAttributes(); i++) {
-                if (dataSet.attribute(i).isNumeric() &&
-                        !dataSet.attribute(i).isDate() &&
-                        !dataSet.attribute(i).name().equals("date")) {
-                    continuousIndex.add(i);
-                }
+                continuousIndex.add(i);
             }
             int[] attIndex = new int[continuousIndex.size()];
             for (int i = 0; i < continuousIndex.size(); i++) attIndex[i] = continuousIndex.get(i);
@@ -225,9 +220,7 @@ public class main {
     public static int[] getAttributeIndicies(Instances instances) {
         ArrayList<Integer> indicesList = new ArrayList<>();
         for (int i = 0; i < instances.numAttributes() - 1; i++) {
-            if (!instances.attribute(i).isDate() && !instances.attribute(i).name().equals("date")) {
-                indicesList.add(i);
-            }
+            indicesList.add(i);
         }
         int[] attributeIndices = new int[indicesList.size()];
         for (int i = 0; i < indicesList.size(); i++) attributeIndices[i] = indicesList.get(i);
