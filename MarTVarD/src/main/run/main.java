@@ -35,7 +35,7 @@ public class main {
         //argv = new String[]{"stream_chunk", "1,2,3",  "-1", "train_seed", "20130419", "20130505", "20130521", "20130606", "20130622"};
         //argv = new String[]{"stream_chunk", "1,2",  "0,7,30", "", "elecNormNew"};
         //argv = new String[]{"moving_chunk", "1,2",  "0,7,30", "", "elecNormNew"};
-        argv = new String[]{"moving_chunk", "7",  "0,7,30", "./data_out/elecNormNew", "./datasets/elecNormNew.arff"};
+        //argv = new String[]{"moving_chunk", "7",  "0,7,30", "./data_out/elecNormNew", "./datasets/elecNormNew.arff"};
         //argv = new String[]{"analyse", "1",  "700000,1100000,1800000", "SITS_2006_NDVI_C", "SITS1M_fold1_TEST"};
         //argv = new String[]{"moving_chunk", "1",  "0,1", "SITS_2006_NDVI_C", "SITS1M_fold1_TEST"};
         //argv = new String[]{"moving_chunk", "1,2",  "4,1,7", "", "airlines"};
