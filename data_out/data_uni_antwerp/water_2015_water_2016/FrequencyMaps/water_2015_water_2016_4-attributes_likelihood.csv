@@ -1,2 +1,0 @@
-"attribute_subset","drift","mean","sd","max_value","max_attribute","min_value","min_attribute"
-"BranchNumber_ConsumerID_Date_ConsumptionTime_Energy","0.07068749957530016","2.570795739233579E-4","4.6888219583563634E-4","0.0058352103825596","BranchNumber=4.254_ConsumerID=2983_Date='(1432980000000-1439200800000]'_ConsumptionTime='(-inf-13650000]'_Energy='(0.035-inf)'","0.0","BranchNumber=4.103_ConsumerID=480_Date='(-inf-1426676400000]'_ConsumptionTime='(-inf-13650000]'_Energy='(0.005-0.015]'"

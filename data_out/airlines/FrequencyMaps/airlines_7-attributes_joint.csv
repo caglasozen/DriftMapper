@@ -1,2 +1,0 @@
-"attribute_subset","drift","mean","sd","max_value","max_attribute","min_value","min_attribute"
-"Airline_Flight_AirportFrom_AirportTo_DayOfWeek_Time_Length_Delay","0.4989228413259489","1.6935602217841623E-6","1.58668727479908E-6","2.039370983829642E-5","Airline=OO_Flight='(4272.5-inf)'_AirportFrom=SAN_AirportTo=LAX_DayOfWeek=3_Time='(890.5-1079.5]'_Length='(-inf-75.5]'_Delay=0","0.0","Airline=YV_Flight='(2431.5-4272.5]'_AirportFrom=CLT_AirportTo=CLE_DayOfWeek=3_Time='(519.5-700.5]'_Length='(75.5-100.5]'_Delay=1"

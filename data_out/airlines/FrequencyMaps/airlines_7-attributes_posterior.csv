@@ -1,2 +1,0 @@
-"attribute_subset","drift","mean","sd","max_value","max_attribute","min_value","min_attribute"
-"Airline_Flight_AirportFrom_AirportTo_DayOfWeek_Time_Length_Delay","0.37272270874130126","0.20465022699625185","0.18234331960258768","0.5","Airline=OO_Flight='(4272.5-inf)'_AirportFrom=SLC_AirportTo=SFO_DayOfWeek=2_Time='(-inf-519.5]'_Length='(130.5-174.5]'_Delay=0","0.0","Airline=WN_Flight='(1306.5-2431.5]'_AirportFrom=DAL_AirportTo=ELP_DayOfWeek=1_Time='(1079.5-inf)'_Length='(100.5-130.5]'_Delay=0"

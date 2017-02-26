@@ -1,2 +1,0 @@
-"attribute_subset","drift","mean","sd","max_value","max_attribute","min_value","min_attribute"
-"Airline_Flight_AirportFrom_AirportTo_DayOfWeek_Time_Length","0.32002921862412204","2.172635564349088E-6","1.804829631673392E-6","2.224768345995973E-5","Airline=WN_Flight='(566.5-1306.5]'_AirportFrom=PHX_AirportTo=SAN_DayOfWeek=3_Time='(890.5-1079.5]'_Length='(-inf-75.5]'","0.0","Airline=AA_Flight='(1306.5-2431.5]'_AirportFrom=DFW_AirportTo=MCO_DayOfWeek=6_Time='(519.5-700.5]'_Length='(130.5-174.5]'"
