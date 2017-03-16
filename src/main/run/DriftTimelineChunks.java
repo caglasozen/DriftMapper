@@ -15,10 +15,11 @@ import java.util.ArrayList;
 public class DriftTimelineChunks extends main{
 
     //TODO: Bug due to discretizing date attributes
-    public static void DriftTimelineChunks(String resultFolder, Instances allInstances,
+    public static void DriftTimelineChunks(String resultFolder, Instances[] allSepInstances,
                                            int groupAttribute, int[] groupSizes, int[] subsetLengths) {
         Instances[] allGroupedInstances;
         if (groupAttribute >= 0) {
+            Instances allInstances = mergeInstances(allSepInstances);
             ArrayList<Instances> groupedInstances = new ArrayList<>();
             double prevAttributeValue = -1;
             double[] groupedAttVals = allInstances.attributeToDoubleArray(groupAttribute);
@@ -35,7 +36,19 @@ public class DriftTimelineChunks extends main{
             allGroupedInstances = groupedInstances.toArray(new Instances[groupedInstances.size()]);
         }
         else {
-            allGroupedInstances = new Instances[]{discretizeDataSet(allInstances)};
+            int[] sizes = new int[allSepInstances.length];
+            for (int i = 0; i < allSepInstances.length; i++) {
+                sizes[i] = allSepInstances[i].size();
+            }
+            Instances allInstances2 = mergeInstances(allSepInstances);
+            allInstances2 = discretizeDataSet(allInstances2);
+            allGroupedInstances = new Instances[allSepInstances.length];
+            int currentIndex = 0;
+            for (int i = 0; i < sizes.length; i++) {
+                allGroupedInstances[i] = new Instances(allInstances2, currentIndex, sizes[i]);
+                currentIndex += sizes[i];
+            }
+            groupSizes = new int[]{1};
         }
 
         for (int subsetLength : subsetLengths) {

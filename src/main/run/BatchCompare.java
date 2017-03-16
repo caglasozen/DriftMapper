@@ -20,7 +20,7 @@ public class BatchCompare extends main{
         Instances[] instancesPair = new Instances[2];
         //TODO: Check math of making window size from indices
         instancesPair[0] = new Instances(instances, splitIndices[0], splitIndices[1] - splitIndices[0]);
-        instancesPair[1] = new Instances(instances, splitIndices[1], splitIndices[2] - splitIndices[1]);
+        instancesPair[1] = new Instances(instances, splitIndices[2], splitIndices[3] - splitIndices[2]);
         runExperiment(subsetLengths, instancesPair, resultFolder, 1.0);
     }
 

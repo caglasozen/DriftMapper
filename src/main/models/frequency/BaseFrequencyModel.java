@@ -293,6 +293,39 @@ public abstract class BaseFrequencyModel extends Model {
                 separateExperiments, experimentProbability, attributeSubset);
     }
 
+    // TODO: Try and separate these into smaller functions
+    @Override
+    public ExperimentResult findClassDistance(Model modelToCompare, double sampleScale) {
+        BaseFrequencyModel modelAfter = (BaseFrequencyModel)modelToCompare;
+
+        // Get the hash of all the seen instances and get a sample from them
+        ArrayList<Integer> allHashes = new ArrayList<>();
+        for (int i = 0; i < this.allInstances.classAttribute().numValues(); i++) {
+            allHashes.add(i);
+        }
+
+        double[] p = new double[allHashes.size()];
+        double[] q = new double[allHashes.size()];
+        double[] separateDistance = new double[allHashes.size()];
+        Instances instanceValues = new Instances(this.allInstances, allHashes.size());
+        for (int i = 0; i < allHashes.size(); i++) {
+            p[i] = this.allInstances.size() == 0 ?
+                    0 : (double)this.findFy(i) / (double)this.allInstances.size();
+            q[i] = modelAfter.allInstances.size() == 0 ?
+                    0 : (double)modelAfter.findFy(i) / (double)modelAfter.allInstances.size();
+            separateDistance[i] = this.distanceMetric.findDistance(new double[]{p[i]}, new double[]{q[i]});
+            Instance instance = new DenseInstance(this.allInstances.instance(0));
+            instance.setDataset(this.allInstances);
+            for (int j = 0; j < this.allInstances.numAttributes(); j++) {
+                instance.setMissing(j);
+            }
+            instance.setClassValue((double)i);
+            instanceValues.add(instance);
+        }
+        double finalDistance = this.distanceMetric.findDistance(p, q) * sampleScale;
+        return new SingleExperimentResult(finalDistance, separateDistance, instanceValues);
+    }
+
     @Override
     public double peakCovariateDistance(Model modelToCompare, int[] attributeSubset, double sampleScale) {
         return this.findCovariateDistance(modelToCompare, attributeSubset, sampleScale).getDistance();
@@ -311,5 +344,10 @@ public abstract class BaseFrequencyModel extends Model {
     @Override
     public double peakPosteriorDistance(Model modelToCompare, int[] attributeSubset, double sampleScale) {
         return this.findPosteriorDistance(modelToCompare, attributeSubset, sampleScale).getDistance();
+    }
+
+    @Override
+    public double peakClassDistance(Model modelToCompare, double sampleScale) {
+        return this.findClassDistance(modelToCompare, sampleScale).getDistance();
     }
 }

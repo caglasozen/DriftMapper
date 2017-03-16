@@ -25,19 +25,33 @@ public class main {
      */
     //TODO: First arg is source second should be destination folder or vice versa
     public static void main(String[] argv) {
+        argv = new String[]{"analyse", "1,2,3", "1,1991977,1991978,3983954", "./data_out/train_seed/20130505_20131129", "./datasets/train_seed/20130505.arff", "./datasets/train_seed/20131129.arff"};
+        //argv = new String[]{"analyse", "1",  "800001,1100000,1100001,1400000", "./data_out/SITS_2006_NDVI_C/SITS1M_fold1_TEST", "./datasets/SITS_2006_NDVI_C/SITS1M_fold1_TEST.arff"};
+        //argv = new String[]{"analyse", "1",  "3100001,3300000,3300001,3500000", "./data_out/SITS_2006_NDVI_C/SITS1M_fold1_TEST", "./datasets/SITS_2006_NDVI_C/SITS1M_fold1_TEST.arff"};
         //argv = new String[]{"analyse", "1,2,3", "0.5", "train_seed", "20130505", "20131129"};
         //argv = new String[]{"analyse", "1,2,3",  "0.5", "", "elecNormNew"};
-        argv = new String[]{"analyse", "1,2",  "1,22656,45311", "./data_out/elecNormNew", "./datasets/elecNormNew.arff"};
+        //argv = new String[]{"analyse", "1,2,3,5",  "1,17376,17377,45312", "./data_out/elecNormNewClean", "./datasets/elecNormNewClean.arff"};
+        //argv = new String[]{"analyse", "1,2,3,7",  "1,17376,17377,539383", "./data_out/airlines", "./datasets/airlines.arff"};
         //argv = new String[]{"analyse", "1,2",  "240796", "", "airlines"};
         //argv = new String[]{"stream", "1,2,7",  "336,1461", "", "elecNormNew"};
         //argv = new String[]{"stream", "1,2,3",  "6048,42336,183859", "data_uni_antwerp", "water_2015"};
         //argv = new String[]{"stream", "1,2,3,4",  "10000,50000,100000,500000", "", "sensor"};
-        //argv = new String[]{"stream_chunk", "1,2,3",  "-1", "train_seed", "20130419", "20130505", "20130521", "20130606", "20130622"};
+        /*
+        argv = new String[]{"stream_chunk", "1,10",  "-1", "./data_out/train_seed",
+                "./datasets/train_seed/20130910.arff",
+                "./datasets/train_seed/20130926.arff",
+                "./datasets/train_seed/20131012.arff",
+                "./datasets/train_seed/20131028.arff",
+                "./datasets/train_seed/20131113.arff",
+                "./datasets/train_seed/20131129.arff"};
+                */
         //argv = new String[]{"stream_chunk", "1,2",  "0,7,30", "", "elecNormNew"};
         //argv = new String[]{"moving_chunk", "1,2,7",  "0,7,30", "./data_out/elecNormNew", "./datasets/elecNormNew.arff"};
+        //argv = new String[]{"moving_chunk", "1,2,5",  "0,7,30", "./data_out/elecNormNewClean", "./datasets/elecNormNewClean.arff"};
+        //argv = new String[]{"moving_chunk", "1,2",  "0,7,30", "./data_out/elecNormNewReduced", "./datasets/elecNormNewReduced.arff"};
         //argv = new String[]{"analyse", "1",  "700000,1100000,1800000", "SITS_2006_NDVI_C", "SITS1M_fold1_TEST"};
-        //argv = new String[]{"moving_chunk", "1",  "0,1", "SITS_2006_NDVI_C", "SITS1M_fold1_TEST"};
-        //argv = new String[]{"moving_chunk", "1,2",  "4,1,7", "", "airlines"};
+        //argv = new String[]{"moving_chunk", "1",  "0,1", "./data_out/SITS_2006_NDVI_C/SITS1M_fold1_TEST", "./datasets/SITS_2006_NDVI_C/SITS1M_fold1_TEST.arff"};
+        //argv = new String[]{"moving_chunk", "1,2,6",  "4,1,7", "./data_out/airlines", "./datasets/airlines.arff"};
         //argv = new String[]{"stream_chunk", "1,2,3,4",  "4,1,7", "", "airlines"};
         //argv = new String[]{"stream_chunk", "1,2",  "2,1,7,30", "data_uni_antwerp", "water_2015"};
         //argv = new String[]{"stream", "1,2,3",  "10000,50000,100000,500000", "synthetic_5Att_5Val", "n1000000_m0.7_both"};
@@ -54,6 +68,9 @@ public class main {
         Instances[] allInstances = new Instances[dataFiles.length];
         for (int i = 0; i < dataFiles.length; i++) {
             allInstances[i] = loadDataSet(dataFiles[i]);
+            if (allInstances[i].classIndex() < 0) {
+                allInstances[i].setClassIndex(allInstances[i].numAttributes() - 1);
+            }
         }
 
         // Obtain Subset Length
@@ -67,8 +84,16 @@ public class main {
         switch (argv[0]){
             //TODO: Different names for different windows
             case "analyse":
+                folders = ArrayUtils.add(folders, argv[0]);
+                folders = ArrayUtils.add(folders, argv[2].replaceAll(",", "_"));
+                outputFolder = createFilePath(folders);
                 String[] splitArgs = argv[2].split(",");
                 instances = mergeInstances(allInstances);
+                for (int i = 0; i < instances.numAttributes(); i++) {
+                    if (instances.attribute(i).isDate()) {
+                        instances.deleteAttributeAt(i);
+                    }
+                }
                 instances = discretizeDataSet(instances);
                 int[] splitIndices = new int[splitArgs.length];
                 for (int i = 0; i < splitIndices.length; i++) {
@@ -100,8 +125,8 @@ public class main {
                 int groupAttribute = Integer.parseInt(arg2[0]);
                 int[] groupsSizes = new int[arg2.length - 1];
                 for (int i = 1; i < arg2.length; i++) groupsSizes[i - 1] = Integer.parseInt(arg2[i]);
-                instances = mergeInstances(allInstances);
-                DriftTimelineChunks.DriftTimelineChunks(outputFolder, instances, groupAttribute, groupsSizes, subsetLengths);
+                //instances = mergeInstances(allInstances);
+                DriftTimelineChunks.DriftTimelineChunks(outputFolder, allInstances, groupAttribute, groupsSizes, subsetLengths);
                 break;
             case "moving_chunk":
                 String[] arg2_m = argv[2].split(",");

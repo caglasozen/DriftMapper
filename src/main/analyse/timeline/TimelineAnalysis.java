@@ -54,6 +54,8 @@ public abstract class TimelineAnalysis {
                 return this.previousModel.peakLikelihoodDistance(this.currentModel, attributeSubset, 1.0);
             case POSTERIOR:
                 return this.previousModel.peakPosteriorDistance(this.currentModel, attributeSubset, 1.0);
+            case CLASS:
+                return this.previousModel.peakClassDistance(this.currentModel, 1.0);
         }
         return Double.NaN;
     }
