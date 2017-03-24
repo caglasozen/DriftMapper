@@ -13,29 +13,21 @@ import java.util.ArrayList;
  * Created by loongkuan on 16/12/2016.
  */
 public class main {
-    //TODO: analyse subsetLength1,subsetLength2,... startIndex,MiddleIndex,EndIndex folder file1 file2 ...
     /**
-     * analyse      subsetLength1,subsetLength2,... splitStart,splitMiddle,splitEnd             folder file1 file2 ...
-     * analyse      subsetLength1,subsetLength2,... startPropostion,Middle,End                  folder file1 file2 ...
-     * stream       subsetLength1,subsetLength2,... windowSize1,windowSize2,...                 folder file1 file2 ...
-     * stream_cont  subsetLength1,subsetLength2,... windowSize1,windowSize2,...                 folder file1 file2 ...
-     * stream_chunk subsetLength1,subsetLength2,... groupAttIndex,groupSize1,groupsSize2,...    folder file1 file2 ...
-     * moving_chunk subsetLength1,subsetLength2,... groupAttIndex,groupSize1,groupsSize2,...    folder file1 file2 ...
+     * analyse      subsetLength1,subsetLength2,... StartIndex1,EndIndex1,StartIndex2,EndIndex2 output_folder file1 file2 ...
+     * stream       subsetLength1,subsetLength2,... windowSize1,windowSize2,...                 output_folder file1 file2 ...
+     * stream_cont  subsetLength1,subsetLength2,... windowSize1,windowSize2,...                 output_folder file1 file2 ...
+     * stream_chunk subsetLength1,subsetLength2,... groupAttIndex,groupSize1,groupsSize2,...    output_folder file1 file2 ...
+     * moving_chunk subsetLength1,subsetLength2,... groupAttIndex,groupSize1,groupsSize2,...    output_folder file1 file2 ...
      * @param argv experimentType folder file1 file2 file3 ...
      */
-    //TODO: First arg is source second should be destination folder or vice versa
     public static void main(String[] argv) {
+        // Example arguments
         argv = new String[]{"analyse", "1,2,3", "1,1991977,1991978,3983954", "./data_out/train_seed/20130505_20131129", "./datasets/train_seed/20130505.arff", "./datasets/train_seed/20131129.arff"};
         //argv = new String[]{"analyse", "1",  "800001,1100000,1100001,1400000", "./data_out/SITS_2006_NDVI_C/SITS1M_fold1_TEST", "./datasets/SITS_2006_NDVI_C/SITS1M_fold1_TEST.arff"};
         //argv = new String[]{"analyse", "1",  "3100001,3300000,3300001,3500000", "./data_out/SITS_2006_NDVI_C/SITS1M_fold1_TEST", "./datasets/SITS_2006_NDVI_C/SITS1M_fold1_TEST.arff"};
-        //argv = new String[]{"analyse", "1,2,3", "0.5", "train_seed", "20130505", "20131129"};
-        //argv = new String[]{"analyse", "1,2,3",  "0.5", "", "elecNormNew"};
         //argv = new String[]{"analyse", "1,2,3,5",  "1,17376,17377,45312", "./data_out/elecNormNewClean", "./datasets/elecNormNewClean.arff"};
         //argv = new String[]{"analyse", "1,2,3,7",  "1,17376,17377,539383", "./data_out/airlines", "./datasets/airlines.arff"};
-        //argv = new String[]{"analyse", "1,2",  "240796", "", "airlines"};
-        //argv = new String[]{"stream", "1,2,7",  "336,1461", "", "elecNormNew"};
-        //argv = new String[]{"stream", "1,2,3",  "6048,42336,183859", "data_uni_antwerp", "water_2015"};
-        //argv = new String[]{"stream", "1,2,3,4",  "10000,50000,100000,500000", "", "sensor"};
         /*
         argv = new String[]{"stream_chunk", "1,10",  "-1", "./data_out/train_seed",
                 "./datasets/train_seed/20130910.arff",
@@ -45,19 +37,11 @@ public class main {
                 "./datasets/train_seed/20131113.arff",
                 "./datasets/train_seed/20131129.arff"};
                 */
-        //argv = new String[]{"stream_chunk", "1,2",  "0,7,30", "", "elecNormNew"};
         //argv = new String[]{"moving_chunk", "1,2,7",  "0,7,30", "./data_out/elecNormNew", "./datasets/elecNormNew.arff"};
         //argv = new String[]{"moving_chunk", "1,2,5",  "0,7,30", "./data_out/elecNormNewClean", "./datasets/elecNormNewClean.arff"};
         //argv = new String[]{"moving_chunk", "1,2",  "0,7,30", "./data_out/elecNormNewReduced", "./datasets/elecNormNewReduced.arff"};
-        //argv = new String[]{"analyse", "1",  "700000,1100000,1800000", "SITS_2006_NDVI_C", "SITS1M_fold1_TEST"};
         //argv = new String[]{"moving_chunk", "1",  "0,1", "./data_out/SITS_2006_NDVI_C/SITS1M_fold1_TEST", "./datasets/SITS_2006_NDVI_C/SITS1M_fold1_TEST.arff"};
         //argv = new String[]{"moving_chunk", "1,2,6",  "4,1,7", "./data_out/airlines", "./datasets/airlines.arff"};
-        //argv = new String[]{"stream_chunk", "1,2,3,4",  "4,1,7", "", "airlines"};
-        //argv = new String[]{"stream_chunk", "1,2",  "2,1,7,30", "data_uni_antwerp", "water_2015"};
-        //argv = new String[]{"stream", "1,2,3",  "10000,50000,100000,500000", "synthetic_5Att_5Val", "n1000000_m0.7_both"};
-        //argv = new String[]{"stream", "1,2,3",  "133332,222221,399999,666666", "synthetic_5Att_5Val", "n1000000_m0.7_both"};
-        //argv = new String[]{"stream_cont", "1,2,3",  "10000,50000,100000,500000", "synthetic_5Att_5Val", "n1000000_m0.7_both"};
-        //argv = new String[]{"stream", "1",  "500,1000,5000", "", "gas-sensor"};
 
         // Obtain folder too put outputs
         String[] folders = argv[3].split("/");
