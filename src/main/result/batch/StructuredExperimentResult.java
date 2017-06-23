@@ -1,4 +1,4 @@
-package main.report;
+package main.result.batch;
 
 import org.apache.commons.lang3.ArrayUtils;
 import weka.core.Instances;

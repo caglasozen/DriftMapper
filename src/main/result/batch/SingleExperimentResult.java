@@ -1,8 +1,7 @@
-package main.report;
+package main.result.batch;
 
 import weka.core.Instances;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**

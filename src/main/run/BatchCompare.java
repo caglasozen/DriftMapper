@@ -1,12 +1,10 @@
 package main.run;
 
 import main.analyse.StaticData;
-import main.report.SummaryReport;
+import main.result.batch.SummaryReport;
 import org.apache.commons.lang3.ArrayUtils;
 import weka.core.Instances;
 import main.DriftMeasurement;
-
-import java.util.ArrayList;
 
 /**
  * Created by loongkuan on 16/12/2016.

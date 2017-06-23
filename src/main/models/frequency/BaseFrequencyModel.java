@@ -1,9 +1,9 @@
 package main.models.frequency;
 
-import main.report.ExperimentResult;
+import main.result.batch.ExperimentResult;
 import main.models.Model;
-import main.report.SingleExperimentResult;
-import main.report.StructuredExperimentResult;
+import main.result.batch.SingleExperimentResult;
+import main.result.batch.StructuredExperimentResult;
 import org.apache.commons.lang3.ArrayUtils;
 import weka.core.DenseInstance;
 import weka.core.Instance;

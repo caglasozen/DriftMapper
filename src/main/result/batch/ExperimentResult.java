@@ -1,4 +1,4 @@
-package main.report;
+package main.result.batch;
 
 import weka.core.Instance;
 import weka.core.Instances;
