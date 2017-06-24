@@ -48,7 +48,7 @@ public abstract class Model {
     public abstract double peakClassDistance(Model modelToCompare, double sampleScale);
 
     public abstract void addInstance(Instance instance);
-    public abstract void removeInstance(int index);
+    public abstract Instance removeInstance(int index);
 
     public int size() {
         return this.allInstances.size();
@@ -70,12 +70,14 @@ public abstract class Model {
         }
     }
 
-    public void removeInstances(int[] indices) {
+    public Instances removeInstances(int[] indices) {
         int offset = 0;
+        Instances instances = new Instances(this.allInstances);
         for (int index : indices) {
-            this.removeInstance(index - offset);
+            instances.add(this.removeInstance(index - offset));
             offset += 1;
         }
+        return instances;
     }
 
     public void addSome(Instances instances, int[] indicesToAdd) {
