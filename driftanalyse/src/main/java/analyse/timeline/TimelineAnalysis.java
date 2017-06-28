@@ -36,6 +36,14 @@ public abstract class TimelineAnalysis {
         return currentIndex;
     }
 
+    public Model getPreviousModel() {
+        return previousModel;
+    }
+
+    public Model getCurrentModel() {
+        return currentModel;
+    }
+
     public void addListener(TimelineListener toAdd) {
         this.listeners.add(toAdd);
     }

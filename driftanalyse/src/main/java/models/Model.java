@@ -72,7 +72,7 @@ public abstract class Model {
 
     public Instances removeInstances(int[] indices) {
         int offset = 0;
-        Instances instances = new Instances(this.allInstances);
+        Instances instances = new Instances(this.allInstances, 0);
         for (int index : indices) {
             instances.add(this.removeInstance(index - offset));
             offset += 1;
