@@ -11,3 +11,5 @@ datasets/
 *.jar
 DataAnalysisR/dist/R-Portable/App/R-Portable/library/
 MarTVarD/src/META-INF/MANIFEST.MF
+driftanalyse/build/
+driftanalyse/.gradle/
