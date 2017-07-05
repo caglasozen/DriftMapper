@@ -1,0 +1,195 @@
+@*
+ * This template is called from the `index` template. This template
+ * handles the rendering of the page header and body tags. It takes
+ * two arguments, a `String` for the title of the page and an `Html`
+ * object to insert into the body of the page.
+ *@
+@(form: Form[controllers.csvFile])(implicit messages: Messages, r: Request[_])
+
+@sidebar = {
+    <div class="col-sm-3 col-md-2 sidebar">
+        <ul class="nav nav-sidebar">
+            <li class=active id="overview"><a href="@routes.OverviewController.index()">Overview <span class="sr-only">(current)</span></a></li>
+            <li class=inactive id="dataset"><a href="#">Dataset</a></li>
+            <li class=inactive id="timeline"><a href="#">Timeline Analysis</a></li>
+            <li class=inactive id="detailed"><a href="#">Detailed Analysis</a></li>
+        </ul>
+    </div>
+}
+
+@dataset = {
+    <div class="panel panel-default">
+        <div class="panel-heading"><strong>Configure and Discretize Dataset</strong></div>
+        <br>
+        <fieldset id="data-config-form" class="panel-body" disabled>
+            <div class="row">
+                <div class="col-lg-4">
+                    <form>
+                        <div class="form-group row">
+                            <label for="classAttribute" class="col-sm-6 col-form-label">Class Attribute: </label>
+                            <div class="col-sm-6">
+                                <select id="classAttribute" class="form-control"></select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="discretization" class="col-sm-6 col-form-label">Discretization Method: (not implemented) </label>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <button type="submit" id="configBtn" class="btn" value="Configure Dataset">Configure Dataset</button>
+        </fieldset>
+        <br>
+    </div>
+}
+
+@timeline = {
+    <div class="panel panel-default">
+        <div class="panel-heading"><strong>Configure Timeline Plot</strong></div>
+        <br>
+        <fieldset id="timeline-form" class="panel-body" disabled>
+            <div class="row">
+                <div class="col-lg-4">
+                    <form>
+                        <div class="form-group row">
+                            <label class="col-sm-6 col-form-legend">Drift Type: </label>
+                            <div class="col-sm-6">
+                                <div class="form-check">
+                                    <label class="form-check-label">
+                                        <input class="form-check-input" type="checkbox" value="" id="typeClass">
+                                        Class Drift
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <label class="form-check-label">
+                                        <input class="form-check-input" type="checkbox" value="" id="typeCovariate">
+                                        Covariate Drift
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <label class="form-check-label">
+                                        <input class="form-check-input" type="checkbox" value="" id="typePosterior">
+                                        Posterior Drift
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <label class="form-check-label">
+                                        <input class="form-check-input" type="checkbox" value="" id="typeLikelihood">
+                                        Likelihood Drift
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <label class="form-check-label">
+                                        <input class="form-check-input" type="checkbox" value="" id="typeJoint">
+                                        Joint Drift
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="subsetLength" class="col-sm-6 col-form-label">Number of Attributes per Marginal: </label>
+                            <div class="col-sm-6">
+                                <input id="subsetLength" type="number" value="0" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="attributes" class="col-sm-6 col-form-label">Attributes: </label>
+                            <div class="col-sm-6">
+                                <select multiple id="attributes" class="form-control">
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-lg-4">
+                    <form>
+                        <div class="form-group row">
+                            <label for="modelType" class="col-sm-6 col-form-label">Group Instances by: </label>
+                            <div class="col-sm-6">
+                                <select id="modelType" class="form-control">
+                                    <option value="Chunks">Sequence Key</option>
+                                    <option value="Windows">Instance Order</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="increment" class="col-sm-6 col-form-label">Move Groups Incrementally: </label>
+                            <div class="col-sm-1">
+                                <input id="increment" type="checkbox" value="" class="form-check">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label id="groupSizeLabel" for="groupSize" class="col-sm-6 col-form-label">Sequence Keys per Group: </label>
+                            <div class="col-sm-6">
+                                <input type="number" value="1" id="groupSize" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="groupAttribute" class="col-sm-6 col-form-label">Grouping Attribute: </label>
+                            <div class="col-sm-6">
+                                <select id="groupAttribute" class="form-control">
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <button type="submit" id="timelineBtn" class="btn" value="Plot Timeline">Plot Timeline</button>
+        </fieldset>
+        <br>
+    </div>
+}
+
+@content = {
+    <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+        @*Load Libraries*@
+        <script type='text/javascript'
+        src='@routes.Assets.versioned("javascripts/3rd_party/plotly-latest.min.js")'
+        charset="utf-8"></script>
+
+        @helper.form(action = routes.OverviewController.upload, 'enctype -> "multipart/form-data") {
+            @helper.inputFile(form(".csv File"))
+            <button type="submit" value="Upload File">Upload File</button>
+        }
+
+        <br>
+
+        <button type="submit" id="tmpLoadFile" class="btn" value="Tmp Load File">Load File</button>
+
+        <br>
+
+        <hr />
+        @dataset
+        <script type='text/javascript' src='@routes.Assets.versioned("javascripts/load_file.js")'></script>
+
+
+
+        <hr />
+
+        @timeline
+
+        <script type='text/javascript' src='@routes.Assets.versioned("javascripts/timeline_form.js")'></script>
+
+        @*Timeline*@
+        <div id="timeline-class" class="timeline"></div>
+        <div id="timeline-covariate" class="timeline"></div>
+        <div id="timeline-posterior" class="timeline"></div>
+        <div id="timeline-likelihood" class="timeline"></div>
+        <div id="timeline-joint" class="timeline"></div>
+        <script type='text/javascript' src='@routes.Assets.versioned("javascripts/timeline.js")'></script>
+
+        <hr />
+
+        @*Heatmap*@
+        <div id='heatmap-ex' class="heatmap"></div>
+        <script type='text/javascript' src='@routes.Assets.versioned("javascripts/heatmap.js")'></script>
+    </div>
+}
+
+
+@main("Drift Mapper")(sidebar)(content)
+
