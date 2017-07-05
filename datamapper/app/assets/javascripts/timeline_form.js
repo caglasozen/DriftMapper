@@ -62,6 +62,15 @@ $("#timelineBtn").click(function (event) {
     var attributes = $('#attributes').val();
     console.log(attributes);
     var groupAttribute = document.getElementById("groupAttribute").value;
+
+    // Remove plots
+    Plotly.purge("timeline-class");
+    Plotly.purge("timeline-covariate");
+    Plotly.purge("timeline-posterior");
+    Plotly.purge("timeline-likelihood");
+    Plotly.purge("timeline-joint");
+
+    // Send data
     ws.send(JSON.stringify({
         messageType: "timeline",
         error: "",
