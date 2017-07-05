@@ -4,7 +4,7 @@ import java.io.{BufferedReader, FileReader}
 import java.util
 
 import akka.actor.ActorRef
-import analyse.timeline.{Chunks, TimelineAnalysis}
+import analyse.timeline.{Chunks, TimelineAnalysis, Windows}
 import global.{DiscretizeDateNum, DriftMeasurement}
 import models.Model
 import models.frequency.FrequencyMaps
@@ -88,6 +88,7 @@ class InstancesReader {
     val model: FrequencyMaps  = new FrequencyMaps(structure, config.subsetLength, attributeIndices.toArray)
     val analysis = config.modelType match {
       case "Chunks" => new Chunks(chunkAttIndex, config.groupSize, config.increment, model)
+      case "Windows" => new Windows(config.groupSize, config.increment, model)
     }
 
     val accumulators: IndexedSeq[MessageAccumulator] =
