@@ -25,6 +25,7 @@ public abstract class TimelineAnalysis {
     protected DriftMeasurement[] driftMeasurementTypes;
 
     protected int currentIndex;
+    protected boolean increment;
 
     protected Map<DriftMeasurement, ArrayList<Integer>> driftPoints;
     protected Map<DriftMeasurement, ArrayList<double[]>> driftValues;

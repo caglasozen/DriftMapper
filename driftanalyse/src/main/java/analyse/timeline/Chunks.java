@@ -13,7 +13,6 @@ import java.util.*;
 public class Chunks extends TimelineAnalysis {
     private int chunkAttribute;
     private int chunkSize;
-    private boolean increment;
 
     private List<Integer> storedChunks1;
     private List<Integer> storedChunks2;
