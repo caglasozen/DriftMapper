@@ -144,35 +144,34 @@
     </div>
 }
 
-@content = {
-    <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-        @*Load Libraries*@
-        <script type='text/javascript'
-        src='@routes.Assets.versioned("javascripts/3rd_party/plotly-latest.min.js")'
-        charset="utf-8"></script>
+@heatmap = {
 
+}
+
+@content = {
+    @*Load Libraries*@
+    <script
+        type='text/javascript'
+        src='@routes.Assets.versioned("javascripts/3rd_party/plotly-latest.min.js")'
+        charset="utf-8">
+    </script>
+
+    <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
         @helper.form(action = routes.OverviewController.upload, 'enctype -> "multipart/form-data") {
             @helper.inputFile(form(".csv File"))
             <button type="submit" value="Upload File">Upload File</button>
         }
-
         <br>
-
         <button type="submit" id="tmpLoadFile" class="btn" value="Tmp Load File">Load File</button>
 
         <br>
-
         <hr />
+
         @dataset
-        <script type='text/javascript' src='@routes.Assets.versioned("javascripts/load_file.js")'></script>
-
-
 
         <hr />
 
         @timeline
-
-        <script type='text/javascript' src='@routes.Assets.versioned("javascripts/timeline_form.js")'></script>
 
         @*Timeline*@
         <div id="timeline-class" class="timeline"></div>
@@ -180,14 +179,16 @@
         <div id="timeline-posterior" class="timeline"></div>
         <div id="timeline-likelihood" class="timeline"></div>
         <div id="timeline-joint" class="timeline"></div>
-        <script type='text/javascript' src='@routes.Assets.versioned("javascripts/timeline.js")'></script>
 
         <hr />
 
         @*Heatmap*@
         <div id='heatmap-ex' class="heatmap"></div>
-        <script type='text/javascript' src='@routes.Assets.versioned("javascripts/heatmap.js")'></script>
     </div>
+    <script type='text/javascript' src='@routes.Assets.versioned("javascripts/load_file.js")'></script>
+    <script type='text/javascript' src='@routes.Assets.versioned("javascripts/timeline_form.js")'></script>
+    <script type='text/javascript' src='@routes.Assets.versioned("javascripts/timeline.js")'></script>
+    <script type='text/javascript' src='@routes.Assets.versioned("javascripts/heatmap.js")'></script>
 }
 
 
