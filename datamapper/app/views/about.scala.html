@@ -1,0 +1,31 @@
+@()(implicit messages: Messages, r: Request[_], flash: Flash)
+
+@sidebar = {
+    <div class="col-sm-3 col-md-2 sidebar">
+        <ul class="nav nav-sidebar">
+            <li class="" id="changelog" ><a href="#changelog">Changelog</a></li>
+            <li class="" id="contact"><a href="#contact">Contact</a></li>
+        </ul>
+    </div>
+}
+
+@content = {
+    <h1><a id="About_0"></a>About</h1>
+    <h2><a id="Changelog_1"></a>Changelog</h2>
+    <h3><a id="01_20170813_2"></a>0.1 (2017-08-13)</h3>
+    <ul>
+        <li>Initial Release</li>
+    </ul>
+    <h3><a id="Backlog_4"></a>Backlog</h3>
+    <ul>
+        <li>Form Validation</li>
+        <li>Use Chunked HTML response instead of websocket for timeline result</li>
+        <li>Progress bar for timeline result</li>
+        <li>More detailed analysis options for analysis between 2 windows</li>
+        <li>Single point comparison for timeline result</li>
+    </ul>
+    <h2><a id="Contact_10"></a>Contact</h2>
+    <p>Email any suggestions, questions, or bugs to <a href="mailto:lklee9@@student.monash.edu">lklee9@@student.monash.edu</a></p>
+}
+
+@main("Drift Mapper")(sidebar)(content)

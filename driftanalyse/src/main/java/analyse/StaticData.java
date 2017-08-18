@@ -17,12 +17,19 @@ public class StaticData {
 
     public StaticData(Instances instances1, Instances instances2,
                       int nAttributesActive, int[] attributeIndices, DriftMeasurement driftMeasurement) {
-        this(instances1, instances2, nAttributesActive, attributeIndices, -1, 1, driftMeasurement, 0);
+        this(instances1, instances2, nAttributesActive, attributeIndices, -1, 1, driftMeasurement, 1);
     }
 
     public StaticData(Instances instances1, Instances instances2,
                       int nAttributesActive, int[] attributeIndices,
                       double sampleScale, int nTests, DriftMeasurement driftMeasurement, int model) {
+        this.resultMap = getResults(instances1, instances2, nAttributesActive, attributeIndices, sampleScale, nTests, driftMeasurement, model);
+    }
+
+    public static Map<int[], ExperimentResult> getResults(Instances instances1, Instances instances2,
+                                                          int nAttributesActive, int[] attributeIndices,
+                                                          double sampleScale, int nTests,
+                                                          DriftMeasurement driftMeasurement, int model) {
         // Generate base models for each data set
         // TODO : Change this
         Model model1;
@@ -40,7 +47,7 @@ public class StaticData {
             model2.addInstances(instances2);
         }
 
-        this.resultMap = model1.analyseDifference(model2, sampleScale, nTests, driftMeasurement);
+        return model1.analyseDifference(model2, sampleScale, nTests, driftMeasurement);
     }
 
     public Map<int[], ExperimentResult> getResultMap() {

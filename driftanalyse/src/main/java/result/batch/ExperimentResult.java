@@ -4,6 +4,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Created by LoongKuan on 31/07/2016.

@@ -19,7 +19,6 @@ class Module extends AbstractModule {
     // Ask Guice to create an instance of ApplicationTimer when the
     // application starts.
     bind(classOf[SocketMessage]).to(classOf[AtomicSocketMessage])
-    bind(classOf[InstancesReader])
   }
 
 }

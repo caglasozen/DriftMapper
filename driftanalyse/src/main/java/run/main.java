@@ -1,8 +1,17 @@
 package run;
 
+import analyse.StaticData;
+import analyse.timeline.Chunks;
+import global.DiscretizeDateNum;
+import global.DriftMeasurement;
+import models.Model;
+import models.frequency.FrequencyMaps;
 import org.apache.commons.lang3.ArrayUtils;
+import result.timeline.ConsolePrintListener;
 import weka.core.Attribute;
+import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.converters.ConverterUtils;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Discretize;
 
@@ -41,6 +50,7 @@ public class main {
         //argv = new String[]{"moving_chunk", "1,2",  "0,7,30", "./data_out/elecNormNewReduced", "./datasets/elecNormNewReduced.arff"};
         //argv = new String[]{"moving_chunk", "1",  "0,1", "./data_out/SITS_2006_NDVI_C/SITS1M_fold1_TEST", "./datasets/SITS_2006_NDVI_C/SITS1M_fold1_TEST.arff"};
         //argv = new String[]{"moving_chunk", "1,2,6",  "4,1,7", "./data_out/airlines", "./datasets/airlines.arff"};
+        argv = new String[]{"tmp_test", "1", "4,5","./data_out/airlines", "./datasets/elecNormNewClean.arff"};
 
         // Obtain folder too put outputs
         String[] folders = argv[3].split("/");
@@ -129,6 +139,31 @@ public class main {
                 instances = discretizeDataSet(instances);
                 DriftTimeline.DriftTimeline(outputFolder, instances, windowSize, subsetLengths, false);
                 break;
+            case "tmp_test":
+                try {
+                    ConverterUtils.DataSource dataSource = new ConverterUtils.DataSource("./datasets/elecNormNewClean.arff");
+                    Instances structure = dataSource.getStructure();
+                    structure.setClassIndex(structure.numAttributes() - 1);
+                    DiscretizeDateNum discretizeDateNum = new DiscretizeDateNum(dataSource, structure);
+                    dataSource.reset();
+                    dataSource.hasMoreElements(dataSource.getStructure());
+
+                    Instances instances1 = new Instances(discretizeDateNum.getDiscreteStructure());
+                    for (int i = 0; i < 1000; i++) {
+                        Instance discInst = discretizeDateNum.discretizeInstance(dataSource.nextElement(structure));
+                        instances1.add(discInst);
+                    }
+
+                    Instances instances2 = new Instances(discretizeDateNum.getDiscreteStructure());
+                    for (int i = 0; i < 1000; i++) {
+                        Instance discInst = discretizeDateNum.discretizeInstance(dataSource.nextElement(structure));
+                        instances2.add(discInst);
+                    }
+
+                    StaticData.getResults(instances1, instances2, 1, new int[]{1,2,3,4}, 1, 1, DriftMeasurement.COVARIATE, 1);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
         }
     }
 

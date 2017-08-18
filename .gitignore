@@ -14,3 +14,4 @@ MarTVarD/src/META-INF/MANIFEST.MF
 driftanalyse/build/
 driftanalyse/.gradle/
 datamapper/sbt-dist/
+datamapper/tmp/

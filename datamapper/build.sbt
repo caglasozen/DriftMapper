@@ -1,9 +1,9 @@
-name := """data-mapper"""
+name := """driftmap"""
 
-version := "1.0-SNAPSHOT"
+version := "0.1-SNAPSHOT"
 
 lazy val root = (project in file("."))
-  .enablePlugins(PlayScala)
+  .enablePlugins(PlayScala, RpmPlugin)
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
@@ -16,6 +16,14 @@ libraryDependencies += "com.h2database" % "h2" % "1.4.194"
 
 libraryDependencies ++= Seq(
   "org.webjars" % "bootstrap" % "3.3.6",
-  "org.webjars.bower" % "plotly.js" % "1.27.1"
+  "org.webjars.bower" % "plotly.js" % "1.27.1",
+  "org.webjars.bower" % "resumable.js" % "2.11.2"
 )
 
+maintainer in Linux := "Loong Kuan Lee <lklee9@student.monash.edu>"
+packageSummary in Linux := "Package for driftmap application in Linux"
+packageDescription := "Allow other users to measure and analyse drift within a data set via a web application"
+rpmRelease := "0.1"
+rpmVendor := "driftmap.infotech.monash.edu.au"
+rpmUrl := Some("https://github.com/LeeLoongKuan/DriftMapper.git")
+rpmLicense := Some("Apache v2")

@@ -6,8 +6,11 @@ function newTimeline(metadata) {
     for (var i = 0; i < metadata.attributeSubsets.length; i++) {
         data.push({x:[], y:[], type:'scatter', name:metadata.attributeSubsets[i]})
     }
+    var layout = {
+        title: metadata.driftType.toString().toLowerCase()
+    };
     console.log("timeline-" + metadata.driftType.toString().toLowerCase());
-    Plotly.newPlot('timeline-' + metadata.driftType.toString().toLowerCase(), data);
+    Plotly.newPlot('timeline-' + metadata.driftType.toString().toLowerCase(), data, layout);
 }
 
 

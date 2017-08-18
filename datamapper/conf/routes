@@ -2,10 +2,19 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET     /                           controllers.OverviewController.index
-GET     /overview                   controllers.OverviewController.index
-GET     /overview/socket            controllers.OverviewController.socket
-POST    /overview/upload            controllers.OverviewController.upload
+GET     /                           controllers.OverviewController.analysisPage
+GET     /analysis                   controllers.OverviewController.analysisPage
+GET     /about                      controllers.OverviewController.aboutPage
+GET     /getDatasetStructure        controllers.OverviewController.getDatasetStructure
+GET     /getNewSession              controllers.OverviewController.getNewSession
+GET     /socket                     controllers.OverviewController.socket
+GET     /jsRoutes                   controllers.OverviewController.jsRoutes
++ nocsrf
+POST    /getHeatmap                 controllers.OverviewController.getHeatmap
++ nocsrf
+GET     /upload                     controllers.OverviewController.upload
++ nocsrf
+POST    /upload                     controllers.OverviewController.upload
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

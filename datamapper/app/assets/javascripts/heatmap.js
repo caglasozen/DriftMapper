@@ -2,13 +2,26 @@
  * Created by LoongKuan on 28/06/2017.
  */
 
-var data = [
-    {
-        z: [[1, 20, 30, 50, 1], [20, 1, 60, 80, 30], [30, 60, 1, -10, 20]],
-        x: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-        y: ['Morning', 'Afternoon', 'Evening'],
-        type: 'heatmap'
-    }
+var colorscaleValue = [
+    [0, '#00ff00'],
+    [1, '#ff0000']
 ];
 
-Plotly.newPlot('heatmap-ex', data);
+function createHeatmap(value) {
+    var data = [
+        {
+            z: value.data,
+            x: value.attributes,
+            y: value.attributes,
+            colorscale: colorscaleValue,
+            name: "drift magnitude",
+            type: 'heatmap'
+        }
+    ];
+    var layout = {
+        title: value.type.toLowerCase() + " (Marginal length of 2)",
+        width: 600,
+        height: 500
+    };
+    Plotly.newPlot('heatmap-' + value.type.toLowerCase(), data, layout);
+}

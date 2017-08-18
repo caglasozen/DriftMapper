@@ -14,33 +14,20 @@ import weka.core.converters.ConverterUtils.DataSource
   * Created by LoongKuan on 1/07/2017.
   */
 
-class ClientActor @Inject() (out: ActorRef)
-                            (implicit socketMessage: SocketMessage,
-                             instancesReader: InstancesReader) extends Actor {
+class ClientActor @Inject() (out: ActorRef, filename: String)
+                            (implicit socketMessage: SocketMessage) extends Actor {
 
   def handleMessage(msg: JsValue) : JsValue = {
     println(msg)
     socketMessage.jsValueToMessageClass(msg) match {
-      case LoadFile(error, file)
-        => println(error)
-        println(file)
-        ClientActor.dataSource = instancesReader.getDataReader("../datasets/elecNormNewClean.arff")
-        ClientActor.structure = ClientActor.dataSource.getStructure
-        val metadata: JsValue = instancesReader.getMetadata(ClientActor.structure)
-        Json.obj("messageType" -> "uploadComplete", "value" -> metadata)
-      case DataConfig(error, config)
-        => println(error)
-        ClientActor.structure = instancesReader.setClassIndex(ClientActor.structure, config)
-        println(ClientActor.structure.classIndex())
-        ClientActor.discretizeDateNum = instancesReader.configureDiscretizer(ClientActor.dataSource, ClientActor.structure)
-        ClientActor.structure = ClientActor.discretizeDateNum.getDiscreteStructure
-        Json.obj("messageType" -> "configComplete", "value" -> instancesReader.getMetadata(ClientActor.structure))
       case TimelineForm(e, mt, inc, gs, dt, sl, a, ga)
-        => val returnCode = instancesReader.startTimeLineAnalysis(TimelineForm(e, mt, inc, gs, dt, sl, a, ga),
-                                                                  out,
-                                                                  ClientActor.dataSource,
-                                                                  ClientActor.discretizeDateNum)
-        Json.obj("messageType" -> "timelineComplete", "value" -> returnCode)
+        => val returnCode = InstancesReader.startTimeLineAnalysis(TimelineForm(e, mt, inc, gs, dt, sl, a, ga),
+                                                                  out, filename)
+        val metadata: JsValue = InstancesReader.getMetadata(filename)
+        Json.obj("messageType" -> "timelineComplete", "value" -> Json.obj(
+          "structure" -> metadata,
+          "nInstances" -> returnCode
+        ))
     }
   }
 
@@ -62,10 +49,9 @@ class ClientActor @Inject() (out: ActorRef)
 // Var for instance structure
 object ClientActor {
   val socketMessage = new AtomicSocketMessage
-  val instancesReader = new InstancesReader
   implicit var dataSource: DataSource = _
   implicit var structure: Instances= _
   implicit var discretizeDateNum: DiscretizeDateNum = _
-  def props(out: ActorRef) = Props(new ClientActor(out)(socketMessage, instancesReader))
+  def props(out: ActorRef, filename: String) = Props(new ClientActor(out, filename)(socketMessage))
 }
 

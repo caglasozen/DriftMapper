@@ -21,9 +21,7 @@ import scala.collection.immutable.Range
   * Created by LoongKuan on 1/07/2017.
   */
 
-class InstancesReader {
-  // Use a direct reference to SLF4J
-  private val logger = org.slf4j.LoggerFactory.getLogger("controllers.HomeController")
+object InstancesReader {
 
   def getDataReader(filepath: String): DataSource = {
     new DataSource(filepath)
@@ -34,11 +32,15 @@ class InstancesReader {
     println(dataSource.getStructure)
   }
 
-  def getMetadata(instanceStructure: Instances): JsValue = {
+  def getMetadata(filepath: String): JsValue = {
+    val instanceStructure = this.getDataReader(filepath).getDataSet
     val attributes: IndexedSeq[String] =
       for (n <- Range(0, instanceStructure.numAttributes())) yield instanceStructure.attribute(n).name()
+    val nInstances: Int = instanceStructure.numInstances()
     val json = Json.obj(
-      "attributes" -> attributes
+      "fileName" -> filepath.split("-").last,
+      "attributes" -> attributes,
+      "nInstances" -> nInstances
     )
     println(json)
     json
@@ -75,10 +77,15 @@ class InstancesReader {
     }
   }
 
-  def startTimeLineAnalysis(config: TimelineForm, out: ActorRef, dataSource: DataSource,
-                            discretizeDateNum: DiscretizeDateNum): String = {
+  def startTimeLineAnalysis(config: TimelineForm, out: ActorRef, filename: String): Int = {
+    val dataSource = this.getDataReader(filename)
+
+    val tmpStructure = setClassIndex(dataSource.getStructure, config.classAttribute)
+    val discretizeDateNum = this.configureDiscretizer(dataSource, tmpStructure)
+
     dataSource.hasMoreElements(dataSource.getStructure())
     dataSource.reset()
+
     val structure = discretizeDateNum.getDiscreteStructure
     val attributes: IndexedSeq[String] = for (n <- Range(0, structure.numAttributes())) yield structure.attribute(n).name()
     val attributeIndices: IndexedSeq[Int] = for (att <- config.attributes) yield attributes.indexOf(att, 0)
@@ -102,7 +109,7 @@ class InstancesReader {
     dataSource.reset()
     for (listener <- timelineListeners) yield analysis.addListener(listener)
     analysis.updateListenerMetadata()
-    val returnCode = runTimelineAnalysis(analysis, dataSource, structure, discretizeDateNum)
+    val returnCode = runTimelineAnalysis(analysis, dataSource, structure, discretizeDateNum, 0)
     //TODO: Add listener post
     for (accumulator <- accumulators) yield accumulator.forwardAll()
     returnCode
@@ -111,16 +118,17 @@ class InstancesReader {
   private def runTimelineAnalysis(analysis: TimelineAnalysis,
                                   dataSource: DataSource,
                                   instanceStructure: Instances,
-                                  discretizeDateNum: DiscretizeDateNum): String = {
+                                  discretizeDateNum: DiscretizeDateNum,
+                                  nInstancesAcc: Int): Int = {
     val inst: Instance = dataSource.nextElement(dataSource.getStructure)
     inst match {
       case null =>
         dataSource.reset()
-        "done"
+        nInstancesAcc
       case _ =>
         val discreteInst: Instance = discretizeDateNum.discretizeInstance(inst)
         analysis.addInstance(discreteInst)
-        runTimelineAnalysis(analysis, dataSource, instanceStructure, discretizeDateNum)
+        runTimelineAnalysis(analysis, dataSource, instanceStructure, discretizeDateNum, nInstancesAcc+1)
     }
   }
 }

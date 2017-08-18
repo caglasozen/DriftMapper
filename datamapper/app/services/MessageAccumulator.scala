@@ -36,11 +36,12 @@ class MessageAccumulator (out: ActorRef, interval: Int, driftMeasurement: DriftM
     val timePassed = System.currentTimeMillis() - this.lastForward
     if (timePassed > this.interval) {
       forwardAll()
+      this.lastForward = System.currentTimeMillis()
     }
-    this.lastForward = System.currentTimeMillis()
   }
 
   def forwardAll(): Unit= {
+    println("Sending Timeline Data")
     if (this.pointBacklog.length > 0) {
       this.out ! Json.obj(
         "messageType" -> "timelineUpdate",
