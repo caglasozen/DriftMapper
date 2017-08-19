@@ -64,6 +64,7 @@ class OverviewController @Inject()(cc: ControllerComponents, messagesApi: Messag
   }
 
   def socket: WebSocket = WebSocket.accept[JsValue, JsValue] { request =>
+    println(request.headers.toString())
     ActorFlow.actorRef { out =>
       ClientActor.props(out, request.session("data"))
     }

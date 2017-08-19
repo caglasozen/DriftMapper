@@ -91,7 +91,7 @@ $("#timelineBtn").click(function (event) {
             attributes: attributes,
             groupAttribute: groupAttribute
         }));
-    }, 1000);
+    }, 1500);
 
     ws.onmessage = function (event) {
     var message = JSON.parse(event.data);
