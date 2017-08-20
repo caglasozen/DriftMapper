@@ -3,9 +3,11 @@ package services
 import java.io.{BufferedReader, FileReader}
 import java.util
 
-import akka.actor.ActorRef
+import akka.actor.{ActorRef, Status}
+import akka.util.ByteString
 import analyse.timeline.{Chunks, TimelineAnalysis, Windows}
 import global.{DiscretizeDateNum, DriftMeasurement}
+import model.TimelineConfig
 import models.Model
 import models.frequency.FrequencyMaps
 import play.api.libs.json.{JsValue, Json}
@@ -15,6 +17,7 @@ import weka.core.converters.ArffLoader.ArffReader
 import weka.core.converters.ConverterUtils.DataSource
 
 import scala.collection.immutable.Range
+import scala.concurrent.{ExecutionContext, Future}
 
 
 /**
@@ -62,11 +65,13 @@ object InstancesReader {
     new TimelineListener {
       override def updateMetaData(attributeSubsets: Array[String]): Unit = {
         println("updating metadata")
-        messageAccumulator.getAttachedActor ! Json.obj(
-          "messageType" -> "timelineHeader",
-          "value" -> Json.obj(
-            "driftType" -> driftMeasurement.toString,
-            "attributeSubsets" -> attributeSubsets))
+        messageAccumulator.getAttachedActor ! ByteString.fromString(
+          Json.obj(
+            "messageType" -> "timelineHeader",
+            "value" -> Json.obj(
+              "driftType" -> driftMeasurement.toString,
+              "attributeSubsets" -> attributeSubsets)).toString() + ";"
+        )
       }
 
       override def returnDriftPointMagnitude(driftPoint: Int, driftMagnitude: Array[Double]): Unit = {
@@ -77,7 +82,7 @@ object InstancesReader {
     }
   }
 
-  def startTimeLineAnalysis(config: TimelineForm, out: ActorRef, filename: String): Int = {
+  def startTimeLineAnalysis(config: TimelineConfig, out: ActorRef, filename: String)(implicit ec: ExecutionContext): Future[Int] = Future {
     val dataSource = this.getDataReader(filename)
 
     val tmpStructure = setClassIndex(dataSource.getStructure, config.classAttribute)
@@ -112,6 +117,7 @@ object InstancesReader {
     val returnCode = runTimelineAnalysis(analysis, dataSource, structure, discretizeDateNum, 0)
     //TODO: Add listener post
     for (accumulator <- accumulators) yield accumulator.forwardAll()
+    for (accumulator <- accumulators) yield accumulator.getAttachedActor ! Status.Success(())
     returnCode
   }
 

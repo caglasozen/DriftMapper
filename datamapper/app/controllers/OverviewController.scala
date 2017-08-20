@@ -3,12 +3,15 @@ package controllers
 import java.io.{BufferedReader, ByteArrayOutputStream, FileReader}
 import java.io.File
 import java.nio.file.{Files, Paths}
+import java.util.concurrent.Executors
 import javax.inject._
 
-import actors.ClientActor
-import akka.actor.ActorSystem
-import akka.stream.Materializer
+import akka.actor.{ActorRef, ActorSystem}
+import akka.stream.{Materializer, OverflowStrategy}
+import akka.stream.scaladsl.{Sink, Source}
+import akka.util.ByteString
 import form.AnalysisForms
+import model.TimelineConfig
 import model.heatmap.{HeatmapConfig, WindowRange}
 import play.api._
 import play.api.data.Form
@@ -18,7 +21,7 @@ import play.api.libs.streams.ActorFlow
 import play.api.mvc._
 import play.api.routing._
 import play.api.libs.functional.syntax._
-import services.{AtomicSocketMessage, FileUploadService, HeatmapGenerator, InstancesReader}
+import services.{FileUploadService, HeatmapGenerator, InstancesReader}
 import weka.core.Instances
 import weka.core.converters.ConverterUtils.DataSource
 
@@ -52,22 +55,27 @@ class OverviewController @Inject()(cc: ControllerComponents, messagesApi: Messag
       (JsPath \ "window2").read[WindowRange]
   )(HeatmapConfig.apply _)
 
+  implicit val timelineConfigReads: Reads[TimelineConfig] = (
+      (JsPath \ "classAttribute").read[String] and
+      (JsPath \ "modelType").read[String] and
+      (JsPath \ "increment").read[Boolean] and
+      (JsPath \ "groupSize").read[Int] and
+      (JsPath \ "driftTypes").read[Array[String]] and
+      (JsPath \ "subsetLength").read[Int] and
+      (JsPath \ "attributes").read[Array[String]] and
+      (JsPath \ "groupAttribute").read[String]
+    )(TimelineConfig.apply _)
+
   def jsRoutes = Action { implicit request: Request[AnyContent] =>
     Ok(
       JavaScriptReverseRouter("jsRoutes")(
         routes.javascript.OverviewController.getDatasetStructure,
         routes.javascript.OverviewController.getNewSession,
         routes.javascript.OverviewController.analysisPage,
+        routes.javascript.OverviewController.getTimeline,
         routes.javascript.OverviewController.getHeatmap
       )
     ).as("text/javascript")
-  }
-
-  def socket: WebSocket = WebSocket.accept[JsValue, JsValue] { request =>
-    println(request.headers.toString())
-    ActorFlow.actorRef { out =>
-      ClientActor.props(out, request.session("data"))
-    }
   }
 
   def analysisPage = Action { implicit request: Request[AnyContent] =>
@@ -98,6 +106,27 @@ class OverviewController @Inject()(cc: ControllerComponents, messagesApi: Messag
     else {
       BadRequest("File Not Uploaded")
     }
+  }
+
+  def getTimeline = Action(parse.json) { request: Request[JsValue] =>
+    println(request)
+    val timelineRequest = request.body.validate[TimelineConfig]
+    timelineRequest.fold(
+      errors => {
+        println("Error getting timeline")
+        BadRequest(Json.obj("status" ->"KO", "message" -> JsError.toJson(errors)))
+      },
+      config => {
+        println("Getting timeline")
+        val filename = request.session("data")
+        val pool = Executors.newCachedThreadPool()
+        implicit val ec = ExecutionContext.fromExecutorService(pool)
+        val source: Source[ByteString, _] = Source
+          .actorRef[ByteString](Int.MaxValue, OverflowStrategy.fail)
+          .mapMaterializedValue(ref => InstancesReader.startTimeLineAnalysis(config, ref, filename))
+        Ok.chunked(source)
+      }
+    )
   }
 
   def getHeatmap = Action(parse.json) { implicit request: Request[JsValue]=>

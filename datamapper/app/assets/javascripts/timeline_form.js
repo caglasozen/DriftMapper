@@ -76,7 +76,58 @@ $("#timelineBtn").click(function (event) {
     var attributes = $('#attributes').val();
     var groupAttribute = document.getElementById("groupAttribute").value;
 
+    var initMessage = JSON.stringify({
+        messageType: "timeline",
+        classAttribute: classAttribute,
+        modelType: modelType,
+        increment: increment,
+        groupSize: groupSize,
+        driftTypes: driftTypes,
+        subsetLength: subsetLength,
+        attributes: attributes,
+        groupAttribute: groupAttribute
+    });
+    console.log(initMessage);
 
+    var route = jsRoutes.controllers.OverviewController.getTimeline();
+    /*
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", route.url, true);
+    xhr.setRequestHeader("Content-Type", "text/json");
+    xhr.onprogress = function () {
+        console.log("Progress: ", xhr.responseText);
+    };
+    xhr.send(initMessage);
+    */
+    jsonpipe.flow(route.url, {
+        "delimiter": ";",
+        "success": function (message) {
+            console.log(message);
+            switch (message.messageType) {
+                case "timelineHeader":
+                    newTimeline(message.value);
+                    break;
+                case "timelineUpdate":
+                    updateTimeline(message.value);
+                    break;
+                case "timelineComplete":
+                    //enableAnalysisForm(message.value);
+                    break;
+            }
+        },
+        "error": function (errorMsg) {
+            console.log("Error for streaming");
+            console.log(errorMsg);
+        },
+        "timeout": 5000,
+        "method": "POST",
+        "data": initMessage,
+        "headers": {
+            "Content-Type": "text/json"
+        }
+    })
+    
+    /*
     ws = new WebSocket($("body").data("ws-url"));
     setTimeout(function () {
         // Send data
@@ -94,21 +145,20 @@ $("#timelineBtn").click(function (event) {
     }, 1500);
 
     ws.onmessage = function (event) {
-    var message = JSON.parse(event.data);
-    console.log(message);
-    switch (message.messageType) {
-        case "timelineHeader":
-            newTimeline(message.value);
-            break;
-        case "timelineUpdate":
-            updateTimeline(message.value);
-            break;
-        case "timelineComplete":
-            //enableAnalysisForm(message.value);
-            ws.close();
-            break;
-        case "analysisComplete":
-            createHeatmap(message.value)
-    }
-};
+        var message = JSON.parse(event.data);
+        console.log(message);
+        switch (message.messageType) {
+            case "timelineHeader":
+                newTimeline(message.value);
+                break;
+            case "timelineUpdate":
+                updateTimeline(message.value);
+                break;
+            case "timelineComplete":
+                //enableAnalysisForm(message.value);
+                ws.close();
+                break;
+        }
+    };
+    */
 });

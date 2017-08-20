@@ -1,6 +1,7 @@
 package services
 
 import akka.actor.ActorRef
+import akka.util.ByteString
 import global.DriftMeasurement
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Action
@@ -43,13 +44,17 @@ class MessageAccumulator (out: ActorRef, interval: Int, driftMeasurement: DriftM
   def forwardAll(): Unit= {
     println("Sending Timeline Data")
     if (this.pointBacklog.length > 0) {
-      this.out ! Json.obj(
-        "messageType" -> "timelineUpdate",
-        "value" -> Json.obj(
-          "driftType" -> this.driftMeasurement.toString,
-          "driftPoint" -> this.pointBacklog,
-          "driftMagnitudes" -> this.driftBacklog)
+      val message = ByteString.fromString(
+        Json.obj(
+          "messageType" -> "timelineUpdate",
+          "value" -> Json.obj(
+            "driftType" -> this.driftMeasurement.toString,
+            "driftPoint" -> this.pointBacklog,
+            "driftMagnitudes" -> this.driftBacklog)
+        ).toString() + ";"
       )
+      println(message)
+      this.out ! message
       this.pointBacklog = Array()
       this.driftBacklog = Array()
     }

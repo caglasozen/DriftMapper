@@ -7,10 +7,11 @@ GET     /analysis                   controllers.OverviewController.analysisPage
 GET     /about                      controllers.OverviewController.aboutPage
 GET     /getDatasetStructure        controllers.OverviewController.getDatasetStructure
 GET     /getNewSession              controllers.OverviewController.getNewSession
-GET     /socket                     controllers.OverviewController.socket
 GET     /jsRoutes                   controllers.OverviewController.jsRoutes
 + nocsrf
 POST    /getHeatmap                 controllers.OverviewController.getHeatmap
++ nocsrf
+POST    /getTimeline                controllers.OverviewController.getTimeline
 + nocsrf
 GET     /upload                     controllers.OverviewController.upload
 + nocsrf
