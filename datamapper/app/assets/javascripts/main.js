@@ -20,7 +20,7 @@ function enableConfigForm(structure) {
     $('#classAttribute').html('');
     for (var i = 0; i < structure.attributes.length; i++) {
         var att = structure.attributes[i];
-        var opt = document.createElement(att.toString());
+        var opt = document.createElement(att.toString().replace(/[^a-zA-Z ]/g, ""));
         opt.value = att.toString();
         opt.innerHTML = att.toString();
         classAttribute.options[classAttribute.options.length] = new Option(att, att);

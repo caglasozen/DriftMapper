@@ -19,7 +19,7 @@ function enableTimelineForm(instancesStructure) {
     var groupSelect = document.getElementById("groupAttribute");
     for (var i = 0; i < instancesStructure.attributes.length; i++) {
         var att = instancesStructure.attributes[i];
-        var opt = document.createElement(att.toString());
+        var opt = document.createElement(att.toString().replace(/[^a-zA-Z ]/g, ""));
         opt.value = att.toString();
         opt.innerHTML = att.toString();
         attSelect.options[attSelect.options.length] = new Option(att, att);
@@ -126,7 +126,7 @@ $("#timelineBtn").click(function (event) {
             "Content-Type": "text/json"
         }
     })
-    
+
     /*
     ws = new WebSocket($("body").data("ws-url"));
     setTimeout(function () {
