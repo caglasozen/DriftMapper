@@ -65,6 +65,15 @@ public abstract class TimelineAnalysis {
             }
             listener.returnDriftPointMagnitude(driftPoint, allDist);
         }
+        for (DriftMeasurement driftMeasurement: DriftMeasurement.values()) {
+            double[] allDist = new double[this.attributeSubsets.size()];
+            this.driftPoints.get(driftMeasurement).add(driftPoint);
+            for (int i = 0; i < this.attributeSubsets.size(); i++) {
+                double dist = this.getDistance(this.attributeSubsets.get(i), driftMeasurement);
+                allDist[i] = dist;
+            }
+            this.driftValues.get(driftMeasurement).add(allDist);
+        }
     }
 
     protected double getDistance(int[] attributeSubset, DriftMeasurement driftMeasurementType) {
