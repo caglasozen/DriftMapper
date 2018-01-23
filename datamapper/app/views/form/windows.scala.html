@@ -1,0 +1,106 @@
+@()
+
+
+<div class="card">
+    <div class="card-header">
+        <strong>Detailed Analysis between 2 Windows</strong>
+        <a data-toggle="collapse" href="#windowsHelp">
+            <span data-feather="help-circle"></span>
+        </a>
+    </div>
+    <div class="collapse" id="windowsHelp">
+        <div class="card card-body text-white bg-info">
+            <div class="card-text">
+                <ul>
+                    <li>
+                        <b>Drift Type</b>: Type of probability distribution to measure the drift of.
+                    </li>
+                    <li>
+                        <b>Number of Attributes per Marginal</b>:
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <fieldset id="analysis-form" class="card-body" disabled>
+        <div class="row">
+            <div class="col-lg-2">
+                <div class="form-group">
+                    <label class="form-legend">Drift Type: </label>
+                    <div>
+                        <div class="form-check">
+                            <label class="form-check-label">
+                                <input class="form-check-input" type="checkbox" value="" id="anaCovariate">
+                                Covariate Drift
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <label class="form-check-label">
+                                <input class="form-check-input" type="checkbox" value="" id="anaPosterior">
+                                Posterior Drift
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <label class="form-check-label">
+                                <input class="form-check-input" type="checkbox" value="" id="anaLikelihood">
+                                Likelihood Drift
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <label class="form-check-label">
+                                <input class="form-check-input" type="checkbox" value="" id="anaJoint">
+                                Joint Drift
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="form-group">
+                    <label for="anaAttributes" class="form-label">Attributes (choose at least 2): </label>
+                    <select multiple id="anaAttributes" class="form-control" size="7">
+                    </select>
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="form-group">
+                    <label class="form-legend">Window 1: </label>
+                    <div>
+                        <label for="window1-from" class="sr-only">Window 1 - from  </label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text">from</div>
+                            </div>
+                            <input id="window1-from" type="number" value="0" class="form-control">
+                        </div>
+                        <label for="window1-to" class="sr-only">Window 1 - to: </label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text" style="padding-right: 14px;">&nbsp to &nbsp</div>
+                            </div>
+                            <input id="window1-to" type="number" value="0" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-legend">Window 2: </label>
+                    <div>
+                        <label for="window2-from" class="sr-only">Window 2 - from: </label>
+                        <div class="input-group">
+                            <div class="input-group-text">from</div>
+                            <input id="window2-from" type="number" value="0" class="form-control">
+                        </div>
+                        <label for="window2-to" class="sr-only">Window 2 - to: </label>
+                        <div class="input-group">
+                            <div class="input-group-text" style="padding-right: 14px;">&nbsp to &nbsp</div>
+                            <input id="window2-to" type="number" value="0" class="form-control">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button type="submit" id="analysisBtn" class="btn" value="Run Analysis">Run Analysis</button>
+    </fieldset>
+    <br>
+</div>

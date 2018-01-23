@@ -7,7 +7,7 @@ $( document ).ready(function() {
     //var r = pageRoutes.controllers.OverviewController.analysisPage;
     //console.log(r.url);
     //$.ajax({url: r.url, type: r.type});
-    enableAllForm()
+    enableAllForm();
 });
 
 function disableConfigForm() {
@@ -42,3 +42,4 @@ function enableAllForm() {
             enableHeatmapForm(structure);
         });
 }
+

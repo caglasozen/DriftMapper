@@ -1,17 +1,14 @@
 @()(implicit messages: Messages, r: Request[_], flash: Flash)
-
-@sidebar = {
-    <div class="col-sm-3 col-md-2 sidebar">
-        <ul class="nav nav-sidebar">
-            <li class="" id="changelog" ><a href="#changelog">Changelog</a></li>
-            <li class="" id="contact"><a href="#contact">Contact</a></li>
-        </ul>
-    </div>
-}
+@import components._
 
 @content = {
     <h1><a id="About_0"></a>About</h1>
     <h2><a id="Changelog_1"></a>Feature Changelog</h2>
+    <h3><a id="01_20180123_2"></a>0.22 (2018-01-23)</h3>
+    <ul>
+        <li>Use Bootstrap 4.0</li>
+        <li>Add tooltips and help text</li>
+    </ul>
     <h3><a id="01_20170820_2"></a>0.2 (2017-08-20)</h3>
     <ul>
         <li>Use Chunked HTML response instead of websocket for timeline result</li>
@@ -32,4 +29,4 @@
     <p>Email any suggestions, questions, or bugs to <a href="mailto:lklee9@@student.monash.edu">lklee9@@student.monash.edu</a></p>
 }
 
-@main("Drift Mapper")(sidebar)(content)
+@main("Drift Mapper")(sidebar("about"))(content)

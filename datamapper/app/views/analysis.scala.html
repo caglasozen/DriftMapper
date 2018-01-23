@@ -5,22 +5,27 @@
  * object to insert into the body of the page.
  *@
 @()(implicit messages: Messages, r: Request[_], flash: Flash)
+@import components._
 
 @upload = {}
 
-@sidebar = {
-    <div class="col-sm-3 col-md-2 sidebar">
-        <ul class="nav nav-sidebar">
-            <li class="" id="analysis"><a href="@routes.OverviewController.analysisPage()">Analysis<span class="sr-only">(current)</span></a></li>
-        </ul>
-    </div>
-}
-
 @dataset = {
-    <div class="panel panel-default">
-        <div class="panel-heading"><strong>Load and Configure Dataset</strong></div>
+    <div class="card" xmlns="http://www.w3.org/1999/html">
+        <div class="card-header">
+            <strong>Load Dataset</strong>
+            <a data-toggle="collapse" href="#loadHelp">
+                <span data-feather="help-circle"></span>
+            </a>
+        </div>
+        <div class="collapse" id="loadHelp">
+            <div class="card card-body text-white bg-info">
+                <div class="card-text">
+                    Upload a dataset to the server to carry out analysis on
+                </div>
+            </div>
+        </div>
         <br>
-        <fieldset id="data-upload-form" class="panel-body" enabled>
+        <fieldset id="data-upload-form" class="card-body">
             <div class="row">
                 <div class="col-lg-4">
                     @helper.form(action = routes.OverviewController.upload, 'enctype -> "multipart/form-data") {
@@ -50,21 +55,36 @@
             @flash.get("message")
             </span>
         </fieldset>
-        <hr />
-        <fieldset id="data-config-form" class="panel-body" disabled>
-            <div class="row">
-                <div class="col-lg-4">
-                    <label class="col-sm-6">File Loaded: </label>
-                    <label id="fileLoaded" class="col-sm-6">none</label>
+    </div>
+    <hr />
+    <div class="card">
+        <div class="card-header">
+            <strong>Configure Dataset</strong>
+            <a data-toggle="collapse" href="#configHelp">
+                <span data-feather="help-circle"></span>
+            </a>
+        </div>
+        <div class="collapse" id="configHelp">
+            <div class="card card-body text-white bg-info">
+                <div class="card-text">
+                    Set metadata for currently loaded dataset
                 </div>
             </div>
-            <br>
+        </div>
+        <fieldset id="data-config-form" class="card-body" disabled>
             <div class="row">
-                <div class="col-lg-4">
+                <label class="col-sm-6">File Loaded: </label>
+            </div>
+            <div class="row">
+                <label id="fileLoaded" class="col-sm-6">none</label>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-lg-3">
                     <form>
-                        <div class="form-group row">
-                            <label for="classAttribute" class="col-sm-6 col-form-label">Class Attribute (class selected will apply to all requests below): </label>
-                            <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="classAttribute" class="form-label">Class Attribute </br> (class selected will apply to all requests below): </label>
+                            <div>
                                 <select id="classAttribute" class="form-control"></select>
                             </div>
                         </div>
@@ -72,195 +92,11 @@
                 </div>
             </div>
         </fieldset>
-        <br>
-    </div>
-}
-
-@timeline = {
-    <div class="panel panel-default">
-        <div class="panel-heading"><strong>Configure Timeline Plot</strong></div>
-        <br>
-        <fieldset id="timeline-form" class="panel-body" disabled>
-            <div class="row">
-                <div class="col-lg-4">
-                    <form>
-                        <div class="form-group row">
-                            <label class="col-sm-6 col-form-legend">Drift Type: </label>
-                            <div class="col-sm-6">
-                                <div class="form-check">
-                                    <label class="form-check-label">
-                                        <input class="form-check-input" type="checkbox" value="" id="typeClass">
-                                        Class Drift
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <label class="form-check-label">
-                                        <input class="form-check-input" type="checkbox" value="" id="typeCovariate">
-                                        Covariate Drift
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <label class="form-check-label">
-                                        <input class="form-check-input" type="checkbox" value="" id="typePosterior">
-                                        Posterior Drift
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <label class="form-check-label">
-                                        <input class="form-check-input" type="checkbox" value="" id="typeLikelihood">
-                                        Likelihood Drift
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <label class="form-check-label">
-                                        <input class="form-check-input" type="checkbox" value="" id="typeJoint">
-                                        Joint Drift
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="subsetLength" class="col-sm-6 col-form-label">Number of Attributes per Marginal: </label>
-                            <div class="col-sm-6">
-                                <input id="subsetLength" type="number" value="1" class="form-control">
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="attributes" class="col-sm-6 col-form-label">Attributes: </label>
-                            <div class="col-sm-6">
-                                <select multiple id="attributes" class="form-control">
-                                </select>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="col-lg-4">
-                    <form>
-                        <div class="form-group row">
-                            <label for="modelType" class="col-sm-6 col-form-label">Group Instances by: </label>
-                            <div class="col-sm-6">
-                                <select id="modelType" class="form-control">
-                                    <option value="Chunks">Sequence Key</option>
-                                    <option value="Windows">Instance Order</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="increment" class="col-sm-6 col-form-label">Move Groups Incrementally: </label>
-                            <div class="col-sm-1">
-                                <input id="increment" type="checkbox" value="" class="form-check">
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label id="groupSizeLabel" for="groupSize" class="col-sm-6 col-form-label">Sequence Keys per Group: </label>
-                            <div class="col-sm-6">
-                                <input type="number" value="1" id="groupSize" class="form-control">
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label for="groupAttribute" class="col-sm-6 col-form-label">Grouping Attribute: </label>
-                            <div class="col-sm-6">
-                                <select id="groupAttribute" class="form-control">
-                                </select>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            <button type="submit" id="timelineBtn" class="btn" value="Plot Timeline">Plot Timeline</button>
-        </fieldset>
-        <br>
-    </div>
-}
-
-@heatmap = {
-    <div class="panel panel-default">
-        <div class="panel-heading"><strong>Detailed Analysis between 2 Windows</strong></div>
-        <br>
-        <fieldset id="analysis-form" class="panel-body" disabled>
-                <div class="row">
-                    <div class="col-lg-4">
-                        <div class="form-group row">
-                            <label class="col-sm-6 col-form-legend">Drift Type: </label>
-                            <div class="col-sm-6">
-                                <div class="form-check">
-                                    <label class="form-check-label">
-                                        <input class="form-check-input" type="checkbox" value="" id="anaCovariate">
-                                        Covariate Drift
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <label class="form-check-label">
-                                        <input class="form-check-input" type="checkbox" value="" id="anaPosterior">
-                                        Posterior Drift
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <label class="form-check-label">
-                                        <input class="form-check-input" type="checkbox" value="" id="anaLikelihood">
-                                        Likelihood Drift
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <label class="form-check-label">
-                                        <input class="form-check-input" type="checkbox" value="" id="anaJoint">
-                                        Joint Drift
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="anaAttributes" class="col-sm-6 col-form-label">Attributes (choose at least 2): </label>
-                            <div class="col-sm-6">
-                                <select multiple id="anaAttributes" class="form-control">
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="form-group row">
-                            <label class="col-sm-6 col-form-legend">Window 1: </label>
-                            <div class="col-sm-6">
-                                <label for="window1-from" class="sr-only">Window 1 - from: </label>
-                                <div class="input-group">
-                                    <div class="input-group-addon">from</div>
-                                    <input id="window1-from" type="number" value="0" class="form-control">
-                                </div>
-                                <label for="window1-to" class="sr-only">Window 1 - to: </label>
-                                <div class="input-group">
-                                    <div class="input-group-addon">&nbsp to &nbsp</div>
-                                    <input id="window1-to" type="number" value="0" class="form-control">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-sm-6 col-form-legend">Window 2: </label>
-                            <div class="col-sm-6">
-                                <label for="window2-from" class="sr-only">Window 2 - from: </label>
-                                <div class="input-group">
-                                    <div class="input-group-addon">from</div>
-                                    <input id="window2-from" type="number" value="0" class="form-control">
-                                </div>
-                                <label for="window2-to" class="sr-only">Window 2 - to: </label>
-                                <div class="input-group">
-                                    <div class="input-group-addon">&nbsp to &nbsp</div>
-                                    <input id="window2-to" type="number" value="0" class="form-control">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <button type="submit" id="analysisBtn" class="btn" value="Run Analysis">Run Analysis</button>
-        </fieldset>
-        <br>
     </div>
 }
 
 @content = {
+        <h1>Analysis</h1>
         @*Load Libraries*@
         <script type='text/javascript'
         src='@routes.Assets.versioned("javascripts/plotly-latest.min.js")'
@@ -276,7 +112,7 @@
 
         <hr />
 
-        @timeline
+        @form.timeline()
         <script type='text/javascript' src='@routes.Assets.versioned("javascripts/timeline_form.js")'></script>
 
         @*Timeline*@
@@ -289,7 +125,7 @@
 
         <hr />
 
-        @heatmap
+        @form.windows()
         <script type='text/javascript' src='@routes.Assets.versioned("javascripts/heatmap_form.js")'></script>
 
         @*Heatmap*@
@@ -300,6 +136,5 @@
         <script type='text/javascript' src='@routes.Assets.versioned("javascripts/gen_heatmap.js")'></script>
 }
 
-
-@main("Drift Mapper")(sidebar)(content)
+@main("Drift Mapper")(sidebar("analysis"))(content)
 

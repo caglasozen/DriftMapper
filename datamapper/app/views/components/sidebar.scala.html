@@ -1,0 +1,35 @@
+@(current: String)
+
+@itemClass(id: String) = {
+    @if(id == current) {
+        nav-link active
+    } else {
+        nav-link
+    }
+}
+
+@*
+<div class="col-sm-3 col-md-2 sidebar">
+    <ul class="nav nav-sidebar">
+        <li class=@itemClass("analysis") id="analysis"><a href="@routes.OverviewController.analysisPage()">Analysis<span class="sr-only">(current)</span></a></li>
+    </ul>
+</div>
+*@
+
+
+<div class="sidebar-sticky">
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="@itemClass("analysis")" href="@routes.OverviewController.analysisPage()">
+                <span data-feather="bar-chart"></span>
+                Analysis <span class="sr-only">(current)</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="@itemClass("about")" href="@routes.OverviewController.aboutPage()">
+                <span data-feather="users"></span>
+                About <span class="sr-only">(current)</span>
+            </a>
+        </li>
+    </ul>
+</div>
