@@ -1,6 +1,6 @@
 name := """driftmap"""
 
-version := "0.22-SNAPSHOT"
+version := "0.23-SNAPSHOT"
 
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala, RpmPlugin)
@@ -24,7 +24,7 @@ libraryDependencies ++= Seq(
 maintainer in Linux := "Loong Kuan Lee <lklee9@student.monash.edu>"
 packageSummary in Linux := "Package for driftmap application in Linux"
 packageDescription := "Allow other users to measure and analyse drift within a data set via a web application"
-rpmRelease := "0.22"
+rpmRelease := "0.23"
 rpmVendor := "driftmap.infotech.monash.edu.au"
 rpmUrl := Some("https://github.com/LeeLoongKuan/DriftMapper.git")
 rpmLicense := Some("Apache v2")

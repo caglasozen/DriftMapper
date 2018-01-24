@@ -11,14 +11,7 @@
     <div class="collapse" id="windowsHelp">
         <div class="card card-body text-white bg-info">
             <div class="card-text">
-                <ul>
-                    <li>
-                        <b>Drift Type</b>: Type of probability distribution to measure the drift of.
-                    </li>
-                    <li>
-                        <b>Number of Attributes per Marginal</b>:
-                    </li>
-                </ul>
+                Generate heatmaps visualizing the drift over individual and pairs of attributes between 2 windows of data.
             </div>
         </div>
     </div>
@@ -28,6 +21,10 @@
             <div class="col-lg-2">
                 <div class="form-group">
                     <label class="form-legend">Drift Type: </label>
+                    <a tabindex="-1" data-toggle="popover" data-placement="right"
+                    data-content="Type of probability distribution to measure the drift of.">
+                        <span data-feather="help-circle"></span>
+                    </a>
                     <div>
                         <div class="form-check">
                             <label class="form-check-label">
@@ -59,6 +56,10 @@
             <div class="col-lg-3">
                 <div class="form-group">
                     <label for="anaAttributes" class="form-label">Attributes (choose at least 2): </label>
+                    <a tabindex="-1" data-toggle="popover" data-placement="right"
+                    data-content="Covariate attributes to factor in to the analysis.">
+                        <span data-feather="help-circle"></span>
+                    </a>
                     <select multiple id="anaAttributes" class="form-control" size="7">
                     </select>
                 </div>
@@ -66,6 +67,10 @@
             <div class="col-lg-3">
                 <div class="form-group">
                     <label class="form-legend">Window 1: </label>
+                    <a tabindex="-1" data-toggle="popover" data-placement="right"
+                    data-content="First window of data to use in terms of the index of instances.">
+                        <span data-feather="help-circle"></span>
+                    </a>
                     <div>
                         <label for="window1-from" class="sr-only">Window 1 - from  </label>
                         <div class="input-group">
@@ -85,6 +90,10 @@
                 </div>
                 <div class="form-group">
                     <label class="form-legend">Window 2: </label>
+                    <a tabindex="-1" data-toggle="popover" data-placement="right"
+                    data-content="Second window of data to use in terms of the index of instances.">
+                        <span data-feather="help-circle"></span>
+                    </a>
                     <div>
                         <label for="window2-from" class="sr-only">Window 2 - from: </label>
                         <div class="input-group">

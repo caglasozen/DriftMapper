@@ -10,48 +10,7 @@
     <div class="collapse" id="timelineHelp">
         <div class="card card-body text-white bg-info">
             <div class="card-text">
-                <ul>
-                    <li>
-                        <b>Drift Type</b>: Type of probability distribution to measure the drift of.
-                    </li>
-                    <li>
-                        <b>Number of Attributes per Marginal</b>: Max number of covariate attributes factored in
-                        when estimating the different probability distributions
-                    </li>
-                    <li>
-                        <b>Attributes</b>: Covariate attributes to factor in to the
-                        estimated probability distributions
-                    </li>
-                    <li>
-                        <b>Group Instances by</b>: Method to determine the grouping of instances into different windows
-                        <ul>
-                            <li>
-                                <b>Sequence Key</b>: Back to back instances with the same value for a specified attribute. Useful for dates.
-                            </li>
-                            <li>
-                                <b>Instance Order</b>: Fixed number of instances per window
-                            </li>
-                        </ul>
-                    </li>
-                    <li>
-                        <b>Sequence Keys per Group</b>: Controls size of instance windows depending on value selected for "Group Instances by"
-                        <ul>
-                            <li>
-                                <b>Sequence Key</b>: Number of instance groups with different values for the specified attribute in a window
-                            </li>
-                            <li>
-                                <b>Instance Order</b>: Number of instances in each window
-                            </li>
-                        </ul>
-                    </li>
-                    <li>
-                        <b>Grouping Attribute</b>: Attribute used by "Sequence Key" grouping
-                    </li>
-                    <li>
-                        <b>Move Groups Incrementally</b>: When checked, move windows by single instances or
-                        by single instance groups depending on Group method selected
-                    </li>
-                </ul>
+                Generate a timeline of drift between moving windows over the data.
             </div>
         </div>
     </div>
