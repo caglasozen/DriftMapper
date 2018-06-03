@@ -31,7 +31,7 @@ public class main {
      */
     public static void main(String[] argv) {
         // Example arguments
-        argv = new String[]{"analyse", "1,2,3", "1,1991977,1991978,3983954", "./data_out/train_seed/20130505_20131129", "./datasets/train_seed/20130505.arff", "./datasets/train_seed/20131129.arff"};
+        //argv = new String[]{"analyse", "1,2,3", "1,1991977,1991978,3983954", "./data_out/train_seed/20130505_20131129", "./datasets/train_seed/20130505.arff", "./datasets/train_seed/20131129.arff"};
         //argv = new String[]{"analyse", "1",  "800001,1100000,1100001,1400000", "./data_out/SITS_2006_NDVI_C/SITS1M_fold1_TEST", "./datasets/SITS_2006_NDVI_C/SITS1M_fold1_TEST.arff"};
         //argv = new String[]{"analyse", "1",  "3100001,3300000,3300001,3500000", "./data_out/SITS_2006_NDVI_C/SITS1M_fold1_TEST", "./datasets/SITS_2006_NDVI_C/SITS1M_fold1_TEST.arff"};
         //argv = new String[]{"analyse", "1,2,3,5",  "1,17376,17377,45312", "./data_out/elecNormNewClean", "./datasets/elecNormNewClean.arff"};
@@ -50,7 +50,7 @@ public class main {
         //argv = new String[]{"moving_chunk", "1,2",  "0,7,30", "./data_out/elecNormNewReduced", "./datasets/elecNormNewReduced.arff"};
         //argv = new String[]{"moving_chunk", "1",  "0,1", "./data_out/SITS_2006_NDVI_C/SITS1M_fold1_TEST", "./datasets/SITS_2006_NDVI_C/SITS1M_fold1_TEST.arff"};
         //argv = new String[]{"moving_chunk", "1,2,6",  "4,1,7", "./data_out/airlines", "./datasets/airlines.arff"};
-        argv = new String[]{"tmp_test", "1", "4,5","./data_out/airlines", "./datasets/elecNormNewClean.arff"};
+        //argv = new String[]{"tmp_test", "1", "4,5","./data_out/airlines", "./datasets/elecNormNewClean.arff"};
 
         // Obtain folder too put outputs
         String[] folders = argv[3].split("/");
