@@ -1,9 +1,11 @@
-# DriftMapper
+There are 2 projects in this repository: DriftAnalyse and DataMapper.
 
-Maps and analyse drift in a dataset
+# Drift Analyse
+
+Manually calls the java code to map and analyse drift in a dataset
 
 # Usage
-* Compile the codebase and generate a .jar artifact
+* Run the gradle task "fatJar"
 * Call the .jar file with the following commands depending on your use case:
 ```sh
 $ java -jar <path to .jar> arg1 arg2 arg3 arg4 arg5 ...
@@ -41,3 +43,16 @@ moving_chunk subsetLength1,subsetLength2,... groupAttIndex,groupSize1,groupsSize
 * Same as experiment type Chunk
 * Difference: given a group/time-window size, n, compares 2 moving chunk windows that moves by 1 chunk at a time
 * eg. Compares Chunks 1-2 and 3-4 then compares chunks 2-3 and 4-5
+
+# Data Mapper
+
+A web application that provide a GUI interface for Drift Analyse.
+
+## Usage
+
+A copy of the fatJar of DriftAnalyse is already added in "datamapper/lib"
+
+1. Open a terminal in the directory "datamapper"
+2. run the command "sbt" or "sbt.bat" in windows
+3. run the command "run" in the sbt prompt
+4. go to localhost:9000 in a browser
