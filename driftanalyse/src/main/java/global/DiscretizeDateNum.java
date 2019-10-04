@@ -29,10 +29,8 @@ public class DiscretizeDateNum {
             ArrayList<Integer> dateIndices = new ArrayList<>();
             ArrayList<Integer> numericIndices = new ArrayList<>();
             for (int i = 0; i < instanceInfo.numAttributes(); i++) {
-                if (instanceInfo.classIndex() != i) {
-                    if (instanceInfo.attribute(i).isDate()) dateIndices.add(i);
-                    else if (instanceInfo.attribute(i).isNumeric()) numericIndices.add(i);
-                }
+                if (instanceInfo.attribute(i).isDate()) dateIndices.add(i);
+                else if (instanceInfo.attribute(i).isNumeric()) numericIndices.add(i);
             }
 
             Instances sampledInstances = sampleInstances(1000, dataSource, instanceInfo);
