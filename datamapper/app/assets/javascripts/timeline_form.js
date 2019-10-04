@@ -119,7 +119,7 @@ $("#timelineBtn").click(function (event) {
             console.log("Error for streaming");
             console.log(errorMsg);
         },
-        "timeout": 5000,
+        "timeout": 30000,
         "method": "POST",
         "data": initMessage,
         "headers": {
