@@ -17,3 +17,9 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile group: 'org.mockito', name: 'mockito-core', version: '2.+'
 }
+
+task fatJar(type: Jar) {
+    classifier = 'all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
