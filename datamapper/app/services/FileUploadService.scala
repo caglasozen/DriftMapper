@@ -27,6 +27,9 @@ class FileUploadService(serviceSavePath: String) {
       println("error uploading part")
       return
     }
+	val file = new File(fileNameFor(fileInfo))
+	var bool = file.getParentFile().mkdirs();
+	file.createNewFile()
     val partialFile = new RandomAccessFile(fileNameFor(fileInfo), "rw")
     val offset = (fileInfo.resumableChunkNumber - 1) * fileInfo.resumableChunkSize
 
